@@ -3,8 +3,11 @@ from flask import Flask, render_template, jsonify
 from flask_bootstrap import Bootstrap
 import boto3
 from flask_cors import CORS
+from datetime import datetime, timedelta
 
 ec2_client = boto3.client("ec2", region_name="us-east-1")
+
+ec2_resource = boto3.resource('ec2', region_name="us-east-1")
 
 app = Flask(__name__)
 Bootstrap(app)
@@ -33,23 +36,34 @@ def ec2_instances():
 
 @app.route('/aws/ec2-instances')
 def get_running_ec2_instances():
-    # ec2_client = boto3.client("ec2", region_name="us-west-2")
-    reservations = ec2_client.describe_instances(Filters=[
-        {
-            "Name": "instance-state-name",
-            "Values": ["running"],
-        }
-    ]).get("Reservations")
+    # # ec2_client = boto3.client("ec2", region_name="us-west-2")
+    # reservations = ec2_client.describe_instances(Filters=[
+    #     {
+    #         "Name": "instance-state-name",
+    #         "Values": ["running"],
+    #     }
+    # ]).get("Reservations")
 
-    for reservation in reservations:
-        for instance in reservation["Instances"]:
-            instance_id = instance["InstanceId"]
-            instance_type = instance["InstanceType"]
-            public_ip = instance["PublicIpAddress"]
-            private_ip = instance["PrivateIpAddress"]
-            print(f"{instance_id}, {instance_type}, {public_ip}, {private_ip}")
+    # for reservation in reservations:
+    #     for instance in reservation["Instances"]:
+    #         instance_id = instance["InstanceId"]
+    #         instance_type = instance["InstanceType"]
+    #         public_ip = instance["PublicIpAddress"]
+    #         private_ip = instance["PrivateIpAddress"]
+    #         print(f"{instance_id}, {instance_type}, {public_ip}, {private_ip}")
         
-    return reservations
+    # return reservations
+
+    active_instances =  get_active_instance_count()
+
+    instances = ec2_resource.instances.all()
+
+    total_instances = len([instance for instance in instances]); 
+
+    if not(instances):
+        return render_template("aws/aws/ec2.html", message="No instance Data")
+
+    return render_template("aws/aws_ec2.html", instances=instances, active_instances=active_instances, total_instances=total_instances)
 
 @app.route('/aws/s3-instance-all')
 def s3_instances():
@@ -64,7 +78,7 @@ def s3_instances():
         print('Existing buckets:')
         for bucket in response['Buckets']:
             print(f'  {bucket["Name"]}')
-        return render_template("s3buckets.html", response=response)
+        return render_template("aws/s3buckets.html", response=response)
 
 @app.route('/aws/rds-instance-all')
 def rds_instances():
@@ -175,6 +189,61 @@ def get_running_instances():
 #         response = ec2.unmonitor_instances(InstanceIds=['i-0eadf739e14d3b325'])
 
 #     return response
+
+# def request_metric(client,InstanceId):
+
+#     startTime= datetime.today() + timedelta(days=-1)
+#     startTimeFormat = startTime.strftime('%Y-%m-%d') + ' 00:00:00'
+
+#     endTime = datetime.today() + timedelta(days=-1)
+#     endTimeFormat = endTime.strftime('%Y-%m-%d') + ' 23:59:59'
+
+#     response = client.get_metric_statistics(
+#         Namespace = 'AWS/EC2',
+#         Period = 86400,
+#         StartTime = startTimeFormat,
+#         EndTime = endTimeFormat,
+#         MetricName = 'CPUUtilization',
+#         Statistics=['Maximum','Minimum','Average'],
+#         Dimensions = [
+#             {
+#                 'Name': 'InstanceId',
+#                 'Value': InstanceId
+#             }   
+#         ],        
+#     )
+
+#     return response["Datapoints"]  
+
+# request_metric(ec2_resource,"i-043567371c05991f9")
+
+def get_active_instance_count():
+
+    INSTANCE_STATE = 'running'
+
+    instances = ec2_resource.instances.filter(
+        Filters=[
+            {
+                'Name': 'instance-state-name',
+                'Values': [
+                    INSTANCE_STATE
+                ]
+            }
+        ]
+    )
+
+    # print(f'Instances in state "{INSTANCE_STATE}":')
+    count = 0
+    for instance in instances:
+        print(f'  - Instance ID: {instance.id}')
+        count += 1
+    
+    return count
+
+
+@app.route('/aws/account')
+def aws_account():
+    return render_template('account.html')
 
 # Page not found
 @app.errorhandler(404)
