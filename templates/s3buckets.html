@@ -1,0 +1,45 @@
+{% extends "base.html" %} 
+{% block html_attribs %} lang="en"{% endblock %} 
+{% block title %}Simple Storage Service (S3){% endblock %} 
+
+{% block content %} 
+
+<h1>Simple Storage Service (S3)</h1>
+<!-- <ul>
+{% for bucket in response['Buckets'] %}
+    <li>{{ bucket.CreationDate }}1</li>
+    <li>{{ bucket.Name}}2</li>
+    
+{% endfor %} 
+</ul> -->
+    {{ response }}
+
+    <div class="container-fluid mt-5">
+        <table border="2" class="table table-dark table-striped">
+            <thead>
+                <th>Bucket Name</th>
+                <!-- <th>Owner</th>
+                <th>Owner ID</th> -->
+                <th>Creation Time</th>
+
+            </thead>
+
+            {%for bucket in response['Buckets']%}
+              <tr>
+                  <td>{{bucket.Name}}</td>
+                  <!-- <td>{{bucket.DisplayName}}</td>
+                  <td>{{bucket.ID}}</td> -->
+                  <td>{{bucket.CreationDate}}</td>
+
+              </tr>
+              {%endfor%}
+
+
+              <h3>Number of buckets</h3> 
+                <h4>{{response['Buckets']|length}}</h4>
+                <h4>{{response['Owner']}}</h4>
+
+        </table>
+        </div>
+
+{% endblock content %}

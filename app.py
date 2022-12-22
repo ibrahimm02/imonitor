@@ -2,20 +2,54 @@ from urllib import response
 from flask import Flask, render_template, jsonify
 from flask_bootstrap import Bootstrap
 import boto3
+from flask_cors import CORS
 
 ec2_client = boto3.client("ec2", region_name="us-east-1")
 
 app = Flask(__name__)
 Bootstrap(app)
+CORS(app)
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
+
+@app.route('/members')
+def members():
+     return render_template('index.html', message="No Instances running. Create an instance first" )
+    # return {"members": ["Member1", "Member2", "Member3"]}
+
+
 @app.route('/aws/ec2-instance-all')
 def ec2_instances():
     response = ec2_client.describe_instances()
-    return response
+
+    if not(response):
+        return render_template("message.html",message="No Instances running. Create an instance first")
+
+    else:
+        return response
+
+@app.route('/aws/ec2-instances')
+def get_running_ec2_instances():
+    # ec2_client = boto3.client("ec2", region_name="us-west-2")
+    reservations = ec2_client.describe_instances(Filters=[
+        {
+            "Name": "instance-state-name",
+            "Values": ["running"],
+        }
+    ]).get("Reservations")
+
+    for reservation in reservations:
+        for instance in reservation["Instances"]:
+            instance_id = instance["InstanceId"]
+            instance_type = instance["InstanceType"]
+            public_ip = instance["PublicIpAddress"]
+            private_ip = instance["PrivateIpAddress"]
+            print(f"{instance_id}, {instance_type}, {public_ip}, {private_ip}")
+        
+    return reservations
 
 @app.route('/aws/s3-instance-all')
 def s3_instances():
@@ -23,11 +57,14 @@ def s3_instances():
     s3_client = boto3.client('s3')
     response = s3_client.list_buckets()
 
+    if len(response['Buckets'])==0:
+        return f'No Buckets!'
     # Output the bucket names
-    print('Existing buckets:')
-    for bucket in response['Buckets']:
-        print(f'  {bucket["Name"]}')
-    return response
+    else:
+        print('Existing buckets:')
+        for bucket in response['Buckets']:
+            print(f'  {bucket["Name"]}')
+        return render_template("s3buckets.html", response=response)
 
 @app.route('/aws/rds-instance-all')
 def rds_instances():
@@ -138,6 +175,16 @@ def get_running_instances():
 #         response = ec2.unmonitor_instances(InstanceIds=['i-0eadf739e14d3b325'])
 
 #     return response
+
+# Page not found
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("404.html"), 404
+
+# Internal server error
+@app.errorhandler(500)
+def server_error(e):
+    return render_template("500.html"), 500
 
 
 if __name__ == "__main__":
