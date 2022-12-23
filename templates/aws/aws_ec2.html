@@ -9,23 +9,25 @@ nav_ec2 %}active{% endblock %} {% block content %}
       <div class="card text-center">
         <div class="card-body">
           <h5 class="card-title">Active Instances</h5>
-          <h1 class="display-2">{{ active_instances }}</h1>
+          <h1 class="display-4">{{ active_instances }}</h1>
         </div>
       </div>
     </div>
-    <div class="col-sm-3" style="margin: 12px 0 12px 0">
+    <!-- <div class="col-sm-3" style="margin: 12px 0 12px 0">
       <div class="card text-center">
         <div class="card-body">
           <h5 class="card-title">Total Instances</h5>
-          <h1 class="display-2">{{ total_instances }}</h1>
+          <h1 class="display-4">{{ total_instances }}</h1>
         </div>
       </div>
-    </div>
+    </div> -->
     <div class="col-sm-3" style="margin: 12px 0 12px 0">
       <div class="card text-center">
         <div class="card-body">
           <h5 class="card-title">Minimum Utilization</h5>
-          <p class="card-text">2</p>
+          {% for m in ec2_metrics: %}
+          <h1 class="display-4">{{m.last_min}}%</h1>
+          {% endfor %}
         </div>
       </div>
     </div>
@@ -33,7 +35,9 @@ nav_ec2 %}active{% endblock %} {% block content %}
       <div class="card text-center">
         <div class="card-body">
           <h5 class="card-title">Maximum Utilization</h5>
-          <p class="card-text">2</p>
+          {% for m in ec2_metrics: %}
+          <h1 class="display-4">{{m.last_max}}%</h1>
+          {% endfor %}
         </div>
       </div>
     </div>
@@ -41,12 +45,16 @@ nav_ec2 %}active{% endblock %} {% block content %}
       <div class="card text-center">
         <div class="card-body">
           <h5 class="card-title">Average Utilization</h5>
-          <p class="card-text">2</p>
+          {% for m in ec2_metrics: %}
+          <h1 class="display-4">{{m.last_avg}}%</h1>
+          {% endfor %}
         </div>
       </div>
     </div>
   </div>
 </div>
+
+
 
 {{message}}
 
@@ -55,10 +63,10 @@ nav_ec2 %}active{% endblock %} {% block content %}
 <!-- {{instances}} -->
 
 <div class="row">
-  <div class="col-sm-6" style="margin: 5px 5px 5px 5px">
+  <div class="col card" style="margin: 5px">
     <img src="data:image/png;base64,{{graphImage}}" alt="EC2 Graph" />
   </div>
-  <div class="col-sm-6" style="margin: 5px 5px 5px 5px">
+  <div class="col card" style="margin: 5px">
     <img src="data:image/png;base64,{{graphImage}}" alt="EC2 Graph" />
   </div>
 </div>
@@ -106,7 +114,6 @@ nav_ec2 %}active{% endblock %} {% block content %}
     {%endfor%}
   </table>
 </div>
-
 
 {{ data }} 
 {% endblock %}
