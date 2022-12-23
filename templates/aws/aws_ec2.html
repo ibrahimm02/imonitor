@@ -1,107 +1,112 @@
-{% extends "base.html" %}
-{% block title %}iMonitor - EC2{% endblock %} 
-{% block nav_ec2 %}active{% endblock %}
+{% extends "base.html" %} {% block title %}iMonitor - EC2{% endblock %} {% block
+nav_ec2 %}active{% endblock %} {% block content %}
+<center><h1>AWS EC2</h1></center>
+{{reservations}}
 
-
-{% block content %}
-  <center><h1>AWS EC2</h1></center>
-  {{reservations}}
-
-  <div class="container">
+<div class="container">
   <div class="row">
-    <div class="col-sm-3" style="margin: 12px 0 12px 0;">
-      <div class="card text-center" style="min-width:200px; min-height:200px">
+    <div class="col-sm-3" style="margin: 12px 0 12px 0">
+      <div class="card text-center">
         <div class="card-body">
           <h5 class="card-title">Active Instances</h5>
           <h1 class="display-2">{{ active_instances }}</h1>
-          
         </div>
       </div>
     </div>
-    <div class="col-sm-3" style="margin: 12px 0 12px 0;">
-      <div class="card text-center" style="min-width:200px; min-height:200px">
+    <div class="col-sm-3" style="margin: 12px 0 12px 0">
+      <div class="card text-center">
         <div class="card-body">
           <h5 class="card-title">Total Instances</h5>
-          <h1 class="display-2"> {{ total_instances }}</h1>
-        
+          <h1 class="display-2">{{ total_instances }}</h1>
         </div>
       </div>
     </div>
-    <div class="col-sm-3" style="margin: 12px 0 12px 0;">
-      <div class="card text-center" style="min-width:200px; min-height:200px">
+    <div class="col-sm-3" style="margin: 12px 0 12px 0">
+      <div class="card text-center">
         <div class="card-body">
           <h5 class="card-title">Minimum Utilization</h5>
           <p class="card-text">2</p>
-        
         </div>
       </div>
     </div>
-    <div class="col-sm-3" style="margin: 12px 0 12px 0;">
-        <div class="card text-center" style="min-width:200px; min-height:200px">
-          <div class="card-body">
-            <h5 class="card-title">Maximum Utilization</h5>
-            <p class="card-text">2</p>
-           
-          </div>
+    <div class="col-sm-3" style="margin: 12px 0 12px 0">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Maximum Utilization</h5>
+          <p class="card-text">2</p>
         </div>
       </div>
-      <div class="col-sm-3" style="margin: 12px 0 12px 0;">
-        <div class="card text-center" style="min-width:200px; min-height:200px">
-          <div class="card-body">
-            <h5 class="card-title">Average Utilization</h5>
-            <p class="card-text">2</p>
-          
-          </div>
+    </div>
+    <div class="col-sm-3" style="margin: 12px 0 12px 0">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Average Utilization</h5>
+          <p class="card-text">2</p>
         </div>
       </div>
+    </div>
   </div>
-    </div>
+</div>
 
-    {{message}}
+{{message}}
 
-    <br/>
+<br />
 
-    {{instances}}
+<!-- {{instances}} -->
 
-    <div class="container-fluid mt-5">
-      <table border="1" class="table">
-          <thead class="thead-light">
-              <!-- <th>Instance Name</th> -->
-              <th>Instance Id</th>
-              <th>State</th>
-              <th>Type</th>
-              <th>Public IPv4</th>
-              <th>AMI Id</th>
-              <th>Launch time</th>
-              <!-- <th>Availability Zone</th>   -->
-          </thead>
-          {%for instance in instances:%}
-            <tr>
-                <!-- <td>{{instance.tags['Value']}}</td>                 -->
-                <td>{{instance.id}}</td>
+<div class="row">
+  <div class="col-sm-6" style="margin: 5px 5px 5px 5px">
+    <img src="data:image/png;base64,{{graphImage}}" alt="EC2 Graph" />
+  </div>
+  <div class="col-sm-6" style="margin: 5px 5px 5px 5px">
+    <img src="data:image/png;base64,{{graphImage}}" alt="EC2 Graph" />
+  </div>
+</div>
 
-                <td><div class="btn-group dropend">
-                  <button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                    {{instance.state['Name']}} 
-                  </button>
-                  <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#">Start</a></li>
-                    <li><a class="dropdown-item" href="#">Stop</a></li>
-                  </ul>
-                </div></td>
+<div class="container-fluid mt-5">
+  <table border="1" class="table">
+    <thead class="thead-light">
+      <!-- <th>Instance Name</th> -->
+      <th>Instance Id</th>
+      <th>State</th>
+      <th>Type</th>
+      <th>Public IPv4</th>
+      <th>AMI Id</th>
+      <th>Launch time</th>
+      <!-- <th>Availability Zone</th>   -->
+    </thead>
+    {%for instance in instances:%}
+    <tr>
+      <!-- <td>{{instance.tags['Value']}}</td>                 -->
+      <td>{{instance.id}}</td>
 
-                
-                <td>{{instance.instance_type}}</td>
-                <td>{{instance.public_ip_address}}</td>
-                <td>{{instance.image.id}}</td>
-                <td>{{instance.launch_time.strftime("%d-%m-%Y, %H:%M:%S")}}</td>
-                <!-- <td>{{instance.availability_zone}}</td> -->
-        
-            </tr>
-            {%endfor%}
-      </table>
-      </div>
+      <td>
+        <div class="btn-group dropend">
+          <button
+            type="button"
+            class="btn btn-info dropdown-toggle"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            {{instance.state['Name']}}
+          </button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Start</a></li>
+            <li><a class="dropdown-item" href="#">Stop</a></li>
+          </ul>
+        </div>
+      </td>
 
-      
+      <td>{{instance.instance_type}}</td>
+      <td>{{instance.public_ip_address}}</td>
+      <td>{{instance.image.id}}</td>
+      <td>{{instance.launch_time.strftime("%d-%m-%Y, %H:%M:%S")}}</td>
+      <!-- <td>{{instance.availability_zone}}</td> -->
+    </tr>
+    {%endfor%}
+  </table>
+</div>
 
+
+{{ data }} 
 {% endblock %}

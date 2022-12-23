@@ -2,8 +2,12 @@ from urllib import response
 from flask import Flask, render_template, jsonify
 from flask_bootstrap import Bootstrap
 import boto3
+from boto3 import Session
 from flask_cors import CORS
 from datetime import datetime, timedelta
+import json
+import base64
+import io
 
 ec2_client = boto3.client("ec2", region_name="us-east-1")
 
@@ -60,10 +64,16 @@ def get_running_ec2_instances():
 
     total_instances = len([instance for instance in instances]); 
 
+    ec2_graph = get_ec2_graph()
+
+    ec2_states = ec2_state_stats()
+    # data = {'chart_data': ec2_states}
+
     if not(instances):
         return render_template("aws/aws/ec2.html", message="No instance Data")
 
-    return render_template("aws/aws_ec2.html", instances=instances, active_instances=active_instances, total_instances=total_instances)
+    return render_template("aws/aws_ec2.html", instances=instances, active_instances=active_instances, 
+            total_instances=total_instances, graphImage=ec2_graph, data=json.dumps(ec2_states))
 
 @app.route('/aws/s3-instance-all')
 def s3_instances():
@@ -217,6 +227,8 @@ def get_running_instances():
 
 # request_metric(ec2_resource,"i-043567371c05991f9")
 
+# --------------------------------------------------------------
+
 def get_active_instance_count():
 
     INSTANCE_STATE = 'running'
@@ -240,6 +252,73 @@ def get_active_instance_count():
     
     return count
 
+#-----------------------------------------------------------------------------
+def instance_output_format(instance_data):
+    response={
+        "InstanceId":instance_data.get("InstanceId",''),
+        "InstanceType":instance_data.get("InstanceType",""),
+        "State":instance_data["State"]["Name"],
+        "PrivateIpAddress":instance_data.get("PrivateIpAddress",""),
+        "PublicIpAddress":instance_data.get("PublicIpAddress",""),
+        "SecurityGroups":instance_data.get("SecurityGroups",""),
+    }
+    return response
+
+
+def get_ec2_graph():
+  
+    client = boto3.client('cloudwatch')
+
+    data=[]
+    response_data=[]
+    for instance in ec2_client.describe_instances()["Reservations"]:
+        for each_in in instance["Instances"]:
+            response_data.append(instance_output_format(each_in)) 
+
+    instance_ids=[i["InstanceId"] for i in response_data]
+    for ins in instance_ids:
+            data.append(["AWS/EC2", "CPUUtilization", "InstanceId",str(ins)])
+            filter_data={"metrics":data}
+
+    # print(data)
+
+    response = client.get_metric_widget_image(MetricWidget=json.dumps(filter_data))
+    bytes_data=io.BytesIO(response["MetricWidgetImage"])
+    fr=base64.b64encode(bytes_data.getvalue())
+    
+    ec2_graph1 = fr.decode('utf-8')
+
+    return ec2_graph1
+
+get_ec2_graph()
+
+#-----------------------------------------------------------------------------
+
+def ec2_state_stats():
+    stats = {
+        'pending': 0,
+        'running': 0,
+        'shutting-down': 0,
+        'terminated': 0,
+        'stopping': 0,
+        'stopped': 0
+        }
+    
+    qs_ = ec2_client.get_paginator('describe_instances')
+    response_ = qs_.paginate()
+    for rs in response_:
+        for reservation in rs['Reservations']:
+            for instance in reservation['Instances']:
+                state = instance['State']['Name']
+                stats[state] += 1
+    graph_data=[]
+    for i in stats.keys():
+        graph_data.append({"key":i,"value":int(stats[i])})
+    return graph_data
+
+
+
+#-----------------------------------------------------------------------------
 
 @app.route('/aws/account')
 def aws_account():

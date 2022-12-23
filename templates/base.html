@@ -22,7 +22,14 @@
       <!-- Custom CSS -->
     <link href="{{url_for('static', filename='css/style.css')}}" rel="stylesheet"/>
     <link href="{{url_for('static', filename='css/sidenav.css')}}" rel="stylesheet"/>
+    <link href="{{url_for('static', filename='css/nv.d3.css')}}" rel="stylesheet"/>
    
+    <!-- NVD3 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.css">
+    <!-- Include d3.js first -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.js"></script>
+    
     <!-- Font Awesome JS -->
     <script
       defer
@@ -37,6 +44,10 @@
       integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY"
       crossorigin="anonymous">
     </script>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
 
   </head>
   <body>

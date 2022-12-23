@@ -41,3 +41,7 @@ a:focus {
   border-bottom: 1px dashed #ddd;
   margin: 40px 0;
 }
+
+.nvtooltip {
+  max-width: 150px;
+}
