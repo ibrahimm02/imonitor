@@ -78,7 +78,7 @@ def get_running_ec2_instances():
     
 
     if not(instances):
-        return render_template("aws/aws/ec2.html", message="No instance Data")
+        return render_template("aws/aws/ec2.html", info="No instance Data")
 
     return render_template("aws/aws_ec2.html", instances=instances, active_instances=active_instances, 
             total_instances=total_instances, graphImage=ec2_graph, ec2_metrics=ec2_metrics)
