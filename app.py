@@ -1,5 +1,5 @@
-from urllib import response
-from flask import Flask, render_template, jsonify, current_app
+from flask import Flask, render_template, request, redirect, url_for, jsonify, current_app, flash
+
 from flask_bootstrap import Bootstrap
 import boto3
 from boto3 import Session
@@ -10,6 +10,7 @@ import json
 import base64
 import io
 
+
 ec2_client = boto3.client("ec2", region_name="us-east-1")
 
 ec2_resource = boto3.resource('ec2', region_name="us-east-1")
@@ -19,6 +20,7 @@ cw_client = boto3.client('cloudwatch')
 app = Flask(__name__)
 Bootstrap(app)
 CORS(app)
+app.secret_key = 'flash-secret'
 
 @app.route('/')
 def index():
@@ -401,6 +403,42 @@ def ec2_metrics_amm():
 
 
 #-----------------------------------------------------------------------------
+
+#-------------------------------------------------------------------
+
+@app.route('/start', methods=["POST"])
+def start_instance():
+    key = request.form['instance']
+
+    instance = ec2_resource.Instance(key)
+    instance.start()
+
+    print(f'Starting EC2 instance: {instance.id}')
+    
+    # instance.wait_until_running()
+
+    print(f'EC2 instance "{instance.id}" has been started')
+    flash(f'EC2 instance "{instance.id}" has been started')
+    return redirect(url_for('get_running_ec2_instances'))
+#-------------------------------------------------------------------
+
+@app.route('/stop', methods=["POST"])
+def stop_instance():
+    key = request.form['instance']
+
+    instance = ec2_resource.Instance(key)
+    instance.stop()
+
+    print(f'Stopping EC2 instance: {instance.id}')
+    
+    # instance.wait_until_running()
+
+    print(f'EC2 instance "{instance.id}" has been stopped')
+
+    flash(f'EC2 instance "{instance.id}" has been stopped')
+    return redirect(url_for('get_running_ec2_instances'))
+#-------------------------------------------------------------------
+
 
 @app.route('/aws/account')
 def aws_account():

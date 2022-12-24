@@ -1,7 +1,9 @@
-{% extends "base.html" %} {% block title %}iMonitor - EC2{% endblock %} {% block
-nav_ec2 %}active{% endblock %} {% block content %}
-<center><h1>AWS EC2</h1></center>
-{{reservations}}
+{% extends "base.html" %} 
+{% block title %}iMonitor - EC2{% endblock %} 
+{% block nav_ec2 %}active{% endblock %} 
+{% block navTitle %}EC2{% endblock %} 
+{% block content %}
+
 
 <div class="container">
   <div class="row">
@@ -9,7 +11,7 @@ nav_ec2 %}active{% endblock %} {% block content %}
       <div class="card text-center">
         <div class="card-body">
           <h5 class="card-title">Active Instances</h5>
-          <h1 class="display-4">{{ active_instances }}</h1>
+          <h1 class="display-5">{{ active_instances }}</h1>
         </div>
       </div>
     </div>
@@ -26,7 +28,7 @@ nav_ec2 %}active{% endblock %} {% block content %}
         <div class="card-body">
           <h5 class="card-title">Minimum Utilization</h5>
           {% for m in ec2_metrics: %}
-          <h1 class="display-4">{{m.last_min}}%</h1>
+          <h1 class="display-5">{{m.last_min}}%</h1>
           {% endfor %}
         </div>
       </div>
@@ -36,7 +38,7 @@ nav_ec2 %}active{% endblock %} {% block content %}
         <div class="card-body">
           <h5 class="card-title">Maximum Utilization</h5>
           {% for m in ec2_metrics: %}
-          <h1 class="display-4">{{m.last_max}}%</h1>
+          <h1 class="display-5">{{m.last_max}}%</h1>
           {% endfor %}
         </div>
       </div>
@@ -46,17 +48,13 @@ nav_ec2 %}active{% endblock %} {% block content %}
         <div class="card-body">
           <h5 class="card-title">Average Utilization</h5>
           {% for m in ec2_metrics: %}
-          <h1 class="display-4">{{m.last_avg}}%</h1>
+          <h1 class="display-5">{{m.last_avg}}%</h1>
           {% endfor %}
         </div>
       </div>
     </div>
   </div>
 </div>
-
-
-
-{{message}}
 
 <br />
 
@@ -71,8 +69,18 @@ nav_ec2 %}active{% endblock %} {% block content %}
   </div>
 </div>
 
+{% with fmessage = get_flashed_messages() %}
+{%if fmessages %}
+  <p class="bg-info" style="padding: 15px;">
+    {% for fmessage in messages %}
+      {{ fmessage }}<br>
+    {% endfor %}
+  </p> 
+{% endif %}
+{% endwith %}
+
 <div class="container-fluid mt-5">
-  <table border="1" class="table">
+  <table border="1" class="table text-center">
     <thead class="thead-light">
       <!-- <th>Instance Name</th> -->
       <th>Instance Id</th>
@@ -99,8 +107,18 @@ nav_ec2 %}active{% endblock %} {% block content %}
             {{instance.state['Name']}}
           </button>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#">Start</a></li>
-            <li><a class="dropdown-item" href="#">Stop</a></li>
+            <li>
+              <form action="{{ url_for('start_instance')}}" method="POST">
+                <input type="hidden" name="instance" value="{{ instance.id }}">
+                <button type="submit" class="dropdown-item">Start</button>
+              </form>
+            </li>
+            <li>
+              <form action="{{ url_for('stop_instance')}}" method="POST">
+                <input type="hidden" name="instance" value="{{ instance.id }}">
+                <button type="submit" class="dropdown-item">Stop</button>
+              </form>
+            </li>
           </ul>
         </div>
       </td>
@@ -114,6 +132,8 @@ nav_ec2 %}active{% endblock %} {% block content %}
     {%endfor%}
   </table>
 </div>
+
+<h4>dashboard24HoursPerformanceChart - in imonitor fiverr app</h4>
 
 {{ data }} 
 {% endblock %}
