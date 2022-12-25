@@ -1,25 +1,16 @@
-{% extends "base.html" %} 
-{% block title %}iMonitor - EC2{% endblock %} 
-{% block nav_ec2 %}active{% endblock %} 
-{% block navTitle %}EC2{% endblock %} 
-{% block content %}
-
-{% with messages = get_flashed_messages() %}
-{% if messages %}
+{% extends "base.html" %} {% block title %}iMonitor - EC2{% endblock %} {% block
+nav_ec2 %}active{% endblock %} {% block navTitle %}EC2{% endblock %} {% block
+content %} {% with messages = get_flashed_messages() %} {% if messages %}
 <div class="alert alert-success" role="alert">
-  
-    {% for message in messages %}
-      {{ message }}<br>
-    {% endfor %}
-  
+  {% for message in messages %} {{ message }}<br />
+  {% endfor %}
 </div>
-{% endif %}
-{% endwith %}
+{% endif %} {% endwith %}
 
 <div class="container">
   <div class="row">
-    <div class="col-sm-3" style="margin: 12px 0 12px 0">
-      <div class="card text-center">
+    <div class="col-sm-3" >
+      <div class="card text-center border-0 shadow mb-4">
         <div class="card-body">
           <h5 class="card-title">Active Instances</h5>
           <h1 class="display-5">{{ active_instances }}</h1>
@@ -34,8 +25,8 @@
         </div>
       </div>
     </div> -->
-    <div class="col-sm-3" style="margin: 12px 0 12px 0">
-      <div class="card text-center">
+    <div class="col-sm-3" >
+      <div class="card text-center border-0 shadow mb-4">
         <div class="card-body">
           <h5 class="card-title">Minimum Utilization</h5>
           {% for m in ec2_metrics: %}
@@ -44,8 +35,8 @@
         </div>
       </div>
     </div>
-    <div class="col-sm-3" style="margin: 12px 0 12px 0">
-      <div class="card text-center">
+    <div class="col-sm-3" >
+      <div class="card text-center border-0 shadow mb-4">
         <div class="card-body">
           <h5 class="card-title">Maximum Utilization</h5>
           {% for m in ec2_metrics: %}
@@ -54,8 +45,8 @@
         </div>
       </div>
     </div>
-    <div class="col-sm-3" style="margin: 12px 0 12px 0">
-      <div class="card text-center">
+    <div class="col-sm-3">
+      <div class="card text-center border-0 shadow mb-4">
         <div class="card-body">
           <h5 class="card-title">Average Utilization</h5>
           {% for m in ec2_metrics: %}
@@ -72,73 +63,147 @@
 <!-- {{instances}} -->
 
 <div class="row">
-  <div class="col card" style="margin: 5px">
+  <div class="col card border-0 shadow mb-4" style="margin: 5px">
     <img src="data:image/png;base64,{{graphImage}}" alt="EC2 Graph" />
   </div>
-  <div class="col card" style="margin: 5px">
+  <div class="col card border-0 shadow mb-4" style="margin: 5px">
     <img src="data:image/png;base64,{{graphImage}}" alt="EC2 Graph" />
   </div>
 </div>
-
-
 
 {{info}}
 
-<div class="container-fluid mt-5">
-  <table border="1" class="table text-center">
-    <thead class="thead-light">
-      <!-- <th>Instance Name</th> -->
-      <th>Instance Id</th>
-      <th>State</th>
-      <th>Type</th>
-      <th>Public IPv4</th>
-      <th>AMI Id</th>
-      <th>Launch time</th>
-      <!-- <th>Availability Zone</th>   -->
-    </thead>
-    {%for instance in instances:%}
-    <tr>
-      <!-- <td>{{instance.tags['Value']}}</td>                 -->
-      <td>{{instance.id}}</td>
+<div class="card text-center border-0 shadow mb-4">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-centered table-nowrap mb-0 rounded">
+        <thead class="thead-light">
+          <!-- <th>Instance Name</th> -->
+          <th class="border-0 rounded-start">Instance Id</th>
+          <th class="border-0">State</th>
+          <th class="border-0">Type</th>
+          <th class="border-0">Public IPv4</th>
+          <th class="border-0">AMI Id</th>
+          <th class="border-0 rounded-end">Launch time</th>
+          <!-- <th>Availability Zone</th>   -->
+        </thead>
+        {%for instance in instances:%}
+        <tr>
+          <!-- <td>{{instance.tags['Value']}}</td>                 -->
+          <td>{{instance.id}}</td>
 
-      <td>
-        <div class="btn-group dropend">
-          <button
-            type="button"
-            class="btn btn-info dropdown-toggle"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            {{instance.state['Name']}}
-          </button>
-          <ul class="dropdown-menu">
-            <li>
-              <form action="{{ url_for('start_instance')}}" method="POST">
-                <input type="hidden" name="instance" value="{{ instance.id }}">
-                <button type="submit" class="dropdown-item">Start</button>
-              </form>
-            </li>
-            <li>
-              <form action="{{ url_for('stop_instance')}}" method="POST">
-                <input type="hidden" name="instance" value="{{ instance.id }}">
-                <button type="submit" class="dropdown-item">Stop</button>
-              </form>
-            </li>
-          </ul>
-        </div>
-      </td>
+          <td>
+            <div class="btn-group dropend">
+              <button
+                type="button"
+                class="btn btn-info dropdown-toggle"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                {{instance.state['Name']}}
+              </button>
+              <ul class="dropdown-menu">
+                <li>
+                  <form action="{{ url_for('start_instance')}}" method="POST">
+                    <input
+                      type="hidden"
+                      name="instance"
+                      value="{{ instance.id }}"
+                    />
+                    <button type="submit" class="dropdown-item">Start</button>
+                  </form>
+                </li>
+                <li>
+                  <form action="{{ url_for('stop_instance')}}" method="POST">
+                    <input
+                      type="hidden"
+                      name="instance"
+                      value="{{ instance.id }}"
+                    />
+                    <button type="submit" class="dropdown-item">Stop</button>
+                  </form>
+                </li>
+              </ul>
+            </div>
+          </td>
 
-      <td>{{instance.instance_type}}</td>
-      <td>{{instance.public_ip_address}}</td>
-      <td>{{instance.image.id}}</td>
-      <td>{{instance.launch_time.strftime("%d-%m-%Y, %H:%M:%S")}}</td>
-      <!-- <td>{{instance.availability_zone}}</td> -->
-    </tr>
-    {%endfor%}
-  </table>
+          <td>{{instance.instance_type}}</td>
+          <td>{{instance.public_ip_address}}</td>
+          <td>{{instance.image.id}}</td>
+          <td>{{instance.launch_time.strftime("%d-%m-%Y, %H:%M:%S")}}</td>
+          <!-- <td>{{instance.availability_zone}}</td> -->
+        </tr>
+        {%endfor%}
+      </table>
+    </div>
+  </div>
 </div>
+
+{% for v in ec2_states: %}
+  {{v.value}}
+{% endfor %}
+
+<canvas id="myChart" width="600" height="400"></canvas>
+
+<script>
+
+  // Global parameters:
+  // do not resize the chart canvas when its container does (keep at 600x400px)
+  Chart.defaults.global.responsive = false;
+
+  // define the chart data
+  var chartData = {
+                labels: [
+                    'Chrome',
+                    'IE',
+                    'FireFox',
+                    'Safari',
+                    'Opera',
+                    'Navigator',
+                ],
+                datasets: [
+                  {
+                    data:[50, 45, 21, 150, 95, 66],
+                    backgroundColor : ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de'],
+                  }
+                ]
+  }
+
+  // get chart canvas
+  var ctx = document.getElementById("myChart").getContext("2d");
+
+  var options = {
+          tooltips: {
+            enabled: false
+          },
+          plugins: {
+            labels: [
+                    {
+                        render: 'label',
+                        position: 'outside',
+                        fontColor: '#000',
+                        fontSize: 15
+                    },
+                    {
+                        render: 'percentage',
+                        fontColor: '#000',
+                        fontSize: 10,
+                        position: 'border',
+                    }
+            ]
+           }
+};
+
+  // create the chart using the chart canvas
+  var myChart = new Chart(ctx, {
+    type: 'pie',
+    data: chartData,
+      options:options
+  });
+
+</script>
+
 
 <h4>dashboard24HoursPerformanceChart - in imonitor fiverr app</h4>
 
-{{ data }} 
-{% endblock %}
+{{ data }} {% endblock %}

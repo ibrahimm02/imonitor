@@ -26,6 +26,9 @@ app.secret_key = 'flash-secret'
 def index():
     return render_template('index.html')
 
+@app.route('/landing')
+def landing():
+    return render_template('landing.html')
 
 @app.route('/members')
 def members():
@@ -81,7 +84,7 @@ def get_running_ec2_instances():
         return render_template("aws/aws/ec2.html", info="No instance Data")
 
     return render_template("aws/aws_ec2.html", instances=instances, active_instances=active_instances, 
-            total_instances=total_instances, graphImage=ec2_graph, ec2_metrics=ec2_metrics)
+            total_instances=total_instances, graphImage=ec2_graph, ec2_metrics=ec2_metrics, ec2_states=ec2_states)
 
 @app.route('/aws/s3-instance-all')
 def s3_instances():
@@ -304,12 +307,12 @@ get_ec2_graph()
 
 def ec2_state_stats():
     stats = {
-        'pending': 0,
-        'running': 0,
-        'shutting-down': 0,
-        'terminated': 0,
-        'stopping': 0,
-        'stopped': 0
+        "pending": 0,
+        "running": 0,
+        "shutting-down": 0,
+        "terminated": 0,
+        "stopping": 0,
+        "stopped": 0
         }
     
     qs_ = ec2_client.get_paginator('describe_instances')
@@ -322,7 +325,7 @@ def ec2_state_stats():
     graph_data=[]
     for i in stats.keys():
         graph_data.append({"key":i,"value":int(stats[i])})
-    return graph_data
+    return (graph_data)
 
 #-----------------------------------------------------------------------------
 now = datetime.utcnow() # Now time in UTC format 

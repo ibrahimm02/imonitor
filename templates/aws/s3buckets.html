@@ -1,13 +1,13 @@
 {% extends "base.html" %} 
 {% block nav_s3 %}active{% endblock %}
 {% block title %}iMonitor - S3{% endblock %} 
-{% block navTitle %}EC2{% endblock %} 
+{% block navTitle %}S3{% endblock %} 
 
 {% block content %} 
 
 
 
-<h1>Simple Storage Service (S3)</h1>
+<!-- <h1>Simple Storage Service (S3)</h1> -->
 <!-- <ul>
 {% for bucket in response['Buckets'] %}
     <li>{{ bucket.CreationDate }}1</li>
@@ -44,5 +44,46 @@
 
         </table>
         </div>
+
+        <div class="ct-chart1 ct-perfect-fourth"></div>
+        <div class="ct-chart2 ct-perfect-fourth"></div>
+
+
+        <script>
+            var data = {
+                // A labels array that can contain any sort of values
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                // Our series array that contains series objects or in this case series data arrays
+                series: [
+                  [5, 2, 4, 2, 0]
+                ]
+              };
+              
+              // As options we currently only set a static size of 300x200 px. We can also omit this and use aspect ratio containers
+              // as you saw in the previous example
+              var options = {
+                width: 300,
+                height: 200
+              };
+              
+              // Create a new line chart object where as first parameter we pass in a selector
+              // that is resolving to our chart container element. The Second parameter
+              // is the actual data object. As a third parameter we pass in our custom options.
+              new Chartist.Line('.ct-chart1', data, options);
+
+
+              new Chartist.Pie('.ct-chart2', {
+                series: [20, 10, 30, 40]
+              }, {
+                donut: true,
+                donutWidth: 60,
+                donutSolid: true,
+                startAngle: 270,
+                showLabel: true
+              });
+
+        </script>
+
+
 
 {% endblock content %}
