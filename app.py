@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, current_app, flash
-
 from flask_bootstrap import Bootstrap
 import boto3
 from boto3 import Session
@@ -10,31 +9,49 @@ import json
 import base64
 import io
 
-
-ec2_client = boto3.client("ec2", region_name="us-east-1")
-
-ec2_resource = boto3.resource('ec2', region_name="us-east-1")
-
-cw_client = boto3.client('cloudwatch')
-
 app = Flask(__name__)
 Bootstrap(app)
 CORS(app)
 app.secret_key = 'flash-secret'
 
+#---- CONSTANTS ------------------------------------------------------------------------------------------------#
+REGION_NAME = "us-east-1"
+
+
+#---- VARIABLES ------------------------------------------------------------------------------------------------#
+
+ec2_client = boto3.client("ec2", region_name=REGION_NAME)
+
+ec2_resource = boto3.resource('ec2', region_name=REGION_NAME)
+
+cw_client = boto3.client('cloudwatch')
+
+#---- OVERVIEW ------------------------------------------------------------------------------------------------#
+
+@app.route('/aws/overview')
+def overview():
+    return render_template('aws/overview.html')
+
+#---- INDEX ------------------------------------------------------------------------------------------------#
+
 @app.route('/')
 def index():
-    return render_template('index.html')
-
-@app.route('/landing')
-def landing():
     return render_template('landing.html')
+
+#---- TEST ------------------------------------------------------------------------------------------------#
 
 @app.route('/members')
 def members():
-     return render_template('index.html', message="No Instances running. Create an instance first" )
+     return render_template('/index.html', message="No Instances running. Create an instance first" )
     # return {"members": ["Member1", "Member2", "Member3"]}
 
+#---- ACCOUNT ------------------------------------------------------------------------------------------------#
+
+@app.route('/aws/account')
+def aws_account():
+    return render_template('account.html')
+
+#---- AWS/EC2 ------------------------------------------------------------------------------------------------#
 
 @app.route('/aws/ec2-instance-all')
 def ec2_instances():
@@ -46,8 +63,8 @@ def ec2_instances():
     else:
         return response
 
-@app.route('/aws/ec2-instances')
-def get_running_ec2_instances():
+@app.route('/aws/ec2')
+def aws_ec2():
     # # ec2_client = boto3.client("ec2", region_name="us-west-2")
     # reservations = ec2_client.describe_instances(Filters=[
     #     {
@@ -72,7 +89,16 @@ def get_running_ec2_instances():
 
     total_instances = len([instance for instance in instances]); 
 
-    ec2_graph = get_ec2_graph()
+    # ec2_CPUUtilization = get_ec2_CPUUtilization()
+    # ec2_DiskReadOps = get_ec2_DiskReadOps()
+    # ec2_DiskWriteOps = get_ec2_DiskWriteOps()
+    # ec2_NetworkIn = get_ec2_NetworkIn()
+    # ec2_NetworkOut = get_ec2_NetworkOut()
+    # ec2_CPUCreditUsage = get_ec2_CPUCreditUsage()
+    # ec2_CPUCreditBalance = get_ec2_CPUCreditBalance()
+    # ec2_DiskReadBytes = get_ec2_DiskReadBytes()
+    # ec2_DiskWriteBytes = get_ec2_DiskWriteBytes()
+
 
     ec2_metrics = ec2_metrics_amm()
 
@@ -81,104 +107,26 @@ def get_running_ec2_instances():
     
 
     if not(instances):
-        return render_template("aws/aws/ec2.html", info="No instance Data")
+        return render_template("aws/ec2.html", info="No instance Data")
 
-    return render_template("aws/aws_ec2.html", instances=instances, active_instances=active_instances, 
-            total_instances=total_instances, graphImage=ec2_graph, ec2_metrics=ec2_metrics, ec2_states=ec2_states)
+    return render_template("aws/aws_ec2.html", 
+        instances=instances, 
+        active_instances=active_instances, 
+        total_instances=total_instances, 
+        # ec2_CPUUtilization=ec2_CPUUtilization, 
+        # ec2_DiskReadOps=ec2_DiskReadOps,
+        # ec2_DiskWriteOps=ec2_DiskWriteOps,
+        # ec2_NetworkIn=ec2_NetworkIn,
+        # ec2_NetworkOut=ec2_NetworkOut,
+        # ec2_CPUCreditUsage=ec2_CPUCreditUsage,
+        # ec2_CPUCreditBalance=ec2_CPUCreditBalance,
+        # ec2_DiskReadBytes=ec2_DiskReadBytes,
+        # ec2_DiskWriteBytes=ec2_DiskWriteBytes,
 
-@app.route('/aws/s3-instance-all')
-def s3_instances():
-    # Retrieve the list of existing buckets
-    s3_client = boto3.client('s3')
-    response = s3_client.list_buckets()
+        ec2_metrics=ec2_metrics, 
+        ec2_states=ec2_states)
 
-    if len(response['Buckets'])==0:
-        return f'No Buckets!'
-    # Output the bucket names
-    else:
-        print('Existing buckets:')
-        for bucket in response['Buckets']:
-            print(f'  {bucket["Name"]}')
-        return render_template("aws/s3buckets.html", response=response)
-
-@app.route('/aws/rds-instance-all')
-def rds_instances():
-    rds_client = boto3.client('rds')
-    response = rds_client.describe_db_instances(
-        # DBInstanceIdentifier='string',
-        # Filters=[
-        #     {
-        #         'Name': 'string',
-        #         'Values': [
-        #             'string',
-        #         ]
-        #     },
-        # ],
-        # MaxRecords=123,
-        # Marker='string'
-    )
-    return response
-
-@app.route('/aws/lambda-instance-all')
-def lambda_instances():
-    lambda_client = boto3.client('lambda')
-    response = lambda_client.list_functions()
-    return response
-
-@app.route('/aws/elb-instance-all')
-def elb_instances():
-    elb_client = boto3.client('elb')
-    response = elb_client.describe_load_balancers()
-    return response
-
-@app.route('/aws/elasticbeanstalk-instance-all')
-def elasticbeanstalk_instances():
-    elasticbeanstalk_client = boto3.client('elasticbeanstalk')
-    response = elasticbeanstalk_client.describe_environments()
-    return response
-
-@app.route('/aws/ecs-instance-all')
-def ecs_instances():
-    ecs_client = boto3.client('ecs')
-    response = ecs_client.describe_clusters(
-        clusters=[
-            'string',
-        ]
-    )
-    return response
-
-@app.route('/aws/efs-instance-all')
-def efs_instances():
-    efs_client = boto3.client('efs')
-    response = efs_client.describe_file_systems(
-        MaxItems=123,
-        # Marker='string',
-        # CreationToken='string',
-        # FileSystemId='string'
-    )
-    return response
-
-# @app.route('/aws/rds-instance-all')
-# def rds_instances():
-#     rds_client = boto3.client('rds')
-#     response = rds_client.describe_db_clusters(
-#         DBClusterIdentifier='string',
-#         Filters=[
-#             {
-#                 'Name': 'string',
-#                 'Values': [
-#                     'string',
-#                 ]
-#             },
-#         ],
-#         MaxRecords=123,
-#         Marker='string',
-#         IncludeShared=True|False
-#     )
-#     return response
-
-
-
+# --------------------------------------------------------------
 
 # get list of all running instances
 def get_running_instances():
@@ -197,6 +145,8 @@ def get_running_instances():
             public_ip = instance["PublicIpAddress"]
             private_ip = instance["PrivateIpAddress"]
             print(f"{instance_id}, {instance_type}, {public_ip}, {private_ip}")
+
+# --------------------------------------------------------------
 
 # get_running_instances()
 
@@ -275,11 +225,10 @@ def instance_output_format(instance_data):
     }
     return response
 
+#---- EC2 GRAPH-1 ------------------------------------------------------------------------------------------------#
 
-def get_ec2_graph():
+def get_ec2_CPUUtilization():
   
-    cw_client = boto3.client('cloudwatch')
-
     data=[]
     response_data=[]
     for instance in ec2_client.describe_instances()["Reservations"]:
@@ -297,21 +246,270 @@ def get_ec2_graph():
     bytes_data=io.BytesIO(response["MetricWidgetImage"])
     fr=base64.b64encode(bytes_data.getvalue())
     
-    ec2_graph1 = fr.decode('utf-8')
+    ec2_graph = fr.decode('utf-8')
 
-    return ec2_graph1
+    return ec2_graph
 
-get_ec2_graph()
+#---- EC2 GRAPH-2 ------------------------------------------------------------------------------------------------#
+
+def get_ec2_DiskReadOps():
+  
+    data=[]
+    response_data=[]
+    for instance in ec2_client.describe_instances()["Reservations"]:
+        for each_in in instance["Instances"]:
+            response_data.append(instance_output_format(each_in)) 
+
+    instance_ids=[i["InstanceId"] for i in response_data]
+    for ins in instance_ids:
+            data.append(["AWS/EC2", "DiskReadOps", "InstanceId",str(ins)])
+            filter_data={"metrics":data}
+
+    # print(data)
+
+    response = cw_client.get_metric_widget_image(MetricWidget=json.dumps(filter_data))
+    bytes_data=io.BytesIO(response["MetricWidgetImage"])
+    fr=base64.b64encode(bytes_data.getvalue())
+    
+    ec2_graph = fr.decode('utf-8')
+
+    return ec2_graph
+
+#---- EC2 GRAPH-3 ------------------------------------------------------------------------------------------------#
+
+def get_ec2_DiskWriteOps():
+  
+    data=[]
+    response_data=[]
+    for instance in ec2_client.describe_instances()["Reservations"]:
+        for each_in in instance["Instances"]:
+            response_data.append(instance_output_format(each_in)) 
+
+    instance_ids=[i["InstanceId"] for i in response_data]
+    for ins in instance_ids:
+            data.append(["AWS/EC2", "DiskWriteOps", "InstanceId",str(ins)])
+            filter_data={"metrics":data}
+
+    # print(data)
+
+    response = cw_client.get_metric_widget_image(MetricWidget=json.dumps(filter_data))
+    bytes_data=io.BytesIO(response["MetricWidgetImage"])
+    fr=base64.b64encode(bytes_data.getvalue())
+    
+    ec2_graph = fr.decode('utf-8')
+
+    return ec2_graph
+
+#---- EC2 GRAPH-4 ------------------------------------------------------------------------------------------------#
+
+def get_ec2_NetworkIn():
+  
+    data=[]
+    response_data=[]
+    for instance in ec2_client.describe_instances()["Reservations"]:
+        for each_in in instance["Instances"]:
+            response_data.append(instance_output_format(each_in)) 
+
+    instance_ids=[i["InstanceId"] for i in response_data]
+    for ins in instance_ids:
+            data.append(["AWS/EC2", "NetworkIn", "InstanceId",str(ins)])
+            filter_data={"metrics":data}
+
+    # print(data)
+
+    response = cw_client.get_metric_widget_image(MetricWidget=json.dumps(filter_data))
+    bytes_data=io.BytesIO(response["MetricWidgetImage"])
+    fr=base64.b64encode(bytes_data.getvalue())
+    
+    ec2_graph = fr.decode('utf-8')
+
+    return ec2_graph
+
+#---- EC2 GRAPH-5 ------------------------------------------------------------------------------------------------#
+
+def get_ec2_NetworkOut():
+  
+    data=[]
+    response_data=[]
+    for instance in ec2_client.describe_instances()["Reservations"]:
+        for each_in in instance["Instances"]:
+            response_data.append(instance_output_format(each_in)) 
+
+    instance_ids=[i["InstanceId"] for i in response_data]
+    for ins in instance_ids:
+            data.append(["AWS/EC2", "NetworkOut", "InstanceId",str(ins)])
+            filter_data={"metrics":data}
+
+    # print(data)
+
+    response = cw_client.get_metric_widget_image(MetricWidget=json.dumps(filter_data))
+    bytes_data=io.BytesIO(response["MetricWidgetImage"])
+    fr=base64.b64encode(bytes_data.getvalue())
+    
+    ec2_graph = fr.decode('utf-8')
+
+    return ec2_graph
+
+#---- EC2 GRAPH-6 ------------------------------------------------------------------------------------------------#
+
+def get_ec2_CPUCreditUsage():
+  
+    data=[]
+    response_data=[]
+    for instance in ec2_client.describe_instances()["Reservations"]:
+        for each_in in instance["Instances"]:
+            response_data.append(instance_output_format(each_in)) 
+
+    instance_ids=[i["InstanceId"] for i in response_data]
+    for ins in instance_ids:
+            data.append(["AWS/EC2", "CPUCreditUsage", "InstanceId",str(ins)])
+            filter_data={"metrics":data}
+
+    # print(data)
+
+    response = cw_client.get_metric_widget_image(MetricWidget=json.dumps(filter_data))
+    bytes_data=io.BytesIO(response["MetricWidgetImage"])
+    fr=base64.b64encode(bytes_data.getvalue())
+    
+    ec2_graph = fr.decode('utf-8')
+
+    return ec2_graph
+
+#---- EC2 GRAPH-7 ------------------------------------------------------------------------------------------------#
+
+def get_ec2_CPUCreditBalance():
+  
+    data=[]
+    response_data=[]
+    for instance in ec2_client.describe_instances()["Reservations"]:
+        for each_in in instance["Instances"]:
+            response_data.append(instance_output_format(each_in)) 
+
+    instance_ids=[i["InstanceId"] for i in response_data]
+    for ins in instance_ids:
+            data.append(["AWS/EC2", "CPUCreditBalance", "InstanceId",str(ins)])
+            filter_data={"metrics":data}
+
+    # print(data)
+
+    response = cw_client.get_metric_widget_image(MetricWidget=json.dumps(filter_data))
+    bytes_data=io.BytesIO(response["MetricWidgetImage"])
+    fr=base64.b64encode(bytes_data.getvalue())
+    
+    ec2_graph = fr.decode('utf-8')
+
+    return ec2_graph
+
+#---- EC2 GRAPH-8 ------------------------------------------------------------------------------------------------#
+
+def get_ec2_DiskReadBytes():
+  
+    data=[]
+    response_data=[]
+    for instance in ec2_client.describe_instances()["Reservations"]:
+        for each_in in instance["Instances"]:
+            response_data.append(instance_output_format(each_in)) 
+
+    instance_ids=[i["InstanceId"] for i in response_data]
+    for ins in instance_ids:
+            data.append(["AWS/EC2", "DiskReadBytes", "InstanceId",str(ins)])
+            filter_data={"metrics":data}
+
+    # print(data)
+
+    response = cw_client.get_metric_widget_image(MetricWidget=json.dumps(filter_data))
+    bytes_data=io.BytesIO(response["MetricWidgetImage"])
+    fr=base64.b64encode(bytes_data.getvalue())
+    
+    ec2_graph = fr.decode('utf-8')
+
+    return ec2_graph
+
+#---- EC2 GRAPH-9 ------------------------------------------------------------------------------------------------#
+
+def get_ec2_DiskWriteBytes():
+  
+    data=[]
+    response_data=[]
+    for instance in ec2_client.describe_instances()["Reservations"]:
+        for each_in in instance["Instances"]:
+            response_data.append(instance_output_format(each_in)) 
+
+    instance_ids=[i["InstanceId"] for i in response_data]
+    for ins in instance_ids:
+            data.append(["AWS/EC2", "DiskWriteBytes", "InstanceId",str(ins)])
+            filter_data={"metrics":data}
+
+    # print(data)
+
+    response = cw_client.get_metric_widget_image(MetricWidget=json.dumps(filter_data))
+    bytes_data=io.BytesIO(response["MetricWidgetImage"])
+    fr=base64.b64encode(bytes_data.getvalue())
+    
+    ec2_graph = fr.decode('utf-8')
+
+    return ec2_graph
+
+#---- EC2 GRAPH-10 ------------------------------------------------------------------------------------------------#
+
+def get_ec2_DiskWriteOps():
+  
+    data=[]
+    response_data=[]
+    for instance in ec2_client.describe_instances()["Reservations"]:
+        for each_in in instance["Instances"]:
+            response_data.append(instance_output_format(each_in)) 
+
+    instance_ids=[i["InstanceId"] for i in response_data]
+    for ins in instance_ids:
+            data.append(["AWS/EC2", "DiskWriteOps", "InstanceId",str(ins)])
+            filter_data={"metrics":data}
+
+    # print(data)
+
+    response = cw_client.get_metric_widget_image(MetricWidget=json.dumps(filter_data))
+    bytes_data=io.BytesIO(response["MetricWidgetImage"])
+    fr=base64.b64encode(bytes_data.getvalue())
+    
+    ec2_graph = fr.decode('utf-8')
+
+    return ec2_graph
+
+#---- EC2 GRAPH-11 ------------------------------------------------------------------------------------------------#
+
+def get_ec2_DiskWriteOps():
+  
+    data=[]
+    response_data=[]
+    for instance in ec2_client.describe_instances()["Reservations"]:
+        for each_in in instance["Instances"]:
+            response_data.append(instance_output_format(each_in)) 
+
+    instance_ids=[i["InstanceId"] for i in response_data]
+    for ins in instance_ids:
+            data.append(["AWS/EC2", "DiskWriteOps", "InstanceId",str(ins)])
+            filter_data={"metrics":data}
+
+    # print(data)
+
+    response = cw_client.get_metric_widget_image(MetricWidget=json.dumps(filter_data))
+    bytes_data=io.BytesIO(response["MetricWidgetImage"])
+    fr=base64.b64encode(bytes_data.getvalue())
+    
+    ec2_graph = fr.decode('utf-8')
+
+    return ec2_graph
+
 
 #-----------------------------------------------------------------------------
 
 def ec2_state_stats():
     stats = {
-        "pending": 0,
+        # "pending": 0,
         "running": 0,
-        "shutting-down": 0,
-        "terminated": 0,
-        "stopping": 0,
+        # "shutting-down": 0,
+        # "terminated": 0,
+        # "stopping": 0,
         "stopped": 0
         }
     
@@ -324,13 +522,13 @@ def ec2_state_stats():
                 stats[state] += 1
     graph_data=[]
     for i in stats.keys():
-        graph_data.append({"key":i,"value":int(stats[i])})
+        graph_data.append({"state":i,"value":int(stats[i])})
     return (graph_data)
 
 #-----------------------------------------------------------------------------
+
 now = datetime.utcnow() # Now time in UTC format 
 past = now - timedelta(minutes=60) # Minus 60 minutes
-
 
 def ec2_metrics_amm():
 
@@ -402,12 +600,27 @@ def ec2_metrics_amm():
             return metrics_holder
             
 #------------------------------------------------------------------------------
-# [{'AmiLaunchIndex': 0, 'ImageId': 'ami-064d05b4fe8515623', 'InstanceId': 'i-043567371c05991f9', 'InstanceType': 't1.micro', 'KeyName': 'ec2-key-pair', 'LaunchTime': datetime.datetime(2022, 12, 22, 16, 25, 14, tzinfo=tzutc()), 'Monitoring': {'State': 'disabled'}, 'Placement': {'AvailabilityZone': 'us-east-1b', 'GroupName': '', 'Tenancy': 'default'}, 'Platform': 'windows', 'PrivateDnsName': 'ip-172-31-21-12.ec2.internal', 'PrivateIpAddress': '172.31.21.12', 'ProductCodes': [], 'PublicDnsName': '', 'State': {'Code': 80, 'Name': 'stopped'}, 'StateTransitionReason': 'User initiated (2022-12-22 23:22:21 GMT)', 'SubnetId': 'subnet-0496468f4b393d676', 'VpcId': 'vpc-0e8dc4407141eb883', 'Architecture': 'x86_64', 'BlockDeviceMappings': [{'DeviceName': '/dev/sda1', 'Ebs': {'AttachTime': datetime.datetime(2022, 12, 4, 17, 49, 27, tzinfo=tzutc()), 'DeleteOnTermination': True, 'Status': 'attached', 'VolumeId': 'vol-0102a32c11923a8c1'}}], 'ClientToken': '6d251cb0-46ab-4e32-8b29-fa85f584488f', 'EbsOptimized': False, 'EnaSupport': True, 'Hypervisor': 'xen', 'NetworkInterfaces': [{'Attachment': {'AttachTime': datetime.datetime(2022, 12, 4, 17, 49, 26, tzinfo=tzutc()), 'AttachmentId': 'eni-attach-0b973f025345198c9', 'DeleteOnTermination': True, 'DeviceIndex': 0, 'Status': 'attached', 'NetworkCardIndex': 0}, 'Description': '', 'Groups': [{'GroupName': 'launch-wizard-2', 'GroupId': 'sg-08d4f8ebbd3bf8b10'}], 'Ipv6Addresses': [], 'MacAddress': '0a:fd:f4:be:f4:21', 'NetworkInterfaceId': 'eni-05fd1aeb96fc3be7e', 'OwnerId': '653628891621', 'PrivateDnsName': 'ip-172-31-21-12.ec2.internal', 'PrivateIpAddress': '172.31.21.12', 'PrivateIpAddresses': [{'Primary': True, 'PrivateDnsName': 'ip-172-31-21-12.ec2.internal', 'PrivateIpAddress': '172.31.21.12'}], 'SourceDestCheck': True, 'Status': 'in-use', 'SubnetId': 'subnet-0496468f4b393d676', 'VpcId': 'vpc-0e8dc4407141eb883', 'InterfaceType': 'interface'}], 'RootDeviceName': '/dev/sda1', 'RootDeviceType': 'ebs', 'SecurityGroups': [{'GroupName': 'launch-wizard-2', 'GroupId': 'sg-08d4f8ebbd3bf8b10'}], 'SourceDestCheck': True, 'StateReason': {'Code': 'Client.UserInitiatedShutdown', 'Message': 'Client.UserInitiatedShutdown: User initiated shutdown'}, 'Tags': [{'Key': 'Name', 'Value': 'test-instance2'}], 'VirtualizationType': 'hvm', 'CpuOptions': {'CoreCount': 1, 'ThreadsPerCore': 1}, 'CapacityReservationSpecification': {'CapacityReservationPreference': 'open'}, 'HibernationOptions': {'Configured': False}, 'MetadataOptions': {'State': 'applied', 'HttpTokens': 'optional', 'HttpPutResponseHopLimit': 1, 'HttpEndpoint': 'enabled', 'HttpProtocolIpv6': 'disabled', 'InstanceMetadataTags': 'disabled'}, 'EnclaveOptions': {'Enabled': False}, 'PlatformDetails': 'Windows', 'UsageOperation': 'RunInstances:0002', 'UsageOperationUpdateTime': datetime.datetime(2022, 12, 4, 17, 49, 26, tzinfo=tzutc()), 'PrivateDnsNameOptions': {'HostnameType': 'ip-name', 'EnableResourceNameDnsARecord': True, 'EnableResourceNameDnsAAAARecord': False}, 'MaintenanceOptions': {'AutoRecovery': 'default'}, 'mainState': {'selected_datapoints': [{'Timestamp': datetime.datetime(2022, 12, 22, 18, 22, tzinfo=tzutc()), 'Average': 0.7333448677986331, 'Minimum': 0.645161290322544, 'Maximum': 1.03448275862073, 'Unit': 'Percent', 'sort_by': 1}, {'Timestamp': datetime.datetime(2022, 12, 21, 18, 22, tzinfo=tzutc()), 'Average': 3.5355675644290567, 'Minimum': 0.645161290322544, 'Maximum': 51.8032786885246, 'Unit': 'Percent', 'sort_by': 0}], 'last_avg': 0.7333448677986331, 'last_min': 0.645161290322544, 'last_max': 1.03448275862073, 'avg_load': 0.007, 'last_time': '2022-12-22 18:22:00+00:00'}}]
+# [{'AmiLaunchIndex': 0, 'ImageId': 'ami-064d05b4fe8515623', 'InstanceId': 'i-043567371c05991f9', 'InstanceType': 't1.micro', 
+# 'KeyName': 'ec2-key-pair', 'LaunchTime': datetime.datetime(2022, 12, 22, 16, 25, 14, tzinfo=tzutc()), 
+# 'Monitoring': {'State': 'disabled'}, 'Placement': {'AvailabilityZone': 'us-east-1b', 'GroupName': '', 'Tenancy': 'default'}, 
+# 'Platform': 'windows', 'PrivateDnsName': 'ip-172-31-21-12.ec2.internal', 'PrivateIpAddress': '172.31.21.12', 'ProductCodes': [], 'PublicDnsName': '', 
+# 'State': {'Code': 80, 'Name': 'stopped'}, 'StateTransitionReason': 'User initiated (2022-12-22 23:22:21 GMT)', 'SubnetId': 'subnet-0496468f4b393d676', 
+# 'VpcId': 'vpc-0e8dc4407141eb883', 'Architecture': 'x86_64', 
+# 'BlockDeviceMappings': [{'DeviceName': '/dev/sda1', 'Ebs': {'AttachTime': datetime.datetime(2022, 12, 4, 17, 49, 27, tzinfo=tzutc()), 'DeleteOnTermination': True, 'Status': 'attached', 'VolumeId': 'vol-0102a32c11923a8c1'}}], 
+# 'ClientToken': '6d251cb0-46ab-4e32-8b29-fa85f584488f', 'EbsOptimized': False, 'EnaSupport': True, 'Hypervisor': 'xen', 
+# 'NetworkInterfaces': [{'Attachment': {'AttachTime': datetime.datetime(2022, 12, 4, 17, 49, 26, tzinfo=tzutc()), 'AttachmentId': 'eni-attach-0b973f025345198c9', 'DeleteOnTermination': True, 'DeviceIndex': 0, 'Status': 'attached', 'NetworkCardIndex': 0}, 
+# 'Description': '', 'Groups': [{'GroupName': 'launch-wizard-2', 'GroupId': 'sg-08d4f8ebbd3bf8b10'}], 'Ipv6Addresses': [], 'MacAddress': '0a:fd:f4:be:f4:21', 'NetworkInterfaceId': 'eni-05fd1aeb96fc3be7e', 'OwnerId': '653628891621', 'PrivateDnsName': 'ip-172-31-21-12.ec2.internal', 'PrivateIpAddress': '172.31.21.12', 
+# 'PrivateIpAddresses': [{'Primary': True, 'PrivateDnsName': 'ip-172-31-21-12.ec2.internal', 'PrivateIpAddress': '172.31.21.12'}], 'SourceDestCheck': True, 'Status': 'in-use', 'SubnetId': 'subnet-0496468f4b393d676', 'VpcId': 'vpc-0e8dc4407141eb883', 'InterfaceType': 'interface'}], 
+# 'RootDeviceName': '/dev/sda1', 'RootDeviceType': 'ebs', 'SecurityGroups': [{'GroupName': 'launch-wizard-2', 'GroupId': 'sg-08d4f8ebbd3bf8b10'}], 'SourceDestCheck': True, 'StateReason': {'Code': 'Client.UserInitiatedShutdown', 'Message': 'Client.UserInitiatedShutdown: User initiated shutdown'}, 
+# 'Tags': [{'Key': 'Name', 'Value': 'test-instance2'}], 'VirtualizationType': 'hvm', 'CpuOptions': {'CoreCount': 1, 'ThreadsPerCore': 1}, 'CapacityReservationSpecification': {'CapacityReservationPreference': 'open'}, 'HibernationOptions': {'Configured': False}, 
+# 'MetadataOptions': {'State': 'applied', 'HttpTokens': 'optional', 'HttpPutResponseHopLimit': 1, 'HttpEndpoint': 'enabled', 'HttpProtocolIpv6': 'disabled', 'InstanceMetadataTags': 'disabled'}, 'EnclaveOptions': {'Enabled': False}, 
+# 'PlatformDetails': 'Windows', 'UsageOperation': 'RunInstances:0002', 'UsageOperationUpdateTime': datetime.datetime(2022, 12, 4, 17, 49, 26, tzinfo=tzutc()), 'PrivateDnsNameOptions': {'HostnameType': 'ip-name', 'EnableResourceNameDnsARecord': True, 'EnableResourceNameDnsAAAARecord': False}, 
+# 'MaintenanceOptions': {'AutoRecovery': 'default'}, 'mainState': {'selected_datapoints': [{'Timestamp': datetime.datetime(2022, 12, 22, 18, 22, tzinfo=tzutc()), 'Average': 0.7333448677986331, 'Minimum': 0.645161290322544, 'Maximum': 1.03448275862073, 'Unit': 'Percent', 'sort_by': 1}, 
+# {'Timestamp': datetime.datetime(2022, 12, 21, 18, 22, tzinfo=tzutc()), 'Average': 3.5355675644290567, 'Minimum': 0.645161290322544, 'Maximum': 51.8032786885246, 'Unit': 'Percent', 'sort_by': 0}], 
+# 'last_avg': 0.7333448677986331, 'last_min': 0.645161290322544, 'last_max': 1.03448275862073, 'avg_load': 0.007, 'last_time': '2022-12-22 18:22:00+00:00'}}]
 
 
 #-----------------------------------------------------------------------------
-
-#-------------------------------------------------------------------
 
 @app.route('/start', methods=["POST"])
 def start_instance():
@@ -422,7 +635,7 @@ def start_instance():
 
     print(f'EC2 instance "{instance.id}" has been started')
     flash(f'EC2 instance "{instance.id}" has been started')
-    return redirect(url_for('get_running_ec2_instances'))
+    return redirect(url_for('aws_ec2'))
 #-------------------------------------------------------------------
 
 @app.route('/stop', methods=["POST"])
@@ -439,13 +652,115 @@ def stop_instance():
     print(f'EC2 instance "{instance.id}" has been stopped')
 
     flash(f'EC2 instance "{instance.id}" has been stopped')
-    return redirect(url_for('get_running_ec2_instances'))
-#-------------------------------------------------------------------
+    return redirect(url_for('aws_ec2'))
 
 
-@app.route('/aws/account')
-def aws_account():
-    return render_template('account.html')
+#---- AWS/S3 ------------------------------------------------------------------------------------------------#
+
+@app.route('/aws/s3')
+def aws_s3():
+    # Retrieve the list of existing buckets
+    s3_client = boto3.client('s3')
+    response = s3_client.list_buckets()
+
+    if len(response['Buckets'])==0:
+        return f'No Buckets!'
+    # Output the bucket names
+    else:
+        print('Existing buckets:')
+        for bucket in response['Buckets']:
+            print(f'  {bucket["Name"]}')
+        return render_template("aws/aws_s3.html", response=response)
+
+#---- AWS/RDS ------------------------------------------------------------------------------------------------#
+
+@app.route('/aws/rds-instance-all')
+def rds_instances():
+    rds_client = boto3.client('rds')
+    response = rds_client.describe_db_instances(
+        # DBInstanceIdentifier='string',
+        # Filters=[
+        #     {
+        #         'Name': 'string',
+        #         'Values': [
+        #             'string',
+        #         ]
+        #     },
+        # ],
+        # MaxRecords=123,
+        # Marker='string'
+    )
+    return response
+
+# @app.route('/aws/rds-instance-all')
+# def rds_instances():
+#     rds_client = boto3.client('rds')
+#     response = rds_client.describe_db_clusters(
+#         DBClusterIdentifier='string',
+#         Filters=[
+#             {
+#                 'Name': 'string',
+#                 'Values': [
+#                     'string',
+#                 ]
+#             },
+#         ],
+#         MaxRecords=123,
+#         Marker='string',
+#         IncludeShared=True|False
+#     )
+#     return response
+
+#---- AWS/LAMBDA ------------------------------------------------------------------------------------------------#
+
+@app.route('/aws/lambda-instance-all')
+def lambda_instances():
+    lambda_client = boto3.client('lambda')
+    response = lambda_client.list_functions()
+    return response
+
+#---- AWS/ELASTIC LOAD BALANCER ------------------------------------------------------------------------------------------------#
+
+@app.route('/aws/elb-instance-all')
+def elb_instances():
+    elb_client = boto3.client('elb')
+    response = elb_client.describe_load_balancers()
+    return response
+
+#---- AWS/ELASTIC BEAN STALK ------------------------------------------------------------------------------------------------#
+
+@app.route('/aws/elasticbeanstalk-instance-all')
+def elasticbeanstalk_instances():
+    elasticbeanstalk_client = boto3.client('elasticbeanstalk')
+    response = elasticbeanstalk_client.describe_environments()
+    return response
+
+#---- AWS/ELASTIC CONTAINER SERVICE ------------------------------------------------------------------------------------------------#
+
+@app.route('/aws/ecs-instance-all')
+def ecs_instances():
+    ecs_client = boto3.client('ecs')
+    response = ecs_client.describe_clusters(
+        clusters=[
+            'string',
+        ]
+    )
+    return response
+
+#---- AWS/ELASTIC FILE SYSTEM ------------------------------------------------------------------------------------------------#
+
+@app.route('/aws/efs-instance-all')
+def efs_instances():
+    efs_client = boto3.client('efs')
+    response = efs_client.describe_file_systems(
+        MaxItems=123,
+        # Marker='string',
+        # CreationToken='string',
+        # FileSystemId='string'
+    )
+    return response
+
+#---- ERROR HANDLERS ------------------------------------------------------------------------------------------------#
 
 # Page not found
 @app.errorhandler(404)
@@ -456,6 +771,13 @@ def page_not_found(e):
 @app.errorhandler(500)
 def server_error(e):
     return render_template("500.html"), 500
+
+
+
+
+
+
+
 
 
 if __name__ == "__main__":
