@@ -5,4 +5,152 @@
 
 {% block content %}
   <h1>Hello, stranger!</h1>
+
+  <h2>Current Region: {{current_region}}</h2>>
+
+  {{ec2_states}}
+
+  <br>first
+
+  {{ec2_states[0]['value']}}
+
+  <br>second
+
+  {% set stat = [] %}
+
+  {% for value in ec2_states: %}
+      {% set tmp = stat.append(value['value']) %}
+      <!-- {{value['value']}} -->
+  {% endfor %}
+  
+  <br>third
+  {{stat}}
+
+  <br>fourth
+    <!-- {% for value in ec2_states: %}
+      {{value['value']}}
+  {% endfor %} -->
+
+<canvas id="myChart" width="300" height="150"></canvas>
+
+<script>
+  // Global parameters:
+  // do not resize the chart canvas when its container does (keep at 600x400px)
+  Chart.defaults.global.responsive = false;
+
+  // define the chart data
+  var chartData = {
+    labels: ["pending","running","shutting-down","terminated","stopping","stopped"],
+    datasets: [
+      {
+        data:{{stat}},
+        backgroundColor: [
+          "#d2d62e",
+          "#00a65a",
+          "#f39c12",
+          "#3c8dbc",
+          "#00c0ef",
+          "#f56954",
+        ],
+      },
+    ],
+  };
+
+  // get chart canvas
+  var ctx = document.getElementById("myChart").getContext("2d");
+
+  var options = {
+    tooltips: {
+      enabled: true,
+    },
+    legend: {
+      position: 'left'
+    },
+    plugins: {
+      labels: [
+        {
+          render: "label",
+          position: "outside",
+          fontColor: "#000",
+          fontSize: 15,
+        },
+        {
+          render: "percentage",
+          fontColor: "#000",
+          fontSize: 10,
+          position: "border",
+        },
+      ],
+    },
+  };
+
+  // create the chart using the chart canvas
+  var myChart = new Chart(ctx, {
+    type: "doughnut",
+    data: chartData,
+    options: options,
+  });
+</script>
+
+<!-- <canvas id="myChart" width="600" height="400"></canvas>
+
+<script>
+  // Global parameters:
+  // do not resize the chart canvas when its container does (keep at 600x400px)
+  Chart.defaults.global.responsive = false;
+
+  // define the chart data
+  var chartData = {
+    labels: ["Chrome", "IE", "FireFox", "Safari", "Opera", "Navigator"],
+    datasets: [
+      {
+        data: [50, 45, 21, 150, 95, 66],
+        backgroundColor: [
+          "#f56954",
+          "#00a65a",
+          "#f39c12",
+          "#00c0ef",
+          "#3c8dbc",
+          "#d2d6de",
+        ],
+      },
+    ],
+  };
+
+  // get chart canvas
+  var ctx = document.getElementById("myChart").getContext("2d");
+
+  var options = {
+    tooltips: {
+      enabled: false,
+    },
+    plugins: {
+      labels: [
+        {
+          render: "label",
+          position: "outside",
+          fontColor: "#000",
+          fontSize: 15,
+        },
+        {
+          render: "percentage",
+          fontColor: "#000",
+          fontSize: 10,
+          position: "border",
+        },
+      ],
+    },
+  };
+
+  // create the chart using the chart canvas
+  var myChart = new Chart(ctx, {
+    type: "pie",
+    data: chartData,
+    options: options,
+  });
+</script> -->
+
+<br>
+{{response}}
+
 {% endblock %}

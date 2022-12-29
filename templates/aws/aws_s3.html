@@ -1,11 +1,6 @@
-{% extends "base.html" %} 
-{% block nav_s3 %}active{% endblock %}
-{% block title %}iMonitor - S3{% endblock %} 
-{% block navTitle %}S3{% endblock %} 
-
-{% block content %} 
-
-
+{% extends "base.html" %} {% block nav_s3 %}active{% endblock %} {% block title
+%}iMonitor - S3{% endblock %} {% block navTitle %}S3{% endblock %} {% block
+content %}
 
 <!-- <h1>Simple Storage Service (S3)</h1> -->
 <!-- <ul>
@@ -15,92 +10,36 @@
     
 {% endfor %} 
 </ul> -->
-    {{ response }}
+<!-- {{ response }} -->
+<div class="row">
+  <div class="col-sm-2">
+    <div class="card text-center border-0 shadow-sm mb-4 h-80">
+      <div class="card-body">
+        <h5 class="card-title">Total Buckets</h5>
+        <h1 class="display-6">{{response['Buckets']|length}}</h1>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <div class="container-fluid mt-5">
-        <table border="2" class="table table-dark table-striped">
-            <thead>
-                <th>Bucket Name</th>
-                <!-- <th>Owner</th>
-                <th>Owner ID</th> -->
-                <th>Creation Time</th>
+<div class="card text-center border-0 shadow-sm mb-4">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-nowrap mb-0 rounded" style="vertical-align: middle">
+        <thead class="table-light">
+          <th class="border-0 rounded-start">Bucket Name</th>
+          <th class="border-0 rounded-end">Creation Date</th>  
+        </thead>
 
-            </thead>
-
-            {%for bucket in response['Buckets']%}
-              <tr>
-                  <td>{{bucket.Name}}</td>
-                  <!-- <td>{{bucket.DisplayName}}</td>
-                  <td>{{bucket.ID}}</td> -->
-                  <td>{{bucket.CreationDate}}</td>
-
-              </tr>
-              {%endfor%}
-
-
-              <h3>Number of buckets</h3> 
-                <h4>{{response['Buckets']|length}}</h4>
-                <h4>{{response['Owner']}}</h4>
-
-        </table>
-        </div>
-
-        <div class="ct-chart1 ct-perfect-fourth"></div>
-        <div class="ct-chart2 ct-perfect-fourth"></div>
-
-        <div class="container text-center">
-          <div class="row">
-            <div class="col-sm-6">
-              <div class="row">
-                <div class="col-8 col-sm-6">
-                  Level 2: .col-8 .col-sm-6
-                </div>
-                <div class="col-4 col-sm-6">
-                  Level 2: .col-4 .col-sm-6
-                </div>
-              </div>
-            </div>
-            <div class="col-sm-4">
-              Level 1: .col-sm-3
-            </div>
-          </div>
-        </div>
-
-        <script>
-            var data = {
-                // A labels array that can contain any sort of values
-                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-                // Our series array that contains series objects or in this case series data arrays
-                series: [
-                  [5, 2, 4, 2, 0]
-                ]
-              };
-              
-              // As options we currently only set a static size of 300x200 px. We can also omit this and use aspect ratio containers
-              // as you saw in the previous example
-              var options = {
-                width: 300,
-                height: 200
-              };
-              
-              // Create a new line chart object where as first parameter we pass in a selector
-              // that is resolving to our chart container element. The Second parameter
-              // is the actual data object. As a third parameter we pass in our custom options.
-              new Chartist.Line('.ct-chart1', data, options);
-
-
-              new Chartist.Pie('.ct-chart2', {
-                series: [20, 10, 30, 40]
-              }, {
-                donut: true,
-                donutWidth: 60,
-                donutSolid: true,
-                startAngle: 270,
-                showLabel: true
-              });
-
-        </script>
-
-
+        {%for bucket in response['Buckets']%}
+        <tr>               
+          <td><a href="#" style="text-decoration:underline; color:#0dcaf0">{{bucket.Name}}</a></td>
+          <td>{{bucket.CreationDate.strftime("%d-%m-%Y, %H:%M:%S")}}</td>
+        </tr>
+        {%endfor%}
+      </table>
+    </div>
+  </div>
+</div>
 
 {% endblock content %}

@@ -26,11 +26,10 @@ a:focus {
   border: none;
   border-radius: 0;
   margin-bottom: 5px;
-  
 }
 
 .tableborder-none {
-  border-bottom:0px !important;
+  border-bottom: 0px !important;
 }
 
 .navbar-btn {
@@ -46,10 +45,9 @@ a:focus {
   margin: 40px 0;
 }
 
-.navbar-center
-{
-    width: 100%;
-   
-    text-align: center;
-    margin-block: auto;   
+.navbar-center {
+  width: 100%;
+
+  text-align: center;
+  margin-block: auto;
 }

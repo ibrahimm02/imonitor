@@ -26,11 +26,20 @@ ec2_resource = boto3.resource('ec2', region_name=REGION_NAME)
 
 cw_client = boto3.client('cloudwatch')
 
+current_region = ec2_client.meta.region_name
 #---- OVERVIEW ------------------------------------------------------------------------------------------------#
 
 @app.route('/aws/overview')
 def overview():
-    return render_template('aws/overview.html')
+
+    ec2_states = ec2_state_stats()
+
+    response = ec2_client.describe_instances()
+
+    if not(response):
+        return render_template("message.html",message="No Instances running. Create an instance first")
+
+    return render_template('aws/overview.html', ec2_states=ec2_states, current_region=current_region, response=response)
 
 #---- INDEX ------------------------------------------------------------------------------------------------#
 
@@ -89,15 +98,15 @@ def aws_ec2():
 
     total_instances = len([instance for instance in instances]); 
 
-    # ec2_CPUUtilization = get_ec2_CPUUtilization()
-    # ec2_DiskReadOps = get_ec2_DiskReadOps()
-    # ec2_DiskWriteOps = get_ec2_DiskWriteOps()
-    # ec2_NetworkIn = get_ec2_NetworkIn()
-    # ec2_NetworkOut = get_ec2_NetworkOut()
-    # ec2_CPUCreditUsage = get_ec2_CPUCreditUsage()
-    # ec2_CPUCreditBalance = get_ec2_CPUCreditBalance()
-    # ec2_DiskReadBytes = get_ec2_DiskReadBytes()
-    # ec2_DiskWriteBytes = get_ec2_DiskWriteBytes()
+    ec2_CPUUtilization = get_ec2_CPUUtilization()
+    ec2_DiskReadOps = get_ec2_DiskReadOps()
+    ec2_DiskWriteOps = get_ec2_DiskWriteOps()
+    ec2_NetworkIn = get_ec2_NetworkIn()
+    ec2_NetworkOut = get_ec2_NetworkOut()
+    ec2_CPUCreditUsage = get_ec2_CPUCreditUsage()
+    ec2_CPUCreditBalance = get_ec2_CPUCreditBalance()
+    ec2_DiskReadBytes = get_ec2_DiskReadBytes()
+    ec2_DiskWriteBytes = get_ec2_DiskWriteBytes()
 
 
     ec2_metrics = ec2_metrics_amm()
@@ -113,15 +122,15 @@ def aws_ec2():
         instances=instances, 
         active_instances=active_instances, 
         total_instances=total_instances, 
-        # ec2_CPUUtilization=ec2_CPUUtilization, 
-        # ec2_DiskReadOps=ec2_DiskReadOps,
-        # ec2_DiskWriteOps=ec2_DiskWriteOps,
-        # ec2_NetworkIn=ec2_NetworkIn,
-        # ec2_NetworkOut=ec2_NetworkOut,
-        # ec2_CPUCreditUsage=ec2_CPUCreditUsage,
-        # ec2_CPUCreditBalance=ec2_CPUCreditBalance,
-        # ec2_DiskReadBytes=ec2_DiskReadBytes,
-        # ec2_DiskWriteBytes=ec2_DiskWriteBytes,
+        ec2_CPUUtilization=ec2_CPUUtilization, 
+        ec2_DiskReadOps=ec2_DiskReadOps,
+        ec2_DiskWriteOps=ec2_DiskWriteOps,
+        ec2_NetworkIn=ec2_NetworkIn,
+        ec2_NetworkOut=ec2_NetworkOut,
+        ec2_CPUCreditUsage=ec2_CPUCreditUsage,
+        ec2_CPUCreditBalance=ec2_CPUCreditBalance,
+        ec2_DiskReadBytes=ec2_DiskReadBytes,
+        ec2_DiskWriteBytes=ec2_DiskWriteBytes,
 
         ec2_metrics=ec2_metrics, 
         ec2_states=ec2_states)
@@ -505,11 +514,11 @@ def get_ec2_DiskWriteOps():
 
 def ec2_state_stats():
     stats = {
-        # "pending": 0,
+        "pending": 0,
         "running": 0,
-        # "shutting-down": 0,
-        # "terminated": 0,
-        # "stopping": 0,
+        "shutting-down": 0,
+        "terminated": 0,
+        "stopping": 0,
         "stopped": 0
         }
     
@@ -545,7 +554,7 @@ def ec2_metrics_amm():
             EC2CPUUtilization = cw_client.get_metric_statistics(
                 Namespace = 'AWS/EC2',
                 MetricName = 'CPUUtilization',
-                StartTime=datetime.utcnow() - timedelta(days=2) ,
+                StartTime=datetime.utcnow() - timedelta(days=7) ,
                 EndTime=datetime.utcnow(),
                 Period = 86400,
                 Statistics=['Maximum','Minimum','Average'],
@@ -598,7 +607,7 @@ def ec2_metrics_amm():
             metrics_holder.append(metrics)
             # response["header"][""]
             return metrics_holder
-            
+
 #------------------------------------------------------------------------------
 # [{'AmiLaunchIndex': 0, 'ImageId': 'ami-064d05b4fe8515623', 'InstanceId': 'i-043567371c05991f9', 'InstanceType': 't1.micro', 
 # 'KeyName': 'ec2-key-pair', 'LaunchTime': datetime.datetime(2022, 12, 22, 16, 25, 14, tzinfo=tzutc()), 
@@ -671,6 +680,31 @@ def aws_s3():
         for bucket in response['Buckets']:
             print(f'  {bucket["Name"]}')
         return render_template("aws/aws_s3.html", response=response)
+
+#-------------------------------------------------------
+
+def aws_get_s3_metrics():
+    # List metrics through the pagination interface
+    paginator = cw_client.get_paginator('list_metrics')
+    for response in paginator.paginate(
+            
+            Dimensions=[
+                {
+                    'Name': 'BucketName',
+                    'Value': 'project-test-bucket1'
+                },
+                {
+                    'Name':'FilterId',
+                    'Value':'EntireBucket'
+                }
+            
+            ],
+            MetricName='BytesDownloaded',
+            Namespace='AWS/S3'):
+        
+        print(response)
+
+# aws_get_s3_metrics()
 
 #---- AWS/RDS ------------------------------------------------------------------------------------------------#
 

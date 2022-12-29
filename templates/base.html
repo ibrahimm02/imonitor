@@ -17,7 +17,6 @@
       rel='stylesheet'>
 
       <!-- Custom CSS -->
-
     <link href="{{url_for('static', filename='css/style.css')}}" rel="stylesheet"/>
     <link href="{{url_for('static', filename='css/sidenav.css')}}" rel="stylesheet"/>
     <link href="{{url_for('static', filename='css/nv.d3.css')}}" rel="stylesheet"/>
@@ -49,12 +48,10 @@
   <body>
 
     <div class="wrapper">
-        <!-- Sidebar Holder -->
         <nav id="sidebar">
           <div class="sidebar-header">
             <h3><i class='bx bxs-chart bx-fw' ></i> iMonitor</h3>
           </div>
-  
           <ul class="list-unstyled components">
             <p>&nbsp;  Amazon Web Services</p>
             <li class="{% block nav_index %}{% endblock %}"><a href="{{url_for('overview')}}">Overview</a></li>
@@ -99,7 +96,6 @@
               </ul>
             </li>
           </ul>
-  
           <!-- <ul class="list-unstyled CTAs">
           <li>
               <a
@@ -161,15 +157,15 @@
             </nav>
 
   
-    <div class="container">
-        
-        {% block content %} 
-            
-        {% endblock %}
-    
-    </div>
+            <div class="container">
+              
+              {% block content %} 
+                  
+              {% endblock %}
+          
+            </div>
 
-      </div>
+        </div>
     </div>
     
     <script
