@@ -1,0 +1,106 @@
+{% extends "base.html" %} {% block nav_s3 %}active{% endblock %} {% block title
+    %}iMonitor - RDS{% endblock %} {% block navTitle %}RDS{% endblock %} {% block
+    content %}
+
+    <!-- {{ response }} -->
+    
+    <br>
+    
+    <div class="cointainer">
+        <div class="row row-cols-1 row-cols-md-3">
+          <div class="col-sm-3">
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img
+                src="data:image/png;base64,{{rds_CPUUtilization}}"
+                alt="CPUUtilization Graph"
+              />
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img src="data:image/png;base64,{{ec2_DiskReadOps}}" alt="DiskReadOps Graph" />
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img src="data:image/png;base64,{{ec2_DiskWriteOps}}" alt="DiskWriteOps Graph" />
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img src="data:image/png;base64,{{ec2_NetworkIn}}" alt="NetworkIn Graph" />
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img src="data:image/png;base64,{{ec2_NetworkOut}}" alt="NetworkOut Graph" />
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img
+                src="data:image/png;base64,{{ec2_CPUCreditUsage}}"
+                alt="CPUCreditUsage Graph"
+              />
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img
+                src="data:image/png;base64,{{ec2_CPUCreditBalance}}"
+                alt="CPUCreditBalance Graph"
+              />
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img
+                src="data:image/png;base64,{{ec2_DiskReadBytes}}"
+                alt="DiskReadBytes Graph"
+              />
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img
+                src="data:image/png;base64,{{ec2_DiskWriteBytes}}"
+                alt="DiskWriteBytes Graph"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+    <div class="card text-center border-0 shadow-sm mb-4">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-nowrap mb-0 rounded" style="vertical-align: middle">
+              <thead class="table-light">
+                <th class="border-0 rounded-start">DB Identifier</th>
+                <th class="border-0">Engine</th>  
+                <th class="border-0">Status</th> 
+                <th class="border-0">Class</th> 
+                <th class="border-0">Allocated Storage</th> 
+                <th class="border-0 rounded-end">AvailabilityZone</th>  
+              </thead>
+      
+              {%for bucket in response['DBInstances']%}
+              <tr>               
+                <td><a href="#" style="text-decoration:underline; color:#0dcaf0">{{bucket.DBInstanceIdentifier}}</a></td>
+                <td>{{bucket.Engine}}</a></td>
+                <td>{{bucket.DBInstanceStatus}}</a></td>
+                <td>{{bucket.DBInstanceClass}}</a></td>
+                <td>{{bucket.AllocatedStorage}} GB</td>
+                <td>{{bucket.AvailabilityZone}}</a></td>
+              </tr>
+              {%endfor%}
+            </table>
+          </div>
+        </div>
+      </div>
+
+    
+    {% endblock content %}
+    

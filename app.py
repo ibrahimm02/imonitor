@@ -26,6 +26,8 @@ ec2_resource = boto3.resource('ec2', region_name=REGION_NAME)
 
 cw_client = boto3.client('cloudwatch')
 
+rds_client = boto3.client("rds", region_name=REGION_NAME)
+
 current_region = ec2_client.meta.region_name
 #---- OVERVIEW ------------------------------------------------------------------------------------------------#
 
@@ -708,23 +710,31 @@ def aws_get_s3_metrics():
 
 #---- AWS/RDS ------------------------------------------------------------------------------------------------#
 
-@app.route('/aws/rds-instance-all')
-def rds_instances():
-    rds_client = boto3.client('rds')
-    response = rds_client.describe_db_instances(
-        # DBInstanceIdentifier='string',
-        # Filters=[
-        #     {
-        #         'Name': 'string',
-        #         'Values': [
-        #             'string',
-        #         ]
-        #     },
-        # ],
-        # MaxRecords=123,
-        # Marker='string'
-    )
-    return response
+@app.route('/aws/rds')
+def aws_rds():
+
+    # get_rds_snapshots()
+    rds_CPUUtilization = get_rds_CPUUtilization()
+    
+    response_data=[]
+
+    response = rds_client.describe_db_instances()
+    for i in response['DBInstances']:
+        try:
+            response_data.append({
+            "DBInstanceIdentifier": i['DBInstanceIdentifier'],
+            "DBInstanceClass":i["DBInstanceClass"],
+            "AllocatedStorage":i["AllocatedStorage"],
+            "Engine":i["Engine"],
+            "AvailabilityZone":i["AvailabilityZone"],
+            "DBInstanceArn":i["DBInstanceArn"],
+            "DBInstanceStatus":i["DBInstanceStatus"]
+        })
+        except Exception as ex:
+            continue
+            pass
+
+    return render_template('aws/aws_rds.html', response=response, rds_CPUUtilization=rds_CPUUtilization)
 
 # @app.route('/aws/rds-instance-all')
 # def rds_instances():
@@ -744,6 +754,59 @@ def rds_instances():
 #         IncludeShared=True|False
 #     )
 #     return response
+
+def get_rds_CPUUtilization():
+    rds_cpu = '{"metrics": [["AWS/RDS", "CPUUtilization"]]}'
+
+    response = cw_client.get_metric_widget_image(MetricWidget=rds_cpu)
+    
+    # print(response)
+
+    bytes_data=io.BytesIO(response["MetricWidgetImage"])
+    fr=base64.b64encode(bytes_data.getvalue())
+
+    # print(fr)
+    rds_graph = fr.decode('utf-8')
+
+    return rds_graph
+
+    #     data=[]
+    # response_data=[]
+    # for instance in ec2_client.describe_instances()["Reservations"]:
+    #     for each_in in instance["Instances"]:
+    #         response_data.append(instance_output_format(each_in)) 
+
+    # instance_ids=[i["InstanceId"] for i in response_data]
+    # for ins in instance_ids:
+    #         data.append(["AWS/EC2", "DiskWriteOps", "InstanceId",str(ins)])
+    #         filter_data={"metrics":data}
+
+    # # print(data)
+
+    # response = cw_client.get_metric_widget_image(MetricWidget=json.dumps(filter_data))
+    # bytes_data=io.BytesIO(response["MetricWidgetImage"])
+    # fr=base64.b64encode(bytes_data.getvalue())
+    
+    # ec2_graph = fr.decode('utf-8')
+
+    # return ec2_graph
+
+def get_rds_snapshots():
+    
+    response_data = []
+    response = rds_client.describe_db_snapshots()
+    # DBInstanceIdentifier='database-instance-01'
+    # )
+    # print(response)
+    for i in response['DBSnapshots']:
+        try:
+            response_data.append({
+            "DBInstanceIdentifier": i['DBInstanceIdentifier'],
+        })
+        except Exception as ex:
+            continue
+            pass
+    return response
 
 #---- AWS/LAMBDA ------------------------------------------------------------------------------------------------#
 
