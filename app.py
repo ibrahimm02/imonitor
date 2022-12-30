@@ -29,10 +29,17 @@ cw_client = boto3.client('cloudwatch')
 rds_client = boto3.client("rds", region_name=REGION_NAME)
 
 current_region = ec2_client.meta.region_name
+
+#---- INDEX ------------------------------------------------------------------------------------------------#
+
+@app.route('/')
+def index():
+    return render_template('landing.html')
+
 #---- OVERVIEW ------------------------------------------------------------------------------------------------#
 
 @app.route('/aws/overview')
-def overview():
+def aws_overview():
 
     ec2_states = ec2_state_stats()
 
@@ -43,11 +50,15 @@ def overview():
 
     return render_template('aws/overview.html', ec2_states=ec2_states, current_region=current_region, response=response)
 
-#---- INDEX ------------------------------------------------------------------------------------------------#
+@app.route('/gcp/overview')
+def gcp_overview():
 
-@app.route('/')
-def index():
-    return render_template('landing.html')
+    return render_template('gcp/gcp_overview.html')
+
+@app.route('/azure/overview')
+def azure_overview():
+
+    return render_template('azure/azure_overview.html')
 
 #---- TEST ------------------------------------------------------------------------------------------------#
 
@@ -713,13 +724,24 @@ def aws_get_s3_metrics():
 @app.route('/aws/rds')
 def aws_rds():
 
-    # get_rds_snapshots()
-    rds_CPUUtilization = get_rds_CPUUtilization()
-    
+    try_graph1 = get_rds_graph(type='CPUUtilization')
+    try_graph2 = get_rds_graph(type='freeStorageSpace')
+
+    rds_CPUUtilization = get_rds_instancelevel_metrics(type='CPUUtilization')
+    rds_DatabaseConnections = get_rds_instancelevel_metrics(type='databaseConnections')    
+    rds_FreeStorageSpace = get_rds_instancelevel_metrics(type='freeStorageSpace')    
+    rds_FreeableMemory = get_rds_instancelevel_metrics(type='freeableMemory')    
+    rds_ReadIOPS = get_rds_instancelevel_metrics(type='readIOPS')
+    rds_WriteIOPS = get_rds_instancelevel_metrics(type='writeIOPS')    
+    rds_ReadThroughput = get_rds_instancelevel_metrics(type='readThroughput')    
+    rds_WriteThroughput = get_rds_instancelevel_metrics(type='writeThroughput')    
+    rds_ReadLatency = get_rds_instancelevel_metrics(type='readLatency')     
+    rds_WriteLatency = get_rds_instancelevel_metrics(type='writeLatency')    
+
     response_data=[]
 
     response = rds_client.describe_db_instances()
-    for i in response['DBInstances']:
+    for i in response['DBInstances']:   
         try:
             response_data.append({
             "DBInstanceIdentifier": i['DBInstanceIdentifier'],
@@ -734,31 +756,49 @@ def aws_rds():
             continue
             pass
 
-    return render_template('aws/aws_rds.html', response=response, rds_CPUUtilization=rds_CPUUtilization)
+    return render_template('aws/aws_rds.html', 
+        response=response, 
+        try_graph1=try_graph1,
+        try_graph2=try_graph2,
 
-# @app.route('/aws/rds-instance-all')
-# def rds_instances():
-#     rds_client = boto3.client('rds')
-#     response = rds_client.describe_db_clusters(
-#         DBClusterIdentifier='string',
-#         Filters=[
-#             {
-#                 'Name': 'string',
-#                 'Values': [
-#                     'string',
-#                 ]
-#             },
-#         ],
-#         MaxRecords=123,
-#         Marker='string',
-#         IncludeShared=True|False
-#     )
-#     return response
-
-def get_rds_CPUUtilization():
-    rds_cpu = '{"metrics": [["AWS/RDS", "CPUUtilization"]]}'
-
-    response = cw_client.get_metric_widget_image(MetricWidget=rds_cpu)
+        rds_CPUUtilization=rds_CPUUtilization,
+        rds_DatabaseConnections=rds_DatabaseConnections,
+        rds_FreeStorageSpace=rds_FreeStorageSpace,
+        rds_FreeableMemory=rds_FreeableMemory,
+        rds_ReadIOPS=rds_ReadIOPS,
+        rds_WriteIOPS=rds_WriteIOPS,
+        
+        rds_WriteThroughput=rds_WriteThroughput,
+        rds_ReadThroughput=rds_ReadThroughput,
+        rds_WriteLatency=rds_WriteLatency,
+        rds_ReadLatency=rds_ReadLatency         
+        )
+#-------------------------------------------------------
+def get_rds_instancelevel_metrics(type):
+    
+    if type == 'CPUUtilization':
+        rds = '{"metrics": [["AWS/RDS", "CPUUtilization"]]}'
+    elif type == 'databaseConnections':
+        rds = '{"metrics": [["AWS/RDS", "DatabaseConnections"]]}'
+    elif type == 'freeStorageSpace':
+        rds = '{"metrics": [["AWS/RDS", "FreeStorageSpace"]]}'
+    elif type == 'freeableMemory':
+        rds = '{"metrics": [["AWS/RDS", "FreeableMemory"]]}'
+    elif type == 'readIOPS':
+        rds = '{"metrics": [["AWS/RDS", "ReadIOPS"]]}'
+    elif type == 'writeIOPS':
+        rds = '{"metrics": [["AWS/RDS", "WriteIOPS"]]}'
+    elif type == 'readThroughput':
+        rds = '{"metrics": [["AWS/RDS", "ReadThroughput"]]}'    
+    elif type == 'writeThroughput':
+        rds = '{"metrics": [["AWS/RDS", "WriteThroughput"]]}'
+    elif type == 'readLatency':
+        rds = '{"metrics": [["AWS/RDS", "ReadLatency"]]}'
+    elif type == 'writeLatency':
+        rds = '{"metrics": [["AWS/RDS", "WriteLatency"]]}'
+    
+    
+    response = cw_client.get_metric_widget_image(MetricWidget=rds)
     
     # print(response)
 
@@ -769,28 +809,42 @@ def get_rds_CPUUtilization():
     rds_graph = fr.decode('utf-8')
 
     return rds_graph
+#------------------------------------------------------------------
+def get_rds_graph(type):
+  
+    data=[]
+    response_data=[]
+    response = rds_client.describe_db_instances()
+    for i in response['DBInstances']:   
+            response_data.append({
+            "DBInstanceIdentifier": i['DBInstanceIdentifier']
+        })
 
-    #     data=[]
-    # response_data=[]
-    # for instance in ec2_client.describe_instances()["Reservations"]:
-    #     for each_in in instance["Instances"]:
-    #         response_data.append(instance_output_format(each_in)) 
+    instance_ids=[i["DBInstanceIdentifier"] for i in response_data]
+    for ins in instance_ids:
 
-    # instance_ids=[i["InstanceId"] for i in response_data]
-    # for ins in instance_ids:
-    #         data.append(["AWS/EC2", "DiskWriteOps", "InstanceId",str(ins)])
-    #         filter_data={"metrics":data}
+        if type == 'CPUUtilization':
+            data.append(["AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", str(ins)])
+            filter_data={"metrics":data}
+        elif type == 'freeStorageSpace':
+            data.append(["AWS/RDS", "FreeStorageSpace", "DBInstanceIdentifier", str(ins)])
+            filter_data={"metrics":data}
 
-    # # print(data)
+        # data.append(["AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", str(ins)])
+        # filter_data={"metrics":data}
 
-    # response = cw_client.get_metric_widget_image(MetricWidget=json.dumps(filter_data))
-    # bytes_data=io.BytesIO(response["MetricWidgetImage"])
-    # fr=base64.b64encode(bytes_data.getvalue())
+    response = cw_client.get_metric_widget_image(MetricWidget=json.dumps(filter_data))
+    bytes_data=io.BytesIO(response["MetricWidgetImage"])
+    fr=base64.b64encode(bytes_data.getvalue())
     
-    # ec2_graph = fr.decode('utf-8')
+    rds_graph = fr.decode('utf-8')
 
-    # return ec2_graph
+    return rds_graph
 
+
+
+
+#------------------------------------------------------------------
 def get_rds_snapshots():
     
     response_data = []

@@ -51,3 +51,9 @@ a:focus {
   text-align: center;
   margin-block: auto;
 }
+
+.table-wrapper {
+  max-height: 300px;
+  overflow: auto;
+  
+}

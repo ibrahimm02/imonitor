@@ -1,83 +1,14 @@
-{% extends "base.html" %} {% block nav_s3 %}active{% endblock %} {% block title
+{% extends "aws/aws_base.html" %} {% block nav_s3 %}active{% endblock %} {% block title
     %}iMonitor - RDS{% endblock %} {% block navTitle %}RDS{% endblock %} {% block
     content %}
 
     <!-- {{ response }} -->
-    
-    <br>
-    
-    <div class="cointainer">
-        <div class="row row-cols-1 row-cols-md-3">
-          <div class="col-sm-3">
-            <div class="card border-0 shadow-sm mb-4 px-1">
-              <img
-                src="data:image/png;base64,{{rds_CPUUtilization}}"
-                alt="CPUUtilization Graph"
-              />
-            </div>
-          </div>
-          <div class="col-sm-3">
-            <div class="card border-0 shadow-sm mb-4 px-1">
-              <img src="data:image/png;base64,{{ec2_DiskReadOps}}" alt="DiskReadOps Graph" />
-            </div>
-          </div>
-          <div class="col-sm-3">
-            <div class="card border-0 shadow-sm mb-4 px-1">
-              <img src="data:image/png;base64,{{ec2_DiskWriteOps}}" alt="DiskWriteOps Graph" />
-            </div>
-          </div>
-          <div class="col-sm-3">
-            <div class="card border-0 shadow-sm mb-4 px-1">
-              <img src="data:image/png;base64,{{ec2_NetworkIn}}" alt="NetworkIn Graph" />
-            </div>
-          </div>
-          <div class="col-sm-3">
-            <div class="card border-0 shadow-sm mb-4 px-1">
-              <img src="data:image/png;base64,{{ec2_NetworkOut}}" alt="NetworkOut Graph" />
-            </div>
-          </div>
-          <div class="col-sm-3">
-            <div class="card border-0 shadow-sm mb-4 px-1">
-              <img
-                src="data:image/png;base64,{{ec2_CPUCreditUsage}}"
-                alt="CPUCreditUsage Graph"
-              />
-            </div>
-          </div>
-          <div class="col-sm-3">
-            <div class="card border-0 shadow-sm mb-4 px-1">
-              <img
-                src="data:image/png;base64,{{ec2_CPUCreditBalance}}"
-                alt="CPUCreditBalance Graph"
-              />
-            </div>
-          </div>
-          <div class="col-sm-3">
-            <div class="card border-0 shadow-sm mb-4 px-1">
-              <img
-                src="data:image/png;base64,{{ec2_DiskReadBytes}}"
-                alt="DiskReadBytes Graph"
-              />
-            </div>
-          </div>
-          <div class="col-sm-3">
-            <div class="card border-0 shadow-sm mb-4 px-1">
-              <img
-                src="data:image/png;base64,{{ec2_DiskWriteBytes}}"
-                alt="DiskWriteBytes Graph"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-
 
     <div class="card text-center border-0 shadow-sm mb-4">
         <div class="card-body p-0">
           <div class="table-responsive">
-            <table class="table table-nowrap mb-0 rounded" style="vertical-align: middle">
-              <thead class="table-light">
+            <table class="table table-nowrap mb-0 rounded table-hover" style="vertical-align: middle">
+              <thead class="table-dark">
                 <th class="border-0 rounded-start">DB Identifier</th>
                 <th class="border-0">Engine</th>  
                 <th class="border-0">Status</th> 
@@ -100,6 +31,103 @@
           </div>
         </div>
       </div>
+
+    
+    <div class="cointainer">
+        <div class="row row-cols-1 row-cols-md-3">
+            <div class="col-sm-3">
+                <div class="card border-0 shadow-sm mb-4 px-1">
+                  <img
+                    src="data:image/png;base64,{{try_graph1}}"
+                    alt="TRY GRAPH1"
+                  />
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="card border-0 shadow-sm mb-4 px-1">
+                  <img
+                    src="data:image/png;base64,{{try_graph2}}"
+                    alt="TRY GRAPH2"
+                  />
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="card border-0 shadow-sm mb-4 px-1">
+                <img
+                    src="data:image/png;base64,{{rds_CPUUtilization}}"
+                    alt="rds_CPUUtilization Graph"
+                />
+                </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img src="data:image/png;base64,{{rds_DatabaseConnections}}" 
+              alt="rds_DatabaseConnections Graph" />
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img src="data:image/png;base64,{{rds_FreeStorageSpace}}" 
+              alt="rds_FreeStorageSpace Graph" />
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img src="data:image/png;base64,{{rds_FreeableMemory}}" 
+              alt="rds_FreeableMemory Graph" />
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img src="data:image/png;base64,{{rds_ReadIOPS}}" 
+              alt="rds_ReadIOPS Graph" />
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img
+                src="data:image/png;base64,{{rds_WriteIOPS}}"
+                alt="rds_WriteIOPS Graph"
+              />
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img
+                src="data:image/png;base64,{{rds_ReadThroughput}}"
+                alt="rds_ReadThroughput Graph"
+              />
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img
+                src="data:image/png;base64,{{rds_WriteThroughput}}"
+                alt="rds_WriteThroughput Graph"
+              />
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img
+                src="data:image/png;base64,{{rds_ReadLatency}}"
+                alt="rds_ReadLatency Graph"
+              />
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img
+                src="data:image/png;base64,{{rds_WriteLatency}}"
+                alt="rds_WriteLatency Graph"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
 
     
     {% endblock content %}

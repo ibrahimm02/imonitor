@@ -1,11 +1,18 @@
-{% extends "base.html" %} {% block title %}iMonitor - EC2{% endblock %} {% block
-nav_ec2 %}active{% endblock %} {% block navTitle %}EC2{% endblock %} {% block
-content %} {% with messages = get_flashed_messages() %} {% if messages %}
-<div class="alert alert-success" role="alert">
-  {% for message in messages %} {{ message }}<br />
-  {% endfor %}
-</div>
-{% endif %} {% endwith %}
+{% extends "aws/aws_base.html" %} 
+{% block title %}iMonitor - EC2{% endblock %} 
+{% block nav_ec2 %}active{% endblock %} 
+{% block navTitle %}EC2{% endblock %} 
+
+{% block content %} 
+
+{% with messages = get_flashed_messages() %} 
+  {% if messages %}
+    <div class="alert alert-success" role="alert">
+      {% for message in messages %} {{ message }}<br />
+      {% endfor %}
+    </div>
+  {% endif %} 
+{% endwith %}
 
 
   <div class="row">
@@ -81,6 +88,76 @@ content %} {% with messages = get_flashed_messages() %} {% if messages %}
 
 <!-- {{instances}} -->
 
+<div class="card text-center border-0 shadow-sm mb-4">
+  <div class="card-body p-0">
+    <div class="table-responsive table-wrapper">
+      <table
+        class="table table-nowrap mb-0 rounded table-hover"
+        style="vertical-align: middle"
+      >
+        <thead class="table-dark align-middle">
+          <th class="border-0 rounded-start">Instance Name</th>
+          <th class="border-0">Instance Id</th>
+          <th class="border-0">State</th>
+          <th class="border-0">Type</th>
+          <th class="border-0">Public IPv4</th>
+          <th class="border-0">AMI Id</th>
+          <th class="border-0">Launch time</th>
+          <th class="border-0 rounded-end">Availability Zone</th>  
+        </thead>
+
+        {%for instance in instances:%}
+        <tr>
+          <td>{{instance.tags[0]['Value']}}</td>                
+          <td><a href="#" style="text-decoration:underline; color:#0dcaf0">{{instance.id}}</a></td>
+
+          <td>
+            <div class="btn-group dropend">
+              <button
+                type="button"
+                class="btn btn-outline-info dropdown-toggle btn-sm"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                {{instance.state['Name']}}
+              </button>
+              <ul class="dropdown-menu">
+                <li>
+                  <form action="{{ url_for('start_instance')}}" method="POST">
+                    <input
+                      type="hidden"
+                      name="instance"
+                      value="{{ instance.id }}"
+                    />
+                    <button type="submit" class="dropdown-item">Start</button>
+                  </form>
+                </li>
+                <li>
+                  <form action="{{ url_for('stop_instance')}}" method="POST">
+                    <input
+                      type="hidden"
+                      name="instance"
+                      value="{{ instance.id }}"
+                    />
+                    <button type="submit" class="dropdown-item">Stop</button>
+                  </form>
+                </li>
+              </ul>
+            </div>
+          </td>
+
+          <td>{{instance.instance_type}}</td>
+          <td>{{instance.public_ip_address}}</td>
+          <td>{{instance.image.id}}</td>
+          <td>{{instance.launch_time.strftime("%d-%m-%Y, %H:%M:%S")}}</td>
+          <td>{{instance.placement['AvailabilityZone']}}</td>
+        </tr>
+        {%endfor%}
+      </table>
+    </div>
+  </div>
+</div>
+
 <div class="cointainer">
   <div class="row row-cols-1 row-cols-md-3">
     <div class="col-sm-3">
@@ -148,84 +225,12 @@ content %} {% with messages = get_flashed_messages() %} {% if messages %}
 
 {{info}}
 
-<div class="card text-center border-0 shadow-sm mb-4">
-  <div class="card-body p-0">
-    <div class="table-responsive">
-      <table
-        class="table table-nowrap mb-0 rounded"
-        style="vertical-align: middle"
-      >
-        <thead class="table-light">
-          <th class="border-0 rounded-start">Instance Name</th>
-          <th class="border-0">Instance Id</th>
-          <th class="border-0">State</th>
-          <th class="border-0">Type</th>
-          <th class="border-0">Public IPv4</th>
-          <th class="border-0">AMI Id</th>
-          <th class="border-0">Launch time</th>
-          <th class="border-0 rounded-end">Availability Zone</th>  
-        </thead>
-
-        {%for instance in instances:%}
-        <tr>
-          <td>{{instance.tags[0]['Value']}}</td>                
-          <td><a href="#" style="text-decoration:underline; color:#0dcaf0">{{instance.id}}</a></td>
-
-          <td>
-            <div class="btn-group dropend">
-              <button
-                type="button"
-                class="btn btn-outline-info dropdown-toggle btn-sm"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                {{instance.state['Name']}}
-              </button>
-              <ul class="dropdown-menu">
-                <li>
-                  <form action="{{ url_for('start_instance')}}" method="POST">
-                    <input
-                      type="hidden"
-                      name="instance"
-                      value="{{ instance.id }}"
-                    />
-                    <button type="submit" class="dropdown-item">Start</button>
-                  </form>
-                </li>
-                <li>
-                  <form action="{{ url_for('stop_instance')}}" method="POST">
-                    <input
-                      type="hidden"
-                      name="instance"
-                      value="{{ instance.id }}"
-                    />
-                    <button type="submit" class="dropdown-item">Stop</button>
-                  </form>
-                </li>
-              </ul>
-            </div>
-          </td>
-
-          <td>{{instance.instance_type}}</td>
-          <td>{{instance.public_ip_address}}</td>
-          <td>{{instance.image.id}}</td>
-          <td>{{instance.launch_time.strftime("%d-%m-%Y, %H:%M:%S")}}</td>
-          <td>{{instance.placement['AvailabilityZone']}}</td>
-        </tr>
-        {%endfor%}
-      </table>
-    </div>
-  </div>
-</div>
-
 {% set stat = [] %}
 
   {% for value in ec2_states: %}
       {% set tmp = stat.append(value['value']) %}
       <!-- {{value['value']}} -->
   {% endfor %}
-
-<canvas id="myChart" width="300" height="150"></canvas>
 
 <script>
   // Global parameters:
@@ -288,8 +293,4 @@ content %} {% with messages = get_flashed_messages() %} {% if messages %}
   });
 </script>
 
-<!-- <h4>dashboard24HoursPerformanceChart - in imonitor fiverr app</h4> -->
-
-<!-- {{ data }}  -->
-
-{% endblock %}
+{% endblock content %}

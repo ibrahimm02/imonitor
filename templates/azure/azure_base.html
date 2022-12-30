@@ -48,16 +48,16 @@
   <body>
 
     <div class="wrapper">
-        <nav id="sidebar">
+        <nav id="sidebar" style="background: #2c3e50;">
           <div class="sidebar-header">
             <h3><i class='bx bxs-chart bx-fw'></i> iMonitor</h3>
           </div>
           <ul class="list-unstyled components">
-            <p class="bg-light text-dark">
-              <img src="https://img.icons8.com/color/480/null/amazon-web-services.png" width="32" height="32"/>
-              Amazon Web Services
-            </p>
-            <li style="border-top: 1px solid #fff;" class="{% block nav_index %}{% endblock %}"><a href="{{url_for('overview')}}">Overview</a></li>
+            <p class="bg-light text-dark" style="text-align: center;">
+                <img src="https://img.icons8.com/color/480/null/azure-1.png" width="32" height="32"/>
+                Microsoft Azure
+              </p>
+            <li style="border-top: 1px solid #fff;" class="{% block nav_index %}{% endblock %}"><a href="{{url_for('azure_overview')}}">Overview</a></li>
             <li>
               <a href="#computeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Compute</a>
               <ul class="collapse list-unstyled" id="computeSubmenu">
