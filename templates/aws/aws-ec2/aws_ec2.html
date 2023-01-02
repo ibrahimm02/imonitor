@@ -20,7 +20,7 @@
     <div class="col-sm-2">
       <div class="card text-center border-0 shadow-sm mb-4 h-80">
         <div class="card-body">
-          <h5 class="card-title">Total Instances</h5>
+          <h5 class="card-title">Total <br>Instances</h5>
           <h1 class="display-6">{{ total_instances }}</h1>
         </div>
       </div>
@@ -88,7 +88,7 @@
 
 <!-- {{instances}} -->
 
-<div class="card text-center border-0 shadow-sm mb-4">
+<div class="card text-center border-0 shadow-sm mb-2">
   <div class="card-body p-0">
     <div class="table-responsive table-wrapper">
       <table
@@ -109,7 +109,13 @@
         {%for instance in instances:%}
         <tr>
           <td>{{instance.tags[0]['Value']}}</td>                
-          <td><a href="#" style="text-decoration:underline; color:#0dcaf0">{{instance.id}}</a></td>
+          <td>
+            <form action="{{ url_for('ec2_instance_data')}}" method="POST">
+              <input type="hidden" name="instance" value="{{ instance.id }}" /> 
+              <!-- <a href="#" style="text-decoration:underline; color:#0dcaf0">{{instance.id}}</a> -->
+              <button type="submit" class="btn btn-link" style="color:#0dcaf0">{{instance.id}}</button>
+            </form>
+          </td>
 
           <td>
             <div class="btn-group dropend">
@@ -117,8 +123,7 @@
                 type="button"
                 class="btn btn-outline-info dropdown-toggle btn-sm"
                 data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
+                aria-expanded="false">
                 {{instance.state['Name']}}
               </button>
               <ul class="dropdown-menu">
@@ -157,6 +162,12 @@
     </div>
   </div>
 </div>
+
+<hr class="mt-2 mb-2">
+      
+<div class="d-grid gap-2 d-md-flex justify-content-md-end mb-2">
+  <a class="btn btn-light btn-outline-dark" href="{{ url_for('aws_ec2')}}" role="button"><i class='bx bx-refresh bx-fw'></i> Refresh</a>
+</div> 
 
 <div class="cointainer">
   <div class="row row-cols-1 row-cols-md-3">

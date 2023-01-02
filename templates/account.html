@@ -1,8 +1,41 @@
-{% extends "base.html" %}
+{% extends "aws/aws_base.html" %}
 {% block title %}iMonitor - Account{% endblock %} 
 {% block nav_account %}active{% endblock %}
 
-
 {% block content %}
-  <center><h1>Welcome to your Account</h1></center>
+  <h5>Account Details</h5>
+
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-sm-3">
+            <h6 class="mb-0">User Id</h6>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            {{account_details.UserId}}
+          </div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-sm-3">
+            <h6 class="mb-0">Account</h6>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            {{account_details.Account}}
+          </div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-sm-3">
+            <h6 class="mb-0">Arn</h6>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            {{account_details.Arn}}
+          </div>
+        </div>       
+      </div>
+    </div>
+  </div>
+
 {% endblock %}

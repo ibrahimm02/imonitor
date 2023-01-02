@@ -3,7 +3,7 @@ from flask_bootstrap import Bootstrap
 import boto3
 from boto3 import Session
 from flask_cors import CORS
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from operator import itemgetter
 import json
 import base64
@@ -36,7 +36,7 @@ current_region = ec2_client.meta.region_name
 def index():
     return render_template('landing.html')
 
-#---- OVERVIEW ------------------------------------------------------------------------------------------------#
+#----AWS OVERVIEW ------------------------------------------------------------------------------------------------#
 
 @app.route('/aws/overview')
 def aws_overview():
@@ -50,10 +50,14 @@ def aws_overview():
 
     return render_template('aws/overview.html', ec2_states=ec2_states, current_region=current_region, response=response)
 
+#----GCP OVERVIEW---------------------------------------------------------------------------------------------------#
+
 @app.route('/gcp/overview')
 def gcp_overview():
 
     return render_template('gcp/gcp_overview.html')
+
+#----AZURE OVERVIEW---------------------------------------------------------------------------------------------------#
 
 @app.route('/azure/overview')
 def azure_overview():
@@ -62,16 +66,20 @@ def azure_overview():
 
 #---- TEST ------------------------------------------------------------------------------------------------#
 
-@app.route('/members')
-def members():
-     return render_template('/index.html', message="No Instances running. Create an instance first" )
+# @app.route('/members')
+# def members():
+#      return render_template('/index.html', message="No Instances running. Create an instance first" )
     # return {"members": ["Member1", "Member2", "Member3"]}
 
 #---- ACCOUNT ------------------------------------------------------------------------------------------------#
 
 @app.route('/aws/account')
 def aws_account():
-    return render_template('account.html')
+
+    account_details = boto3.client("sts").get_caller_identity()
+
+
+    return render_template('account.html', account_details=account_details)
 
 #---- AWS/EC2 ------------------------------------------------------------------------------------------------#
 
@@ -105,9 +113,9 @@ def aws_ec2():
         
     # return reservations
 
-    active_instances =  get_active_instance_count()
-
     instances = ec2_resource.instances.all()
+
+    active_instances =  get_active_instance_count()
 
     total_instances = len([instance for instance in instances]); 
 
@@ -127,11 +135,10 @@ def aws_ec2():
     ec2_states = ec2_state_stats()
     # data = {'chart_data': ec2_states}
     
-
     if not(instances):
-        return render_template("aws/ec2.html", info="No instance Data")
+        return render_template("aws/aws-ec2/ec2.html", info="No instance Data")
 
-    return render_template("aws/aws_ec2.html", 
+    return render_template("aws/aws-ec2/aws_ec2.html", 
         instances=instances, 
         active_instances=active_instances, 
         total_instances=total_instances, 
@@ -583,6 +590,8 @@ def ec2_metrics_amm():
             datapoints = EC2CPUUtilization['Datapoints']     # CPU Utilization results                
             sorted_datapoint = sorted(datapoints, key=itemgetter('Timestamp'))
 
+            # print(sorted_datapoint)
+
             for i in range(len(sorted_datapoint)):
                 sorted_datapoint[i]['sort_by'] = i
 
@@ -676,7 +685,36 @@ def stop_instance():
     flash(f'EC2 instance "{instance.id}" has been stopped')
     return redirect(url_for('aws_ec2'))
 
+#---------------------------------------------------------------------
+@app.route('/ec2-instance-data', methods=["POST"])
+def ec2_instance_data():
 
+    key = request.form['instance']
+
+    # Helper method to serialize datetime fields
+    def json_datetime_serializer(obj):
+        if isinstance(obj, (datetime, date)):
+            return obj.isoformat()
+        raise TypeError ("Type %s not serializable" % type(obj))
+
+
+    response = ec2_client.describe_instances(
+        InstanceIds=[
+            key,
+        ],
+    )
+
+    print(f'Instance {key} attributes:')
+
+    for reservation in response['Reservations']:
+        print(json.dumps(
+                reservation,
+                indent=4,
+                default=json_datetime_serializer
+            )
+        )
+    
+    return render_template('aws/aws-ec2/aws_ec2_instance_data.html', instance=reservation)
 #---- AWS/S3 ------------------------------------------------------------------------------------------------#
 
 @app.route('/aws/s3')
@@ -724,19 +762,16 @@ def aws_get_s3_metrics():
 @app.route('/aws/rds')
 def aws_rds():
 
-    try_graph1 = get_rds_graph(type='CPUUtilization')
-    try_graph2 = get_rds_graph(type='freeStorageSpace')
-
-    rds_CPUUtilization = get_rds_instancelevel_metrics(type='CPUUtilization')
-    rds_DatabaseConnections = get_rds_instancelevel_metrics(type='databaseConnections')    
-    rds_FreeStorageSpace = get_rds_instancelevel_metrics(type='freeStorageSpace')    
-    rds_FreeableMemory = get_rds_instancelevel_metrics(type='freeableMemory')    
-    rds_ReadIOPS = get_rds_instancelevel_metrics(type='readIOPS')
-    rds_WriteIOPS = get_rds_instancelevel_metrics(type='writeIOPS')    
-    rds_ReadThroughput = get_rds_instancelevel_metrics(type='readThroughput')    
-    rds_WriteThroughput = get_rds_instancelevel_metrics(type='writeThroughput')    
-    rds_ReadLatency = get_rds_instancelevel_metrics(type='readLatency')     
-    rds_WriteLatency = get_rds_instancelevel_metrics(type='writeLatency')    
+    rds_CPUUtilization = get_rds_graph(type='CPUUtilization')
+    # rds_DatabaseConnections = get_rds_instancelevel_metrics(type='databaseConnections')    
+    rds_FreeStorageSpace = get_rds_graph(type='freeStorageSpace')    
+    rds_FreeableMemory = get_rds_graph(type='freeableMemory')    
+    rds_ReadIOPS = get_rds_graph(type='readIOPS')
+    rds_WriteIOPS = get_rds_graph(type='writeIOPS')    
+    rds_ReadThroughput = get_rds_graph(type='readThroughput')    
+    rds_WriteThroughput = get_rds_graph(type='writeThroughput')    
+    rds_ReadLatency = get_rds_graph(type='readLatency')     
+    rds_WriteLatency = get_rds_graph(type='writeLatency')    
 
     response_data=[]
 
@@ -758,16 +793,14 @@ def aws_rds():
 
     return render_template('aws/aws_rds.html', 
         response=response, 
-        try_graph1=try_graph1,
-        try_graph2=try_graph2,
+     
 
         rds_CPUUtilization=rds_CPUUtilization,
-        rds_DatabaseConnections=rds_DatabaseConnections,
+        # rds_DatabaseConnections=rds_DatabaseConnections,
         rds_FreeStorageSpace=rds_FreeStorageSpace,
         rds_FreeableMemory=rds_FreeableMemory,
         rds_ReadIOPS=rds_ReadIOPS,
         rds_WriteIOPS=rds_WriteIOPS,
-        
         rds_WriteThroughput=rds_WriteThroughput,
         rds_ReadThroughput=rds_ReadThroughput,
         rds_WriteLatency=rds_WriteLatency,
@@ -829,9 +862,27 @@ def get_rds_graph(type):
         elif type == 'freeStorageSpace':
             data.append(["AWS/RDS", "FreeStorageSpace", "DBInstanceIdentifier", str(ins)])
             filter_data={"metrics":data}
-
-        # data.append(["AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", str(ins)])
-        # filter_data={"metrics":data}
+        elif type == 'freeableMemory':
+            data.append(["AWS/RDS", "FreeableMemory", "DBInstanceIdentifier", str(ins)])
+            filter_data={"metrics":data}
+        elif type == 'readIOPS':
+            data.append(["AWS/RDS", "ReadIOPS", "DBInstanceIdentifier", str(ins)])
+            filter_data={"metrics":data}
+        elif type == 'writeIOPS':
+            data.append(["AWS/RDS", "WriteIOPS", "DBInstanceIdentifier", str(ins)])
+            filter_data={"metrics":data}
+        elif type == 'readThroughput':
+            data.append(["AWS/RDS", "ReadThroughput", "DBInstanceIdentifier", str(ins)])
+            filter_data={"metrics":data}
+        elif type == 'writeThroughput':
+            data.append(["AWS/RDS", "WriteThroughput", "DBInstanceIdentifier", str(ins)])
+            filter_data={"metrics":data}
+        elif type == 'readLatency':
+            data.append(["AWS/RDS", "ReadLatency", "DBInstanceIdentifier", str(ins)])
+            filter_data={"metrics":data}
+        elif type == 'writeLatency':
+            data.append(["AWS/RDS", "WriteLatency", "DBInstanceIdentifier", str(ins)])
+            filter_data={"metrics":data}
 
     response = cw_client.get_metric_widget_image(MetricWidget=json.dumps(filter_data))
     bytes_data=io.BytesIO(response["MetricWidgetImage"])
@@ -841,8 +892,25 @@ def get_rds_graph(type):
 
     return rds_graph
 
+#------------------------------------------------------------------
+def get_rds_metrics():
+    
+    now = datetime.utcnow() # Now time in UTC format 
+    past = now - timedelta(minutes=60) # Minus 60 minutes
+ 
+    response = cw_client.get_metric_statistics(
+        Period=86400,
+        StartTime=datetime.utcnow() - timedelta(days=7) ,
+        EndTime=datetime.utcnow(),
+        MetricName='CPUUtilization',
+        Namespace='AWS/RDS',
+        Statistics=['Maximum'],
+        Dimensions=[{'Name':'DBInstanceIdentifier', 'Value':'database-1'}]
+        )
+    return print(response)
 
 
+# get_rds_metrics()
 
 #------------------------------------------------------------------
 def get_rds_snapshots():

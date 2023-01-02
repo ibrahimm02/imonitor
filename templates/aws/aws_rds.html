@@ -4,9 +4,9 @@
 
     <!-- {{ response }} -->
 
-    <div class="card text-center border-0 shadow-sm mb-4">
+    <div class="card text-center border-0 shadow-sm mb-2">
         <div class="card-body p-0">
-          <div class="table-responsive">
+          <div class="table-responsive table-wrapper">
             <table class="table table-nowrap mb-0 rounded table-hover" style="vertical-align: middle">
               <thead class="table-dark">
                 <th class="border-0 rounded-start">DB Identifier</th>
@@ -30,39 +30,20 @@
             </table>
           </div>
         </div>
-      </div>
+    </div>
 
+      <hr class="mt-2 mb-2">
+      
+      <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-2">
+        <a class="btn btn-light btn-outline-dark" href="{{ url_for('aws_rds')}}" role="button"><i class='bx bx-refresh bx-fw'></i> Refresh</a>
+      </div> 
     
-    <div class="cointainer">
+      <div class="cointainer">
         <div class="row row-cols-1 row-cols-md-3">
-            <div class="col-sm-3">
-                <div class="card border-0 shadow-sm mb-4 px-1">
-                  <img
-                    src="data:image/png;base64,{{try_graph1}}"
-                    alt="TRY GRAPH1"
-                  />
-                </div>
-            </div>
-            <div class="col-sm-3">
-                <div class="card border-0 shadow-sm mb-4 px-1">
-                  <img
-                    src="data:image/png;base64,{{try_graph2}}"
-                    alt="TRY GRAPH2"
-                  />
-                </div>
-            </div>
-            <div class="col-sm-3">
-                <div class="card border-0 shadow-sm mb-4 px-1">
-                <img
-                    src="data:image/png;base64,{{rds_CPUUtilization}}"
-                    alt="rds_CPUUtilization Graph"
-                />
-                </div>
-          </div>
           <div class="col-sm-3">
             <div class="card border-0 shadow-sm mb-4 px-1">
-              <img src="data:image/png;base64,{{rds_DatabaseConnections}}" 
-              alt="rds_DatabaseConnections Graph" />
+              <img src="data:image/png;base64,{{rds_CPUUtilization}}"
+              alt="rds_CPUUtilization Graph"/>
             </div>
           </div>
           <div class="col-sm-3">

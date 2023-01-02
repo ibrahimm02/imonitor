@@ -1,0 +1,709 @@
+{% extends "aws/aws_base.html" %} {% block title %}iMonitor - EC2{% endblock %}
+<!-- {% block nav_index %}active{% endblock %}  -->
+
+{% block content %}
+
+<div class="container">
+  <h4 class="mt-2">Instance Id: {{instance.Instances[0]['InstanceId']}}</h4>
+
+  <hr />
+
+  <div class="card mb-2">
+    <div class="row m-2 mb-4">
+      <!-- <h4>Instance Details</h4> -->
+      <div class="row mt-2">
+        <div class="col">
+          <div>
+            <h6>Instance Name:</h6>
+            {{instance.Instances[0]['Tags'][0]['Value']}}
+          </div>
+        </div>
+        <div class="col">
+          <div>
+            <h6>AMI ID:</h6>
+            {{instance.Instances[0]['ImageId']}}
+          </div>
+        </div>
+        <div class="col">
+          <div>
+            <h6>AMI Launch Index:</h6>
+            {{instance.Instances[0]['AmiLaunchIndex']}}
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-2">
+        <div class="col">
+          <div>
+            <h6>Monitoring</h6>
+            {{instance.Instances[0]['Monitoring']['State']}}
+          </div>
+        </div>
+        <div class="col">
+          <div>
+            <h6>Launch Time</h6>
+            {{instance.Instances[0]['LaunchTime']}}
+          </div>
+        </div>
+        <div class="col">
+          <div>
+            <h6>Key Pair Name</h6>
+            {{instance.Instances[0]['KeyName']}}
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-2">
+        <div class="col">
+          <div>
+            <h6>Owner ID</h6>
+            {{instance['OwnerId']}}
+          </div>
+        </div>
+        <div class="col">
+          <div>
+            <h6>Tenancy</h6>
+            {{instance.Instances[0]['Placement']['Tenancy']}}
+          </div>
+        </div>
+        <div class="col">
+          <div>
+            <h6>Reservation</h6>
+            {{instance['ReservationId']}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-2">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link active" data-bs-toggle="tab" href="#security"
+          >Security</a
+        >
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#networking"
+          >Networking</a
+        >
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#storage">Storage</a>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <div class="tab-pane active" id="security">
+        <div class="row">
+          <div class="col">
+            <div class="row m-2 mb-4">
+              <!-- <h4>Security</h4> -->
+              <div class="row mt-2">
+                <div class="col">
+                  <div>
+                    <h6>Group Name:</h6>
+                    {{instance.Instances[0]['NetworkInterfaces'][0]['Groups'][0]['GroupName']}}
+                  </div>
+                </div>
+                <div class="col">
+                  <div>
+                    <h6>Group Id :</h6>
+                    {{instance.Instances[0]['NetworkInterfaces'][0]['Groups'][0]['GroupId']}}
+                  </div>
+                </div>
+                <div class="col">
+                  <div>
+                    <h6>IAM Role:</h6>
+                    -
+                  </div>
+                </div>
+              </div>
+
+              <hr class="mt-3" />
+
+              <div class="row mt-2 mx-0">
+                <h6>Inbound Rules</h6>
+                <div class="card text-center border-0 shadow-sm mb-2 p-0">
+                  <div class="card-body p-0">
+                    <div class="table-responsive table-wrapper">
+                      <table
+                        class="table table-nowrap mb-0 rounded table-hover"
+                        style="vertical-align: middle"
+                      >
+                        <thead class="table-secondary">
+                          <th class="border-0 rounded-start">Name</th>
+                          <th class="border-0">Security group rule ID</th>
+                          <th class="border-0">Port Range</th>
+                          <th class="border-0">Protocol</th>
+                          <th class="border-0">Source</th>
+                          <th class="border-0">Security Groups</th>
+                          <th class="border-0 rounded-end">Description</th>
+                        </thead>
+
+                        <tr>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                        </tr>
+                        <tr>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                        </tr>
+                        <tr>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <hr class="my-3" />
+              </div>
+
+              <div class="row mt-2 mx-0">
+                <h6>Outbound Rules</h6>
+                <div class="card text-center border-0 shadow-sm mb-2 p-0">
+                  <div class="card-body p-0">
+                    <div class="table-responsive table-wrapper">
+                      <table
+                        class="table table-nowrap mb-0 rounded table-hover"
+                        style="vertical-align: middle"
+                      >
+                        <thead class="table-secondary">
+                          <th class="border-0 rounded-start">Name</th>
+                          <th class="border-0">Security group rule ID</th>
+                          <th class="border-0">Port Range</th>
+                          <th class="border-0">Protocol</th>
+                          <th class="border-0">Source</th>
+                          <th class="border-0">Security Groups</th>
+                          <th class="border-0 rounded-end">Description</th>
+                        </thead>
+
+                        <tr>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                        </tr>
+                        <tr>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                        </tr>
+                        <tr>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="networking">
+        <div class="row">
+          <div class="col">
+            <div class="row m-2 mb-4">
+              <!-- <h4>Networking</h4> -->
+              <div class="row mt-2">
+                <div class="col">
+                  <div>
+                    <h6>Public IPv4 address</h6>
+                    {{instance.Instances[0]['NetworkInterfaces'][0]['PublicIpAddress']}}
+                  </div>
+                </div>
+                <div class="col">
+                  <div>
+                    <h6>Private IPv4 addresses</h6>
+                    {{instance.Instances[0]['NetworkInterfaces'][0]['PrivateIpAddress']}}
+                  </div>
+                </div>
+                <div class="col">
+                  <div>
+                    <h6>VPC ID</h6>
+                    {{instance.Instances[0]['NetworkInterfaces'][0]['VpcId']}}
+                  </div>
+                </div>
+              </div>
+
+              <div class="row mt-2">
+                <div class="col">
+                  <div>
+                    <h6>Public IPv4 DNS</h6>
+                    {{instance.Instances[0]['ImageId']}}
+                  </div>
+                </div>
+                <div class="col">
+                  <div>
+                    <h6>Private IP DNS name (IPv4 only)</h6>
+                    {{instance.Instances[0]['ImageId']}}
+                  </div>
+                </div>
+                <div class="col">
+                  <div>
+                    <h6>Subnet ID</h6>
+                    {{instance.Instances[0]['ImageId']}}
+                  </div>
+                </div>
+              </div>
+
+              <div class="row mt-2">
+                <div class="col">
+                  <div>
+                    <h6>IPV6 addresses</h6>
+                    {{instance.Instances[0]['ImageId']}}
+                  </div>
+                </div>
+                <div class="col">
+                  <div>
+                    <h6>Availability zone</h6>
+                    {{instance.Instances[0]['ImageId']}}
+                  </div>
+                </div>
+                <div class="col">
+                  <div>
+                    <h6>Image Id:</h6>
+                    {{instance.Instances[0]['ImageId']}}
+                  </div>
+                </div>
+              </div>
+
+              <hr class="my-3" />
+
+              <div class="row mt-2 mx-0">
+                <h6>Network Interfaces</h6>
+                <div class="card text-center border-0 shadow-sm mb-3 p-0">
+                  <div class="card-body p-0">
+                    <div class="table-responsive table-wrapper">
+                      <table
+                        class="table table-nowrap mb-0 rounded table-hover"
+                        style="vertical-align: middle"
+                      >
+                        <thead class="table-secondary">
+                          <th class="border-0 rounded-start">Interface ID</th>
+                          <th class="border-0">Description</th>
+                          <th class="border-0">IPv4 Prefixes</th>
+                          <th class="border-0">IPv6 Prefixes</th>
+                          <th class="border-0">Public IPv4 address</th>
+                          <th class="border-0">Private IPv4 address</th>
+                          <th class="border-0">Private IPv4 DNS</th>
+                          <th class="border-0">IPv6 addresses</th>
+                          <th class="border-0">Attachment time</th>
+                          <th class="border-0">Interface owner</th>
+                          <th class="border-0">Attachment status</th>
+                          <th class="border-0">VPC ID</th>
+                          <th class="border-0">Subnet ID</th>
+                          <th class="border-0">Delete on terminate</th>
+                          <th class="border-0">Source / destination check</th>
+                          <th class="border-0">Security groups</th>
+                          <th class="border-0">Interface type</th>
+                          <th class="border-0">ENA Express</th>
+                          <th class="border-0 rounded-end">ENA Express UDP</th>
+                        </thead>
+
+                        <tr>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                        </tr>
+                        <tr>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <hr class="my-3" />
+              <div class="row mt-2 mx-0">
+                <h6>Elastic IP addresses</h6>
+                <div class="card text-center border-0 shadow-sm mb-3 p-0">
+                  <div class="card-body p-0">
+                    <div class="table-responsive table-wrapper">
+                      <table
+                        class="table table-nowrap mb-0 rounded table-hover"
+                        style="vertical-align: middle"
+                      >
+                        <thead class="table-secondary">
+                          <th class="border-0 rounded-start">Name</th>
+                          <th class="border-0">Allocated IPv4 address</th>
+                          <th class="border-0">Type</th>
+                          <th class="border-0">Address pool</th>
+                          <th class="border-0 rounded-end">Allocation ID</th>
+                        </thead>
+
+                        <tr>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                        </tr>
+                        <tr>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                        </tr>
+                        <tr>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="storage">
+        <div class="row">
+          <div class="col">
+            <div class="row m-2 mb-4">
+              <!-- <h4>Storage</h4> -->
+              <div class="row mt-2">
+                <div class="col">
+                  <div>
+                    <h6>Root device details</h6>
+                    {{instance.Instances[0]['ImageId']}}
+                  </div>
+                </div>
+                <div class="col">
+                  <div>
+                    <h6>Root device type</h6>
+                    {{instance.Instances[0]['Monitoring']['State']}}
+                  </div>
+                </div>
+                <div class="col">
+                  <div>
+                    <h6>EBS optimization</h6>
+                    {{instance.Instances[0]['InstanceType']}}
+                  </div>
+                </div>
+              </div>
+
+              <hr class="mt-3" />
+
+              <div class="row mt-1 mx-0">
+                <h6>Block Devices</h6>
+                <div class="card text-center border-0 shadow-sm mb-2 p-0">
+                  <div class="card-body p-0">
+                    <div class="table-responsive table-wrapper">
+                      <table
+                        class="table table-nowrap mb-0 rounded table-hover"
+                        style="vertical-align: middle"
+                      >
+                        <thead class="table-secondary">
+                          <th class="border-0 rounded-start">Volume ID</th>
+                          <th class="border-0">Device name</th>
+                          <th class="border-0">Volume size (GiB)</th>
+                          <th class="border-0">Attachment status</th>
+                          <th class="border-0">Attachment time</th>
+                          <th class="border-0">Encrypted</th>
+                          <th class="border-0">KMS key ID</th>
+                          <th class="border-0">Delete on termination</th>
+                          <th class="border-0 rounded-end">Attachment time</th>
+                        </thead>
+
+                        <tr>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                        </tr>
+                        <tr>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                        </tr>
+                        <tr>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <hr class="mt-3" />
+
+              <div class="row mt-1 mx-0">
+                <h6>Recent root volume replacement tasks</h6>
+                <div class="card text-center border-0 shadow-sm mb-2 p-0">
+                  <div class="card-body p-0">
+                    <div class="table-responsive table-wrapper">
+                      <table
+                        class="table table-nowrap mb-0 rounded table-hover"
+                        style="vertical-align: middle"
+                      >
+                        <thead class="table-secondary">
+                          <th class="border-0 rounded-start">Task ID</th>
+                          <th class="border-0">Task state</th>
+                          <th class="border-0">Start time</th>
+                          <th class="border-0">Completion time</th>
+                          <th class="border-0 rounded-end">Tags</th>
+                        </thead>
+
+                        <tr>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                        </tr>
+                        <tr>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                        </tr>
+                        <tr>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                          <td>data</td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- <div class="tab-pane" id="contact">
+        <div class="row border g-0 rounded shadow-sm">
+          <div class="col p-4">
+            <h3>Contact</h3>
+            <p>
+              Lorem Ipsum is simply dummy text of the printing and typesetting
+              industry. Lorem Ipsum has been the industry's standard dummy text
+              ever since the 1500s, when an unknown printer took a galley of
+              type and scrambled it to make a type specimen book.
+            </p>
+          </div>
+          <div class="col-auto">
+            <img src="images/contact.jpg" class="img-thumbnail dimension" />
+          </div>
+        </div>
+      </div> -->
+    </div>
+  </div>
+
+
+  <div class="card mb-2">
+    <div class="row m-2 mb-4 mt-3">
+      <!-- <h4>Monitoring</h4> -->
+      <nav class="navbar" style="background: transparent !important;">
+        <div class="container-fluid">
+          <a class="navbar-brand">Monitoring</a>
+          <a
+            class="btn btn-light btn-outline-dark"
+            href="{{ url_for('aws_ec2')}}"
+            role="button"
+            ><i class="bx bx-refresh bx-fw"></i> Refresh</a
+          >
+        </div>
+      </nav>
+
+      <div class="row mt-2 mx-0">
+        <div class="col">
+          <div>
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img
+                src="data:image/png;base64,{{ec2_DiskReadOps}}"
+                alt="CPUUtilization Graph"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div>
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img
+                src="data:image/png;base64,{{ec2_DiskReadOps}}"
+                alt="DiskReadOps Graph"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div>
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img
+                src="data:image/png;base64,{{ec2_DiskReadOps}}"
+                alt="DiskReadOps Graph"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-2 mx-0">
+        <div class="col">
+          <div>
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img
+                src="data:image/png;base64,{{ec2_DiskReadOps}}"
+                alt="DiskReadOps Graph"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div>
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img
+                src="data:image/png;base64,{{ec2_DiskReadOps}}"
+                alt="DiskReadOps Graph"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div>
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img
+                src="data:image/png;base64,{{ec2_DiskReadOps}}"
+                alt="DiskReadOps Graph"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-2 mx-0">
+        <div class="col">
+          <div>
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img
+                src="data:image/png;base64,{{ec2_DiskReadOps}}"
+                alt="DiskReadOps Graph"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div>
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img
+                src="data:image/png;base64,{{ec2_DiskReadOps}}"
+                alt="DiskReadOps Graph"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div>
+            <div class="card border-0 shadow-sm mb-4 px-1">
+              <img
+                src="data:image/png;base64,{{ec2_DiskReadOps}}"
+                alt="DiskReadOps Graph"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{instance}}
+</div>
+
+{% endblock %}
