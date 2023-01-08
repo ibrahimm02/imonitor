@@ -1,65 +1,61 @@
 {% extends "aws/aws_base.html" %} 
-{% block title %}iMonitor - EC2{% endblock %} 
+{% block title %}iMonitor - EC2{% endblock %}
 {% block nav_ec2 %}active{% endblock %} 
 {% block navTitle %}EC2{% endblock %} 
-
 {% block content %} 
-
 {% with messages = get_flashed_messages() %} 
-  {% if messages %}
-    <div class="alert alert-success" role="alert">
-      {% for message in messages %} {{ message }}<br />
-      {% endfor %}
-    </div>
-  {% endif %} 
+{% if messages %}
+<div class="alert alert-success" role="alert">
+  {% for message in messages %} {{ message }}<br />
+  {% endfor %}
+</div>
+{% endif %} 
 {% endwith %}
 
-
-  <div class="row">
-
-    <div class="col-sm-2">
-      <div class="card text-center border-0 shadow-sm mb-4 h-80">
-        <div class="card-body">
-          <h5 class="card-title">Total <br>Instances</h5>
-          <h1 class="display-6">{{ total_instances }}</h1>
-        </div>
+<div class="row">
+  <div class="col-sm-2">
+    <div class="card text-center border-0 shadow-sm mb-4 h-80">
+      <div class="card-body">
+        <h5 class="card-title">Total <br />Instances</h5>
+        <h1 class="display-6">{{ total_instances }}</h1>
       </div>
     </div>
-    <div class="col-sm-2">
-      <div class="card text-center border-0 shadow-sm mb-4 h-80">
-        <div class="card-body">
-          <h5 class="card-title">Average Utilization</h5>
-          {% for m in ec2_metrics: %}
-          <h1 class="display-6">{{m.last_avg}}%</h1>
-          {% endfor %}
-        </div>
+  </div>
+  <div class="col-sm-2">
+    <div class="card text-center border-0 shadow-sm mb-4 h-80">
+      <div class="card-body">
+        <h5 class="card-title">Average Utilization</h5>
+        {% for m in ec2_metrics: %}
+        <h1 class="display-6">{{m.last_avg}}%</h1>
+        {% endfor %}
       </div>
     </div>
-    <div class="col-sm-2">
-      <div class="card text-center border-0 shadow-sm mb-4 h-80">
-        <div class="card-body">
-          <h5 class="card-title">Minimum Utilization</h5>
-          {% for m in ec2_metrics: %}
-          <h1 class="display-6">{{m.last_min}}%</h1>
-          {% endfor %}
-        </div>
+  </div>
+  <div class="col-sm-2">
+    <div class="card text-center border-0 shadow-sm mb-4 h-80">
+      <div class="card-body">
+        <h5 class="card-title">Minimum Utilization</h5>
+        {% for m in ec2_metrics: %}
+        <h1 class="display-6">{{m.last_min}}%</h1>
+        {% endfor %}
       </div>
     </div>
-    <div class="col-sm-2">
-      <div class="card text-center border-0 shadow-sm mb-4 h-80">
-        <div class="card-body">
-          <h5 class="card-title">Maximum Utilization</h5>
-          {% for m in ec2_metrics: %}
-          <h1 class="display-6">{{m.last_max}}%</h1>
-          {% endfor %}
-        </div>
+  </div>
+  <div class="col-sm-2">
+    <div class="card text-center border-0 shadow-sm mb-4 h-80">
+      <div class="card-body">
+        <h5 class="card-title">Maximum Utilization</h5>
+        {% for m in ec2_metrics: %}
+        <h1 class="display-6">{{m.last_max}}%</h1>
+        {% endfor %}
       </div>
     </div>
-    <div class="col-sm-4">
-      <div class="card text-center border-0 shadow-sm mb-4 h-80">
-        <div class="card-body m-0" style="padding: 5px 10px">
-          <span class="card-title">Instance States</span>
-            <!-- <table class="table table-borderless">
+  </div>
+  <div class="col-sm-4">
+    <div class="card text-center border-0 shadow-sm mb-4 h-80">
+      <div class="card-body m-0" style="padding: 5px 10px">
+        <span class="card-title">Instance States</span>
+        <!-- <table class="table table-borderless">
               <tbody">
 
                 {% for st in ec2_states%}
@@ -78,98 +74,37 @@
                 {% endfor %}
               </tbody>
             </table> -->
-            <canvas id="myChart" width="350" height="110"></canvas>
-
-         </div>
+        <canvas id="myChart" width="350" height="110"></canvas>
       </div>
-    </div>
-  </div>
-
-
-<!-- {{instances}} -->
-
-<div class="card text-center border-0 shadow-sm mb-2">
-  <div class="card-body p-0">
-    <div class="table-responsive table-wrapper">
-      <table
-        class="table table-nowrap mb-0 rounded table-hover"
-        style="vertical-align: middle"
-      >
-        <thead class="table-dark align-middle">
-          <th class="border-0 rounded-start">Instance Name</th>
-          <th class="border-0">Instance Id</th>
-          <th class="border-0">State</th>
-          <th class="border-0">Type</th>
-          <th class="border-0">Public IPv4</th>
-          <th class="border-0">AMI Id</th>
-          <th class="border-0">Launch time</th>
-          <th class="border-0 rounded-end">Availability Zone</th>  
-        </thead>
-
-        {%for instance in instances:%}
-        <tr>
-          <td>{{instance.tags[0]['Value']}}</td>                
-          <td>
-            <form action="{{ url_for('ec2_instance_data')}}" method="POST">
-              <input type="hidden" name="instance" value="{{ instance.id }}" /> 
-              <!-- <a href="#" style="text-decoration:underline; color:#0dcaf0">{{instance.id}}</a> -->
-              <button type="submit" class="btn btn-link" style="color:#0dcaf0">{{instance.id}}</button>
-            </form>
-          </td>
-
-          <td>
-            <div class="btn-group dropend">
-              <button
-                type="button"
-                class="btn btn-outline-info dropdown-toggle btn-sm"
-                data-bs-toggle="dropdown"
-                aria-expanded="false">
-                {{instance.state['Name']}}
-              </button>
-              <ul class="dropdown-menu">
-                <li>
-                  <form action="{{ url_for('start_instance')}}" method="POST">
-                    <input
-                      type="hidden"
-                      name="instance"
-                      value="{{ instance.id }}"
-                    />
-                    <button type="submit" class="dropdown-item">Start</button>
-                  </form>
-                </li>
-                <li>
-                  <form action="{{ url_for('stop_instance')}}" method="POST">
-                    <input
-                      type="hidden"
-                      name="instance"
-                      value="{{ instance.id }}"
-                    />
-                    <button type="submit" class="dropdown-item">Stop</button>
-                  </form>
-                </li>
-              </ul>
-            </div>
-          </td>
-
-          <td>{{instance.instance_type}}</td>
-          <td>{{instance.public_ip_address}}</td>
-          <td>{{instance.image.id}}</td>
-          <td>{{instance.launch_time.strftime("%d-%m-%Y, %H:%M:%S")}}</td>
-          <td>{{instance.placement['AvailabilityZone']}}</td>
-        </tr>
-        {%endfor%}
-      </table>
     </div>
   </div>
 </div>
 
-<hr class="mt-2 mb-2">
-      
-<div class="d-grid gap-2 d-md-flex justify-content-md-end mb-2">
-  <a class="btn btn-light btn-outline-dark" href="{{ url_for('aws_ec2')}}" role="button"><i class='bx bx-refresh bx-fw'></i> Refresh</a>
-</div> 
+<!-- {{instances}} -->
+
+
+
+
+<!-- <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-2">
+  <a
+    class="btn btn-light btn-outline-dark"
+    href="{{ url_for('aws_ec2')}}"
+    role="button"
+    ><i class="bx bx-refresh bx-fw"></i> Refresh</a
+  >
+</div> -->
 
 <div class="cointainer">
+
+  <nav class="navbar px-0" style="background: transparent !important">
+    <div class="container-fluid px-0">
+      <a class="navbar-brand">Monitoring-all instances</a>
+      <a class="btn btn-light btn-outline-dark" href="{{ url_for('aws_ec2')}}" role="button">
+          <i class="bx bx-refresh bx-fw"></i> Refresh
+      </a>
+    </div>
+  </nav>
+
   <div class="row row-cols-1 row-cols-md-3">
     <div class="col-sm-3">
       <div class="card border-0 shadow-sm mb-4 px-1">
@@ -181,22 +116,34 @@
     </div>
     <div class="col-sm-3">
       <div class="card border-0 shadow-sm mb-4 px-1">
-        <img src="data:image/png;base64,{{ec2_DiskReadOps}}" alt="DiskReadOps Graph" />
+        <img
+          src="data:image/png;base64,{{ec2_DiskReadOps}}"
+          alt="DiskReadOps Graph"
+        />
       </div>
     </div>
     <div class="col-sm-3">
       <div class="card border-0 shadow-sm mb-4 px-1">
-        <img src="data:image/png;base64,{{ec2_DiskWriteOps}}" alt="DiskWriteOps Graph" />
+        <img
+          src="data:image/png;base64,{{ec2_DiskWriteOps}}"
+          alt="DiskWriteOps Graph"
+        />
       </div>
     </div>
     <div class="col-sm-3">
       <div class="card border-0 shadow-sm mb-4 px-1">
-        <img src="data:image/png;base64,{{ec2_NetworkIn}}" alt="NetworkIn Graph" />
+        <img
+          src="data:image/png;base64,{{ec2_NetworkIn}}"
+          alt="NetworkIn Graph"
+        />
       </div>
     </div>
     <div class="col-sm-3">
       <div class="card border-0 shadow-sm mb-4 px-1">
-        <img src="data:image/png;base64,{{ec2_NetworkOut}}" alt="NetworkOut Graph" />
+        <img
+          src="data:image/png;base64,{{ec2_NetworkOut}}"
+          alt="NetworkOut Graph"
+        />
       </div>
     </div>
     <div class="col-sm-3">
@@ -208,7 +155,7 @@
       </div>
     </div>
     <div class="col-sm-3">
-      <div class="card border-0 shadow-sm mb-4 px-1">
+      <div class="card border-0 shadow-sm mb-3 px-1">
         <img
           src="data:image/png;base64,{{ec2_CPUCreditBalance}}"
           alt="CPUCreditBalance Graph"
@@ -216,7 +163,7 @@
       </div>
     </div>
     <div class="col-sm-3">
-      <div class="card border-0 shadow-sm mb-4 px-1">
+      <div class="card border-0 shadow-sm mb-3 px-1">
         <img
           src="data:image/png;base64,{{ec2_DiskReadBytes}}"
           alt="DiskReadBytes Graph"
@@ -224,7 +171,7 @@
       </div>
     </div>
     <div class="col-sm-3">
-      <div class="card border-0 shadow-sm mb-4 px-1">
+      <div class="card border-0 shadow-sm mb-3 px-1">
         <img
           src="data:image/png;base64,{{ec2_DiskWriteBytes}}"
           alt="DiskWriteBytes Graph"
@@ -232,16 +179,110 @@
       </div>
     </div>
   </div>
+
 </div>
 
-{{info}}
+<hr class="mt-3 mb-3" />
 
-{% set stat = [] %}
+<div class="card text-center border-0 shadow-sm mb-2">
+  <div class="card-body p-0">
+    <div class="table-responsive table-wrapper">
+      <table
+        class="table table-nowrap mb-0 rounded table-hover"
+        style="vertical-align: middle"
+      >
+        <thead class="align-middle table-secondary">
+          <tr>
+            <th class="border-0 rounded-start">Instance Name</th>
+            <th class="border-0" >Instance Id</th>
+            <th class="border-0">State</th>
+            <th class="border-0">Type</th>
+            <th class="border-0">Public IPv4</th>
+            <th class="border-0">AMI Id</th>
+            <th class="border-0">Launch time</th>
+            <th class="border-0 rounded-end">Availability Zone</th>
+          </tr>
+        </thead>
+        <tbody">
+          {%for instance in instances:%}
+          <tr>
+            <td><span>{{instance.tags[0]['Value']}}</span></td>
+            <td><span>
+              <form action="{{ url_for('ec2_instance_data')}}" method="POST">
+                <input
+                  type="hidden"
+                  name="instance"
+                  value="{{ instance.id }}"
+                />
+                <!-- <a href="#" style="text-decoration:underline; color:#0dcaf0">{{instance.id}}</a> -->
+                <button
+                  type="submit"
+                  class="btn btn-link"
+                  style="color: #0dcaf0"
+                >
+                  {{instance.id}}
+                </button>
+              </form>
+            </span>
+            </td>
 
-  {% for value in ec2_states: %}
-      {% set tmp = stat.append(value['value']) %}
-      <!-- {{value['value']}} -->
-  {% endfor %}
+            <td><span>
+              <div class="btn-group dropend">
+                <button
+                  type="button"
+                  class="btn btn-outline-info dropdown-toggle btn-sm"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  {{instance.state['Name']}}
+                </button>
+                <ul class="dropdown-menu">
+                  <li>
+                    <form action="{{ url_for('ec2_instance_start')}}" method="POST">
+                      <input
+                        type="hidden"
+                        name="instance"
+                        value="{{ instance.id }}"
+                      />
+                      <button type="submit" class="dropdown-item">Start</button>
+                    </form>
+                  </li>
+                  <li>
+                    <form action="{{ url_for('ec2_instance_stop')}}" method="POST">
+                      <input
+                        type="hidden"
+                        name="instance"
+                        value="{{ instance.id }}"
+                      />
+                      <button type="submit" class="dropdown-item">Stop</button>
+                    </form>
+                  </li>
+                </ul>
+              </div>
+            </span>
+            </td>
+
+            <td><span>{{instance.instance_type}}</span></td>
+            <td><span>{{instance.public_ip_address}}</span></td>
+            <td><span>{{instance.image.id}}</span></td>
+            <td><span>{{instance.launch_time.strftime("%d-%m-%Y, %H:%M:%S")}}</span></td>
+            <td><span>{{instance.placement['AvailabilityZone']}}</span></td>
+          </tr>
+          {%endfor%}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Pie Chart - Instance States -->
+
+{{info}} 
+{% set stat = [] %} 
+{% for value in ec2_states: %} 
+{% set tmp = stat.append(value['value']) %}
+<!-- {{value['value']}} -->
+{% endfor %}
 
 <script>
   // Global parameters:
@@ -303,5 +344,7 @@
     options: options,
   });
 </script>
+
+<!-- Pie Chart End -->
 
 {% endblock content %}

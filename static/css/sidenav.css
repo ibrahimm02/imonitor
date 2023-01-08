@@ -8,7 +8,7 @@
 }
 
 #sidebar {
-  min-width: 250px;
+  min-width: 200px;
   max-width: 250px;
   background: #2c3e50;
   color: #fff;
@@ -18,7 +18,7 @@
 }
 
 #sidebar.active {
-  margin-left: -250px;
+  margin-left: -200px;
   transform: rotateY(100deg);
 }
 
@@ -139,7 +139,7 @@ a.article:hover {
 
 @media (max-width: 768px) {
   #sidebar {
-    margin-left: -250px;
+    margin-left: -200px;
     transform: rotateY(90deg);
   }
   #sidebar.active {

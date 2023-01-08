@@ -8,6 +8,7 @@ from operator import itemgetter
 import json
 import base64
 import io
+import sys
 
 app = Flask(__name__)
 Bootstrap(app)
@@ -25,6 +26,10 @@ ec2_client = boto3.client("ec2", region_name=REGION_NAME)
 ec2_resource = boto3.resource('ec2', region_name=REGION_NAME)
 
 cw_client = boto3.client('cloudwatch')
+
+s3_client = boto3.client('s3')
+
+s3_resource = boto3.resource('s3')
 
 rds_client = boto3.client("rds", region_name=REGION_NAME)
 
@@ -45,10 +50,24 @@ def aws_overview():
 
     response = ec2_client.describe_instances()
 
+    ec2_CPUUtilization = get_ec2_CPUUtilization()
+    ec2_CPUCreditUsage = get_ec2_CPUCreditUsage()
+
+    size_count = s3_objects_size()
+
+    rds_states = rds_state_stats()
+
     if not(response):
         return render_template("message.html",message="No Instances running. Create an instance first")
 
-    return render_template('aws/overview.html', ec2_states=ec2_states, current_region=current_region, response=response)
+    return render_template('aws/overview.html', 
+    current_region=current_region, 
+    response=response,
+    ec2_states=ec2_states,
+    ec2_CPUUtilization=ec2_CPUUtilization,
+    ec2_CPUCreditUsage=ec2_CPUCreditUsage,
+    size_count=size_count,
+    rds_states=rds_states)
 
 #----GCP OVERVIEW---------------------------------------------------------------------------------------------------#
 
@@ -130,7 +149,7 @@ def aws_ec2():
     ec2_DiskWriteBytes = get_ec2_DiskWriteBytes()
 
 
-    ec2_metrics = ec2_metrics_amm()
+    # ec2_metrics = ec2_metrics_amm()
 
     ec2_states = ec2_state_stats()
     # data = {'chart_data': ec2_states}
@@ -152,7 +171,7 @@ def aws_ec2():
         ec2_DiskReadBytes=ec2_DiskReadBytes,
         ec2_DiskWriteBytes=ec2_DiskWriteBytes,
 
-        ec2_metrics=ec2_metrics, 
+        # ec2_metrics=ec2_metrics, 
         ec2_states=ec2_states)
 
 # --------------------------------------------------------------
@@ -570,30 +589,34 @@ def ec2_metrics_amm():
     for reservation in response["Reservations"]:
         for instance in reservation["Instances"]:
             #print(instance["InstanceId"])
-
-            EC2CPUUtilization = cw_client.get_metric_statistics(
-                Namespace = 'AWS/EC2',
-                MetricName = 'CPUUtilization',
-                StartTime=datetime.utcnow() - timedelta(days=7) ,
-                EndTime=datetime.utcnow(),
-                Period = 86400,
-                Statistics=['Maximum','Minimum','Average'],
-                Dimensions = [
-                    {
-                        'Name': 'InstanceId',
-                        'Value': instance['InstanceId']
-                    }   
-                ]        
-            ) 
-          #  return print(EC2CPUUtilization)
-                
+            try:
+                EC2CPUUtilization = cw_client.get_metric_statistics(
+                    Namespace = 'AWS/EC2',
+                    MetricName = 'CPUUtilization',
+                    StartTime=datetime.utcnow() - timedelta(days=7) ,
+                    EndTime=datetime.utcnow(),
+                    Period = 86400,
+                    Statistics=['Maximum','Minimum','Average'],
+                    Dimensions = [
+                        {
+                            'Name': 'InstanceId',
+                            'Value': instance['InstanceId']
+                        }   
+                    ]        
+                ) 
+            except Exception():
+                print(Exception)
+            #  return print(EC2CPUUtilization)
+                    
             datapoints = EC2CPUUtilization['Datapoints']     # CPU Utilization results                
             sorted_datapoint = sorted(datapoints, key=itemgetter('Timestamp'))
 
-            # print(sorted_datapoint)
+                # print(sorted_datapoint)
 
             for i in range(len(sorted_datapoint)):
                 sorted_datapoint[i]['sort_by'] = i
+
+                print(sorted_datapoint)
 
             last_datapoint = sorted_datapoint[-1]  # Last result
             last_max_utilization = last_datapoint['Maximum'] # Last utilization
@@ -653,8 +676,8 @@ def ec2_metrics_amm():
 
 #-----------------------------------------------------------------------------
 
-@app.route('/start', methods=["POST"])
-def start_instance():
+@app.route('/ec2-instance-start', methods=["POST"])
+def ec2_instance_start():
     key = request.form['instance']
 
     instance = ec2_resource.Instance(key)
@@ -669,8 +692,8 @@ def start_instance():
     return redirect(url_for('aws_ec2'))
 #-------------------------------------------------------------------
 
-@app.route('/stop', methods=["POST"])
-def stop_instance():
+@app.route('/ec2-instance-stop', methods=["POST"])
+def ec2_instance_stop():
     key = request.form['instance']
 
     instance = ec2_resource.Instance(key)
@@ -691,12 +714,23 @@ def ec2_instance_data():
 
     key = request.form['instance']
 
+   
+    ec2_CPUUtilization = ec2_instance_metrics(type='CPUUtilization', ins_id=key)
+    ec2_DiskReadOps = ec2_instance_metrics(type='DiskReadOps', ins_id=key)
+    ec2_DiskWriteOps = ec2_instance_metrics(type='DiskWriteOps', ins_id=key)
+    ec2_NetworkIn = ec2_instance_metrics(type='NetworkIn', ins_id=key)
+    ec2_NetworkOut = ec2_instance_metrics(type='NetworkOut', ins_id=key)
+    ec2_CPUCreditUsage = ec2_instance_metrics(type='CPUCreditUsage', ins_id=key)
+    ec2_CPUCreditBalance = ec2_instance_metrics(type='CPUCreditBalance', ins_id=key)
+    ec2_DiskReadBytes = ec2_instance_metrics(type='DiskReadBytes', ins_id=key)
+    ec2_DiskWriteBytes = ec2_instance_metrics(type='DiskWriteBytes', ins_id=key)
+
+
     # Helper method to serialize datetime fields
     def json_datetime_serializer(obj):
         if isinstance(obj, (datetime, date)):
             return obj.isoformat()
         raise TypeError ("Type %s not serializable" % type(obj))
-
 
     response = ec2_client.describe_instances(
         InstanceIds=[
@@ -704,24 +738,78 @@ def ec2_instance_data():
         ],
     )
 
-    print(f'Instance {key} attributes:')
+    # print(f'Instance {key} attributes:')
 
     for reservation in response['Reservations']:
-        print(json.dumps(
+        json.dumps(
                 reservation,
                 indent=4,
                 default=json_datetime_serializer
             )
-        )
     
-    return render_template('aws/aws-ec2/aws_ec2_instance_data.html', instance=reservation)
+    return render_template('aws/aws-ec2/aws_ec2_instance_data.html', 
+                            instance=reservation,
+                            ec2_CPUUtilization=ec2_CPUUtilization,
+                            ec2_DiskReadOps=ec2_DiskReadOps,
+                            ec2_DiskWriteOps=ec2_DiskWriteOps,
+                            ec2_NetworkIn= ec2_NetworkIn,
+                            ec2_NetworkOut= ec2_NetworkOut,
+                            ec2_CPUCreditUsage= ec2_CPUCreditUsage,
+                            ec2_CPUCreditBalance=ec2_CPUCreditBalance,           
+                            ec2_DiskReadBytes=ec2_DiskReadBytes,             
+                            ec2_DiskWriteBytes= ec2_DiskWriteBytes
+                            )
+
+
+def ec2_instance_metrics(type, ins_id):
+
+    
+
+    if type == "CPUUtilization":
+        ins_met = {"metrics":[["AWS/EC2", "CPUUtilization", "InstanceId", str(ins_id)]]}  
+    if type == "DiskReadOps":
+        ins_met = {"metrics": [["AWS/EC2", "DiskReadOps", "InstanceId", str(ins_id)]]}
+    if type == "DiskWriteOps":
+        ins_met = {"metrics": [["AWS/EC2", "DiskWriteOps", "InstanceId", str(ins_id)]]}
+    if type == "NetworkIn":
+        ins_met = {"metrics": [["AWS/EC2", "NetworkIn", "InstanceId", str(ins_id)]]}
+    if type == "NetworkOut":
+        ins_met = {"metrics": [["AWS/EC2", "NetworkOut", "InstanceId", str(ins_id)]]}
+    if type == "CPUCreditUsage":
+        ins_met = {"metrics": [["AWS/EC2", "CPUCreditUsage", "InstanceId", str(ins_id)]]}
+    if type == "CPUCreditBalance":
+        ins_met = {"metrics": [["AWS/EC2", "CPUCreditBalance", "InstanceId", str(ins_id)]]}
+    if type == "DiskReadBytes":
+        ins_met = {"metrics": [["AWS/EC2", "DiskReadBytes", "InstanceId", str(ins_id)]]}
+    if type == "DiskWriteBytes":
+        ins_met = {"metrics": [["AWS/EC2", "DiskWriteBytes", "InstanceId", str(ins_id)]]}
+
+
+    response = cw_client.get_metric_widget_image(MetricWidget=json.dumps(ins_met))
+    
+    # print(response)
+
+    bytes_data=io.BytesIO(response["MetricWidgetImage"])
+    fr=base64.b64encode(bytes_data.getvalue())
+
+    # print(fr)
+    rds_graph = fr.decode('utf-8')
+
+    return rds_graph
+    
+
+
 #---- AWS/S3 ------------------------------------------------------------------------------------------------#
 
 @app.route('/aws/s3')
 def aws_s3():
     # Retrieve the list of existing buckets
-    s3_client = boto3.client('s3')
+    
     response = s3_client.list_buckets()
+
+    size_count = s3_objects_size()
+
+    s3_graph = aws_get_s3_metrics()
 
     if len(response['Buckets'])==0:
         return f'No Buckets!'
@@ -730,32 +818,115 @@ def aws_s3():
         print('Existing buckets:')
         for bucket in response['Buckets']:
             print(f'  {bucket["Name"]}')
-        return render_template("aws/aws_s3.html", response=response)
+        return render_template("aws/aws_s3.html", response=response, size_count=size_count, s3_graph=s3_graph)
+
+#-------------------------------------------------------
+
+def aws_get_s3_bucket_size():
+
+    
+
+    cw = boto3.client('cloudwatch')
+    s3client = boto3.client('s3')
+
+    # Get a list of all buckets
+    allbuckets = s3client.list_buckets()
+
+    # Header Line for the output going to standard out
+    print('Bucket'.ljust(45) + 'Size in Bytes'.rjust(25))
+
+    # Iterate through each bucket
+    for bucket in allbuckets['Buckets']:
+        # For each bucket item, look up the cooresponding metrics from CloudWatch
+        response = cw.get_metric_statistics(Namespace='AWS/S3',
+                                            MetricName='BucketSizeBytes',
+                                            Dimensions=[
+                                                {'Name': 'BucketName', 'Value': bucket['Name']},
+                                                {'Name': 'StorageType', 'Value': 'StandardStorage'}
+                                            ],
+                                            Statistics=['Average'],
+                                            Period=3600,
+                                            StartTime=datetime.utcnow() - timedelta(days=7) ,
+                                            EndTime=datetime.utcnow(),
+                                            )
+        # The cloudwatch metrics will have the single datapoint, so we just report on it. 
+
+        print(response)
+        for item in response["Datapoints"]:
+            print(bucket["Name"].ljust(45) + str("{:,}".format(int(item["Average"]))).rjust(25))
+            # Note the use of "{:,}".format.   
+            # This is a new shorthand method to format output.
+            # I just discovered it recently.
+
+# aws_get_s3_bucket_size()
+
+#-------------------------------------------------------
+def s3_objects_size():
+
+    data = []
+    size = 0
+    totalObject = 0
+
+    allbuckets = s3_client.list_buckets()
+
+    totalBucket = len(allbuckets['Buckets'])
+
+    for bucket in allbuckets['Buckets']:
+        bucket = s3_resource.Bucket(bucket["Name"])
+        for obj in bucket.objects.all():
+            totalObject += 1
+            size += obj.size
+
+    # print('total size:')
+    roundSize = ("%.3f GB" % (size*1.0/1024/1024/1024))
+    # print("%.3f GB" % (size*1.0/1024/1024/1024))
+    # print('total count:')
+    # print(totalCount)
+    data.append({'total_size': roundSize, 'total_bucket': totalBucket, 'total_object': totalObject })
+    return data
+
 
 #-------------------------------------------------------
 
 def aws_get_s3_metrics():
     # List metrics through the pagination interface
-    paginator = cw_client.get_paginator('list_metrics')
-    for response in paginator.paginate(
-            
+    response = cw_client.get_metric_statistics(
+            MetricName='BucketSizeBytes',
+            Namespace='AWS/S3',
             Dimensions=[
                 {
                     'Name': 'BucketName',
                     'Value': 'project-test-bucket1'
                 },
                 {
-                    'Name':'FilterId',
-                    'Value':'EntireBucket'
+                    'Name': 'StorageType',
+                    'Value': 'StandardStorage'
                 }
-            
             ],
-            MetricName='BytesDownloaded',
-            Namespace='AWS/S3'):
+            Statistics=['Average'],
+            Period=86400,
+            StartTime=datetime.utcnow() - timedelta(days=14) ,
+            EndTime=datetime.utcnow(),
         
-        print(response)
+    )
+        
+    print(response)
 
-# aws_get_s3_metrics()
+    ins_met = '{"metrics": [["AWS/S3", "BucketSizeBytes", "BucketName", "project-test-bucket1", "StorageType", "StandardStorage", "Statistics", "Average"]]}'
+
+    response2 = cw_client.get_metric_widget_image(MetricWidget=ins_met)
+    
+    # print(response)
+
+    bytes_data=io.BytesIO(response2["MetricWidgetImage"])
+    fr=base64.b64encode(bytes_data.getvalue())
+
+    # print(fr)
+    s3_graph = fr.decode('utf-8')
+
+    return s3_graph
+
+
 
 #---- AWS/RDS ------------------------------------------------------------------------------------------------#
 
@@ -772,6 +943,8 @@ def aws_rds():
     rds_WriteThroughput = get_rds_graph(type='writeThroughput')    
     rds_ReadLatency = get_rds_graph(type='readLatency')     
     rds_WriteLatency = get_rds_graph(type='writeLatency')    
+
+    rds_states = rds_state_stats()
 
     response_data=[]
 
@@ -804,7 +977,8 @@ def aws_rds():
         rds_WriteThroughput=rds_WriteThroughput,
         rds_ReadThroughput=rds_ReadThroughput,
         rds_WriteLatency=rds_WriteLatency,
-        rds_ReadLatency=rds_ReadLatency         
+        rds_ReadLatency=rds_ReadLatency,
+        rds_states=rds_states         
         )
 #-------------------------------------------------------
 def get_rds_instancelevel_metrics(type):
@@ -852,6 +1026,8 @@ def get_rds_graph(type):
             response_data.append({
             "DBInstanceIdentifier": i['DBInstanceIdentifier']
         })
+
+    # print(response_data)
 
     instance_ids=[i["DBInstanceIdentifier"] for i in response_data]
     for ins in instance_ids:
@@ -929,6 +1105,67 @@ def get_rds_snapshots():
             continue
             pass
     return response
+
+#------------------------------------------------
+
+@app.route('/aws/rds/rds-instance-start', methods=["POST"])
+def rds_instance_start():
+    key = request.form['instance']
+
+    dbinstance = rds_client.start_db_instance(DBInstanceIdentifier=key)
+
+    print(f'Starting RDS instance: {dbinstance["DBInstance"]["DBInstanceIdentifier"]}')
+    
+    # # instance.wait_until_running()
+
+    print(f'EC2 instance "{dbinstance["DBInstance"]["DBInstanceIdentifier"]}" has been started')
+    flash(f'EC2 instance "{dbinstance["DBInstance"]["DBInstanceIdentifier"]}" has been started')
+    return redirect(url_for('aws_rds'))
+
+#------------------------------------------------
+
+@app.route('/aws/rds/rds-instance-stop', methods=["POST"])
+def rds_instance_stop():
+    key = request.form['instance']
+
+    dbinstance = rds_client.stop_db_instance(DBInstanceIdentifier=key)
+   
+    print(f'Stopping RDS instance: {dbinstance["DBInstance"]["DBInstanceIdentifier"]}')
+    
+    # instance.wait_until_running()
+
+    print(f'EC2 instance "{dbinstance["DBInstance"]["DBInstanceIdentifier"]}" has been stopped')
+    flash(f'EC2 instance "{dbinstance["DBInstance"]["DBInstanceIdentifier"]}" has been stopped')
+
+    return redirect(url_for('aws_rds'))
+
+#---------------------------------------------------------------
+
+def rds_state_stats():
+    stats = {
+        "available": 0,
+        "starting": 0,
+        "stopping": 0,
+        "stopped": 0
+        }
+    
+    paginator = rds_client.get_paginator('describe_db_instances')
+    response_iterator = paginator.paginate()
+    for ri in response_iterator:
+            for ins in ri['DBInstances']:
+                    
+                    # print(ins)
+                    # print('##############################################')
+                    state = ins['DBInstanceStatus']
+                    stats[state] += 1
+    graph_data=[]
+    for i in stats.keys():
+        graph_data.append({"state":i,"value":int(stats[i])})
+
+    return(graph_data)   
+
+#---------------------------------------------------------------
+
 
 #---- AWS/LAMBDA ------------------------------------------------------------------------------------------------#
 

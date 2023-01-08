@@ -13,6 +13,11 @@
       integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4"
       crossorigin="anonymous"/> -->
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" 
+    integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" 
+    crossorigin="anonymous" 
+    referrerpolicy="no-referrer" />
+
     <link href='https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css' 
       rel='stylesheet'>
 
@@ -26,19 +31,7 @@
     <script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script>
 
     <!-- Font Awesome JS -->
-    <script
-      defer
-      src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js"
-      integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ"
-      crossorigin="anonymous">
-    </script>
     
-    <script
-      defer
-      src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js"
-      integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY"
-      crossorigin="anonymous">
-    </script>
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
 
@@ -48,57 +41,84 @@
   <body>
 
     <div class="wrapper">
-        <nav id="sidebar">
+        <nav id="sidebar" >
+          
           <div class="sidebar-header">
-            <h3><i class='bx bxs-chart bx-fw'></i>iMonitor</h3>
+            <h4><i class='bx bxs-chart bx-fw'></i>iMonitor</h4>
           </div>
-          <ul class="list-unstyled components">
-            <p class="bg-light text-dark">
-              <img src="https://img.icons8.com/color/480/null/amazon-web-services.png" width="32" height="32"/>
-              Amazon Web Services
-            </p>
-            <li style="border-top: 1px solid #fff;" class="{% block nav_index %}{% endblock %}"><a href="{{url_for('aws_overview')}}">Overview</a></li>
-            <li>
-              <a href="#computeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Compute</a>
-              <ul class="collapse list-unstyled" id="computeSubmenu">
-                <li class="{% block nav_ec2 %}{% endblock %}"><a href="{{url_for('aws_ec2')}}">EC2</a></li>
-                <li><a href="#">Lambda</a></li>
-                <li><a href="#">Elastic Beanstalk</a></li>
-              </ul>
-            </li>
-            <li>
-              <a href="#storageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Storage</a>
-              <ul class="collapse list-unstyled" id="storageSubmenu">
-                <li class="{% block nav_s3 %}{% endblock %}"><a href="{{ url_for('aws_s3')}}">S3</a></li>
-                <li><a href="#">Elastic Block Store</a></li>
-                <li><a href="#">Elastic File System</a></li>
-              </ul>
-            </li>
-            <li>
-              <a href="#databaseSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Database</a>
-              <ul class="collapse list-unstyled" id="databaseSubmenu">
-                <li><a href="{{ url_for('aws_rds')}}">RDS</a></li>
-                <li><a href="#">DynamoDB</a></li>   
-                <li><a href="#">ElastiCache</a></li>
-              </ul>
-            </li>
-            <li>
-              <a href="#networkingSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Networking & CD</a>
-              <ul class="collapse list-unstyled" id="networkingSubmenu">
-                <li><a href="#">CloudFront</a></li>
-                <li><a href="#">Elastic Load Balancing</a></li>
-                <li><a href="#">VPC</a></li>
-              </ul>
-            </li>
-            <li>
-              <a href="#containersSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Containers</a>
-              <ul class="collapse list-unstyled" id="containersSubmenu">
-                <li><a href="#">Elastic Container Registry</a></li>
-                <li><a href="#">Elastic Container Service</a></li>
-                <li><a href="#">Elastic Kubernetes Service</a></li>
-              </ul>
-            </li>
-          </ul>
+          
+            <ul class="list-unstyled components">
+              <p class="bg-light text-dark" style="font-size: 0.8em;">
+                <img src="https://img.icons8.com/color/480/null/amazon-web-services.png" width="32" height="32"/>
+                Amazon Web Services
+              </p>
+              <li style="border-top: 1px solid #fff;" class="{% block nav_index %}{% endblock %}">
+                <a href="{{url_for('aws_overview')}}">
+                  &nbsp;<svg width="26" height="26" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="4" height="4" rx="1" fill="currentColor"></rect><rect y="6" width="4" height="4" rx="1" fill="currentColor"></rect><rect y="12" width="4" height="4" rx="1" fill="currentColor"></rect><rect x="6" width="4" height="4" rx="1" fill="currentColor"></rect><rect x="6" y="6" width="4" height="4" rx="1" fill="currentColor"></rect><rect x="6" y="12" width="4" height="4" rx="1" fill="currentColor"></rect><rect x="12" width="4" height="4" rx="1" fill="currentColor"></rect><rect x="12" y="6" width="4" height="4" rx="1" fill="currentColor"></rect><rect x="12" y="12" width="4" height="4" rx="1" fill="currentColor"></rect></svg>
+                  Overview
+                </a>
+              </li>
+              <li>
+                <a href="#computeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                  <svg width="32" height="32" viewBox="0 0 55 55" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="globalNav-0391" data-testid="compute-svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M17 38H38V17H17V38ZM16 40H39C39.553 40 40 39.552 40 39V16C40 15.448 39.553 15 39 15H16C15.447 15 15 15.448 15 16V39C15 39.552 15.447 40 16 40ZM9 46H46V9H9V46ZM55 11V9H48V8C48 7.448 47.553 7 47 7H46V0H44V7H39V0H37V7H32V0H30V7H25V0H23V7H18V0H16V7H11V0H9V7H8C7.447 7 7 7.448 7 8V9H0V11H7V16H0V18H7V23H0V25H7V30H0V32H7V37H0V39H7V44H0V46H7V47C7 47.552 7.447 48 8 48H9V55H11V48H16V55H18V48H23V55H25V48H30V55H32V48H37V55H39V48H44V55H46V48H47C47.553 48 48 47.552 48 47V46H55V44H48V39H55V37H48V32H55V30H48V25H55V23H48V18H55V16H48V11H55Z" fill="currentColor"></path></svg>
+                  Compute
+                </a>
+                <ul class="collapse list-unstyled" id="computeSubmenu">
+                  <li class="{% block nav_ec2 %}{% endblock %}">
+                    <a href="{{url_for('aws_ec2')}}">
+                      EC2
+                    </a>
+                  </li>
+                  <li><a href="#">Lambda</a></li>
+                  <li><a href="#">Elastic Beanstalk</a></li>
+                </ul>
+              </li>
+              <li>
+                <a href="#storageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                  <svg width="32" height="32" viewBox="0 0 52 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="globalNav-0391" data-testid="storage-svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M17 38H35L35.001 43H17V38ZM17 45H35C36.103 45 37 44.103 37 43V38C37 36.897 36.103 36 35 36H17C15.897 36 15 36.897 15 38V43C15 44.103 15.897 45 17 45ZM15 23H36V21H15V23ZM15 10H23V8H15V10ZM15 16H24V14H15V16ZM50 52.034C50 53.118 49.118 54 48.034 54H3.966C2.882 54 2 53.118 2 52.034V31H50V52.034ZM11 2H30V12C30 12.552 30.447 13 31 13H41V29H11V2ZM32 3.414L39.586 11H32V3.414ZM51 29H43V12H42.991C42.99 11.74 42.898 11.484 42.707 11.293L31.707 0.293C31.516 0.102 31.26 0.0100002 31 0.0100002V0H10C9.447 0 9 0.448 9 1V29H1C0.447 29 0 29.448 0 30V52.034C0 54.221 1.779 56 3.966 56H48.034C50.221 56 52 54.221 52 52.034V30C52 29.448 51.553 29 51 29Z" fill="currentColor"></path></svg>
+                  Storage
+                </a>
+                <ul class="collapse list-unstyled" id="storageSubmenu">
+                  <li class="{% block nav_s3 %}{% endblock %}"><a href="{{ url_for('aws_s3')}}">S3</a></li>
+                  <li><a href="#">Elastic Block Store</a></li>
+                  <li><a href="#">Elastic File System</a></li>
+                </ul>
+              </li>
+              <li>
+                <a href="#databaseSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                  <svg width="32" height="32" viewBox="0 0 38 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="globalNav-0391" data-testid="database-svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M19 27.982C8.981 27.982 2 24.822 2 21.986V11.667C5.057 14.275 11.357 15.991 19 15.991C26.643 15.991 32.943 14.275 36 11.667V21.986C36 24.822 29.019 27.982 19 27.982ZM19 41.727C8.981 41.727 2 38.567 2 35.732V25.658C5.057 28.267 11.357 29.982 19 29.982C26.643 29.982 32.943 28.267 36 25.658V35.732C36 38.567 29.019 41.727 19 41.727ZM19 54C8.981 54 2 50.84 2 48.004V39.403C5.057 42.012 11.357 43.727 19 43.727C26.643 43.727 32.943 42.012 36 39.403V48.004C36 50.84 29.019 54 19 54ZM19 2C29.019 2 36 5.16 36 7.996C36 10.831 29.019 13.991 19 13.991C8.981 13.991 2 10.831 2 7.996C2 5.16 8.981 2 19 2ZM19 0C8.168 0 0 3.438 0 7.996V48.004C0 52.563 8.168 56 19 56C29.832 56 38 52.563 38 48.004V7.996C38 3.438 29.832 0 19 0Z" fill="currentColor"></path></svg>
+                  Database
+                </a>
+                <ul class="collapse list-unstyled" id="databaseSubmenu">
+                  <li><a href="{{ url_for('aws_rds')}}">RDS</a></li>
+                  <li><a href="#">DynamoDB</a></li>   
+                  <li><a href="#">ElastiCache</a></li>
+                </ul>
+              </li>
+              <li>
+                <a href="#networkingSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                  <svg width="32" height="32" viewBox="0 0 52 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="globalNav-0391" data-testid="networking-svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M2 24.23C2.002 23.915 2.156 16.516 11.162 16.516C11.715 16.516 12.162 16.068 12.162 15.516C12.162 2.214 22.345 2.002 22.775 2C28.081 2 31.126 4.256 32.359 9.102C32.435 9.397 32.64 9.643 32.918 9.768C33.196 9.893 33.517 9.883 33.787 9.744C35.283 8.971 36.616 9.81 37.279 10.377C38.811 11.687 40.021 14.331 39.247 16.651C39.145 16.957 39.196 17.292 39.384 17.552C39.572 17.813 39.874 17.968 40.195 17.968C46.932 17.968 50 21.358 50 24.509C50 29.09 47.355 31.937 43.099 31.937H9.71C5.314 31.937 2 28.622 2 24.23ZM44.313 45.437C44.313 47.366 42.742 48.937 40.813 48.937C38.883 48.937 37.313 47.366 37.313 45.437C37.313 43.507 38.883 41.937 40.813 41.937C42.742 41.937 44.313 43.507 44.313 45.437ZM29.812 50.437C29.812 52.366 28.242 53.937 26.312 53.937C24.383 53.937 22.812 52.366 22.812 50.437C22.812 48.507 24.383 46.937 26.312 46.937C28.242 46.937 29.812 48.507 29.812 50.437ZM11.813 48.937C9.883 48.937 8.312 47.366 8.312 45.437C8.312 43.507 9.883 41.937 11.813 41.937C13.742 41.937 15.313 43.507 15.313 45.437C15.313 47.366 13.742 48.937 11.813 48.937ZM43.099 33.937C48.506 33.937 52 30.236 52 24.509C52 20.611 48.684 16.431 41.434 16.003C41.784 13.209 40.381 10.398 38.58 8.857C37.153 7.636 35.531 7.187 33.989 7.549C32.34 2.538 28.572 0 22.775 0C22.652 0 10.696 0.169 10.18 14.542C0.119 15.095 0 24.132 0 24.227C0 29.762 4.175 33.937 9.71 33.937H22.192L14.517 40.653C13.717 40.199 12.795 39.937 11.813 39.937C8.78 39.937 6.312 42.404 6.312 45.437C6.312 48.469 8.78 50.937 11.813 50.937C14.845 50.937 17.313 48.469 17.313 45.437C17.313 44.116 16.844 42.903 16.065 41.954L25.312 33.937V45.032C22.757 45.504 20.812 47.746 20.812 50.437C20.812 53.469 23.28 55.937 26.312 55.937C29.345 55.937 31.812 53.469 31.812 50.437C31.812 47.746 29.868 45.504 27.312 45.032V33.937L36.56 41.954C35.781 42.903 35.313 44.116 35.313 45.437C35.313 48.469 37.78 50.937 40.813 50.937C43.845 50.937 46.313 48.469 46.313 45.437C46.313 42.404 43.845 39.937 40.813 39.937C39.83 39.937 38.908 40.199 38.108 40.653L30.433 33.937H43.099Z" fill="currentColor"></path></svg>
+                  Networking
+                </a>
+                <ul class="collapse list-unstyled" id="networkingSubmenu">
+                  <li><a href="#">CloudFront</a></li>
+                  <li><a href="#">Elastic Load Balancing</a></li>
+                  <li><a href="#">VPC</a></li>
+                </ul>
+              </li>
+              <li>
+                <a href="#containersSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                  <svg width="32" height="32" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="globalNav-0391" data-testid="containers-svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M4 49H52V30H4V49ZM2 54H54V51H2V54ZM54 30V49H55C55.553 49 56 49.448 56 50V55C56 55.552 55.553 56 55 56H1C0.447 56 0 55.552 0 55V50C0 49.448 0.447 49 1 49H2V30H1C0.447 30 0 29.552 0 29V24C0 23.478 0.404 23.062 0.915 23.017L21.47 10.152L22.53 11.848L4.712 23H37V25H2V28H54V25H40V23H51.288L33.47 11.848L34.53 10.152L55.085 23.017C55.596 23.062 56 23.478 56 24V29C56 29.552 55.553 30 55 30H54ZM28 12C30.206 12 32 10.206 32 8H30C30 9.103 29.103 10 28 10C26.897 10 26 9.103 26 8C26 6.897 26.897 6 28 6C28.553 6 29 5.552 29 5V0H27V4.126C25.276 4.572 24 6.14 24 8C24 10.206 25.794 12 28 12ZM9 46H11V33H9V46ZM15 46H17V33H15V46ZM21 46H23V33.143H21V46ZM45 46H47V33.143H45V46ZM39 46H41V33.143H39V46ZM33 46H35V33.143H33V46ZM27 46H29V33H27V46Z" fill="currentColor"></path></svg>
+                  Containers
+                </a>
+                <ul class="collapse list-unstyled" id="containersSubmenu">
+                  <li><a href="#">Elastic Container Registry</a></li>
+                  <li><a href="#">Elastic Container Service</a></li>
+                  <li><a href="#">Elastic Kubernetes Service</a></li>
+                </ul>
+              </li>
+            </ul>
+         
           <!-- <ul class="list-unstyled CTAs">
           <li>
               <a
@@ -195,6 +215,13 @@
      src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"
      integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm"
      crossorigin="anonymous">
+    </script>
+
+    <!-- Datalables Chartjs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" 
+    integrity="sha512-JPcRR8yFa8mmCsfrw4TNte1ZvF1e3+1SdGMslZvmrzDYxS69J7J49vkFL8u6u8PlPJK+H3voElBtUCzaXj+6ig==" 
+    crossorigin="anonymous" 
+    referrerpolicy="no-referrer">
     </script>
 
     <script type="text/javascript">

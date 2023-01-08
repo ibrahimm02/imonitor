@@ -1,8 +1,131 @@
-{% extends "aws/aws_base.html" %} {% block nav_s3 %}active{% endblock %} {% block title
-    %}iMonitor - RDS{% endblock %} {% block navTitle %}RDS{% endblock %} {% block
-    content %}
+{% extends "aws/aws_base.html" %} 
+{% block nav_s3 %}active{% endblock %} 
+{% block title %}iMonitor - RDS{% endblock %} 
+{% block navTitle %}RDS{% endblock %} 
 
+{% block content %}
+
+{% with messages = get_flashed_messages() %} 
+{% if messages %}
+<div class="alert alert-success" role="alert">
+  {% for message in messages %} {{ message }}<br />
+  {% endfor %}
+</div>
+{% endif %} 
+{% endwith %}
+
+<!-- {{rds_states}} -->
     <!-- {{ response }} -->
+    <div class="row mb-3">
+      <div class="col-4">
+        <div class="card">
+          <div class="card-body">
+            <table class="table table-sm mb-0">
+              <tbody>
+                <tr>
+                  <td class="border-0">Available</td>
+                  <td class="border-0">{{rds_states[0]['value']}}</td>
+                </tr>
+                <tr>
+                  <td class="border-0">Starting</td>
+                  <td class="border-0">{{rds_states[1]['value']}}</td>
+                </tr>
+                <tr>
+                  <td class="border-0">Stopping</td>
+                  <td class="border-0">{{rds_states[2]['value']}}</td>
+                </tr>
+                <tr>  
+                  <td class="border-0">Stopped</td>
+                  <td class="border-0">{{rds_states[3]['value']}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="mt-0 mb-2">
+
+    <nav class="navbar px-0" style="background: transparent !important">
+      <div class="container-fluid px-0">
+        <a class="navbar-brand">Monitoring-all DBs </a>
+        <a class="btn btn-light btn-outline-dark" href="{{ url_for('aws_rds')}}" role="button">
+            <i class="bx bx-refresh bx-fw"></i> Refresh
+        </a>
+      </div>
+    </nav>
+
+    <div class="cointainer">
+      <div class="row row-cols-1 row-cols-md-3">
+        <div class="col-sm-3">
+          <div class="card border-0 shadow-sm mb-4 px-1">
+            <img src="data:image/png;base64,{{rds_CPUUtilization}}"
+            alt="rds_CPUUtilization Graph"/>
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="card border-0 shadow-sm mb-4 px-1">
+            <img src="data:image/png;base64,{{rds_FreeStorageSpace}}" 
+            alt="rds_FreeStorageSpace Graph" />
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="card border-0 shadow-sm mb-4 px-1">
+            <img src="data:image/png;base64,{{rds_FreeableMemory}}" 
+            alt="rds_FreeableMemory Graph" />
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="card border-0 shadow-sm mb-4 px-1">
+            <img src="data:image/png;base64,{{rds_ReadIOPS}}" 
+            alt="rds_ReadIOPS Graph" />
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="card border-0 shadow-sm mb-4 px-1">
+            <img
+              src="data:image/png;base64,{{rds_WriteIOPS}}"
+              alt="rds_WriteIOPS Graph"
+            />
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="card border-0 shadow-sm mb-3 px-1">
+            <img
+              src="data:image/png;base64,{{rds_ReadThroughput}}"
+              alt="rds_ReadThroughput Graph"
+            />
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="card border-0 shadow-sm mb-4 px-1">
+            <img
+              src="data:image/png;base64,{{rds_WriteThroughput}}"
+              alt="rds_WriteThroughput Graph"
+            />
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="card border-0 shadow-sm mb-3 px-1">
+            <img
+              src="data:image/png;base64,{{rds_ReadLatency}}"
+              alt="rds_ReadLatency Graph"
+            />
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="card border-0 shadow-sm mb-3 px-1">
+            <img
+              src="data:image/png;base64,{{rds_WriteLatency}}"
+              alt="rds_WriteLatency Graph"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="mt-0 mb-3">
 
     <div class="card text-center border-0 shadow-sm mb-2">
         <div class="card-body p-0">
@@ -20,11 +143,49 @@
               {%for bucket in response['DBInstances']%}
               <tr>               
                 <td><a href="#" style="text-decoration:underline; color:#0dcaf0">{{bucket.DBInstanceIdentifier}}</a></td>
-                <td>{{bucket.Engine}}</a></td>
-                <td>{{bucket.DBInstanceStatus}}</a></td>
-                <td>{{bucket.DBInstanceClass}}</a></td>
+                <td>{{bucket.Engine}}</td>
+                <td>
+                  <span>
+                    <div class="btn-group dropend">
+                      <button
+                        type="button"
+                        class="btn btn-outline-info dropdown-toggle btn-sm"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                      >
+                      {{bucket.DBInstanceStatus}}
+                      </button>
+                      <ul class="dropdown-menu">
+                        <li>
+                          <form action="{{ url_for('rds_instance_start')}}" method="POST">
+                            <input
+                              type="hidden"
+                              name="instance"
+                              value="{{bucket.DBInstanceIdentifier}}"
+                            />
+                            <button type="submit" class="dropdown-item">Start</button>
+                          </form>
+                        </li>
+                        <li>
+                          <form action="{{ url_for('rds_instance_stop')}}" method="POST">
+                            <input
+                              type="hidden"
+                              name="instance"
+                              value="{{bucket.DBInstanceIdentifier}}"
+                            />
+                            <button type="submit" class="dropdown-item">Stop</button>
+                          </form>
+                        </li>
+                      </ul>
+                    </div>
+                  </span>
+                </td>
+
+
+
+                <td>{{bucket.DBInstanceClass}}</td>
                 <td>{{bucket.AllocatedStorage}} GB</td>
-                <td>{{bucket.AvailabilityZone}}</a></td>
+                <td>{{bucket.AvailabilityZone}}</td>
               </tr>
               {%endfor%}
             </table>
@@ -32,80 +193,10 @@
         </div>
     </div>
 
-      <hr class="mt-2 mb-2">
       
-      <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-2">
-        <a class="btn btn-light btn-outline-dark" href="{{ url_for('aws_rds')}}" role="button"><i class='bx bx-refresh bx-fw'></i> Refresh</a>
-      </div> 
+      
+
     
-      <div class="cointainer">
-        <div class="row row-cols-1 row-cols-md-3">
-          <div class="col-sm-3">
-            <div class="card border-0 shadow-sm mb-4 px-1">
-              <img src="data:image/png;base64,{{rds_CPUUtilization}}"
-              alt="rds_CPUUtilization Graph"/>
-            </div>
-          </div>
-          <div class="col-sm-3">
-            <div class="card border-0 shadow-sm mb-4 px-1">
-              <img src="data:image/png;base64,{{rds_FreeStorageSpace}}" 
-              alt="rds_FreeStorageSpace Graph" />
-            </div>
-          </div>
-          <div class="col-sm-3">
-            <div class="card border-0 shadow-sm mb-4 px-1">
-              <img src="data:image/png;base64,{{rds_FreeableMemory}}" 
-              alt="rds_FreeableMemory Graph" />
-            </div>
-          </div>
-          <div class="col-sm-3">
-            <div class="card border-0 shadow-sm mb-4 px-1">
-              <img src="data:image/png;base64,{{rds_ReadIOPS}}" 
-              alt="rds_ReadIOPS Graph" />
-            </div>
-          </div>
-          <div class="col-sm-3">
-            <div class="card border-0 shadow-sm mb-4 px-1">
-              <img
-                src="data:image/png;base64,{{rds_WriteIOPS}}"
-                alt="rds_WriteIOPS Graph"
-              />
-            </div>
-          </div>
-          <div class="col-sm-3">
-            <div class="card border-0 shadow-sm mb-4 px-1">
-              <img
-                src="data:image/png;base64,{{rds_ReadThroughput}}"
-                alt="rds_ReadThroughput Graph"
-              />
-            </div>
-          </div>
-          <div class="col-sm-3">
-            <div class="card border-0 shadow-sm mb-4 px-1">
-              <img
-                src="data:image/png;base64,{{rds_WriteThroughput}}"
-                alt="rds_WriteThroughput Graph"
-              />
-            </div>
-          </div>
-          <div class="col-sm-3">
-            <div class="card border-0 shadow-sm mb-4 px-1">
-              <img
-                src="data:image/png;base64,{{rds_ReadLatency}}"
-                alt="rds_ReadLatency Graph"
-              />
-            </div>
-          </div>
-          <div class="col-sm-3">
-            <div class="card border-0 shadow-sm mb-4 px-1">
-              <img
-                src="data:image/png;base64,{{rds_WriteLatency}}"
-                alt="rds_WriteLatency Graph"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
 
 
 

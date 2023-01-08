@@ -57,3 +57,17 @@ a:focus {
   overflow: auto;
   
 }
+
+span {
+  color: #595959;
+}
+
+#instancePage span[contenteditable]:empty:focus::before,
+span[contenteditable]:empty::before{
+content: '-';
+pointer-events: none;
+}
+
+th {
+  font-weight: 500 !important;
+}

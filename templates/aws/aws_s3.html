@@ -1,6 +1,6 @@
-{% extends "aws/aws_base.html" %} {% block nav_s3 %}active{% endblock %} {% block title
-%}iMonitor - S3{% endblock %} {% block navTitle %}S3{% endblock %} {% block
-content %}
+{% extends "aws/aws_base.html" %} {% block nav_s3 %}active{% endblock %} {%
+block title %}iMonitor - S3{% endblock %} {% block navTitle %}S3{% endblock %}
+{% block content %}
 
 <!-- <h1>Simple Storage Service (S3)</h1> -->
 <!-- <ul>
@@ -12,7 +12,7 @@ content %}
 </ul> -->
 <!-- {{ response }} -->
 <div class="row">
-  <div class="col-sm-2">
+  <div class="col-sm">
     <div class="card text-center border-0 shadow-sm mb-4 h-80">
       <div class="card-body">
         <h5 class="card-title">Total Buckets</h5>
@@ -20,24 +20,72 @@ content %}
       </div>
     </div>
   </div>
+  <div class="col-sm">
+    <div class="card text-center border-0 shadow-sm mb-4 h-80">
+      <div class="card-body">
+        <h5 class="card-title">No of Objects</h5>
+        <h1 class="display-6">
+          {% for item in size_count:%} {{item['total_object']}} {% endfor %}
+        </h1>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm">
+    <div class="card text-center border-0 shadow-sm mb-4 h-80">
+      <div class="card-body">
+        <h5 class="card-title">Storage Size</h5>
+        <h1 class="display-6">
+          {% for item in size_count:%} {{item['total_size']}} {% endfor %}
+        </h1>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="card text-center border-0 shadow-sm mb-4">
   <div class="card-body p-0">
-    <div class="table-responsive">
-      <table class="table table-nowrap mb-0 rounded" style="vertical-align: middle">
-        <thead class="table-light">
+    <div class="table-responsive table-wrapper">
+      <table
+        class="table table-nowrap mb-0 rounded table-hover"
+        style="vertical-align: middle">
+        <thead class="table-dark">
           <th class="border-0 rounded-start">Bucket Name</th>
-          <th class="border-0 rounded-end">Creation Date</th>  
+          <th class="border-0 rounded-end">Creation Date</th>
         </thead>
 
         {%for bucket in response['Buckets']%}
-        <tr>               
-          <td><a href="#" style="text-decoration:underline; color:#0dcaf0">{{bucket.Name}}</a></td>
+        <tr>
+          <td>
+            <a href="#" style="text-decoration: underline; color: #0dcaf0"
+              >{{bucket.Name}}</a
+            >
+          </td>
           <td>{{bucket.CreationDate.strftime("%d-%m-%Y, %H:%M:%S")}}</td>
         </tr>
         {%endfor%}
       </table>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="row">
+      <div class="col-4">
+        <div class="card border-1 shadow-sm px-1" >
+            <img src="data:image/png;base64,{{s3_graph}}" alt="S3 Graph" />
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="card border-1 shadow-sm  px-1">
+            <img src="data:image/png;base64,{{s3_graph}}" alt="S3 Graph" />
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="card border-1 shadow-sm  px-1">
+            <img src="data:image/png;base64,{{s3_graph}}" alt="S3 Graph" />
+        </div>
+      </div>
     </div>
   </div>
 </div>
