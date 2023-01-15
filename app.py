@@ -8,7 +8,7 @@ from operator import itemgetter
 import json
 import base64
 import io
-import sys
+from collections import defaultdict
 
 app = Flask(__name__)
 Bootstrap(app)
@@ -56,6 +56,11 @@ def aws_overview():
     size_count = s3_objects_size()
 
     rds_states = rds_state_stats()
+    rds, rds_totalStorage, rds_insCnt = get_rds_instance_details()
+    rds_CPUUtilization = get_rds_graph(type='CPUUtilization')  
+    rds_FreeableMemory = get_rds_graph(type='freeableMemory') 
+
+    ebs_volumes, ebs_vol_count, ebs_unattached_count = aws_ebs_volumes()
 
     if not(response):
         return render_template("message.html",message="No Instances running. Create an instance first")
@@ -67,7 +72,15 @@ def aws_overview():
     ec2_CPUUtilization=ec2_CPUUtilization,
     ec2_CPUCreditUsage=ec2_CPUCreditUsage,
     size_count=size_count,
-    rds_states=rds_states)
+    rds_states=rds_states,
+    rds_insCnt=rds_insCnt,
+    rds_totalStorage=rds_totalStorage,
+    rds_CPUUtilization=rds_CPUUtilization,
+    rds_FreeableMemory=rds_FreeableMemory,
+    ebs_volumes=ebs_volumes,
+    ebs_vol_count=ebs_vol_count,
+    ebs_unattached_count=ebs_unattached_count,
+    )
 
 #----GCP OVERVIEW---------------------------------------------------------------------------------------------------#
 
@@ -133,7 +146,7 @@ def aws_ec2():
     # return reservations
 
     instances = ec2_resource.instances.all()
-
+    
     active_instances =  get_active_instance_count()
 
     total_instances = len([instance for instance in instances]); 
@@ -193,6 +206,43 @@ def get_running_instances():
             public_ip = instance["PublicIpAddress"]
             private_ip = instance["PrivateIpAddress"]
             print(f"{instance_id}, {instance_type}, {public_ip}, {private_ip}")
+
+#---------------------------------------------------------------
+def test1():
+
+    # instance = ec2_resource.instances.filter(Filters=[{
+    #     'Name': 'instance-state-name',
+    #     'Values': ['running']}])
+
+    # ec2info = defaultdict()
+    # for tag in instance.tags:
+    #     if 'Name'in tag['Key']:
+    #         print(tag['Key'])
+    #         name = tag['Value']
+    # # Add instance info to a dictionary    \
+    # print(instance.get('Instances'))
+    # ec2info[instance.id] = {
+    #     'Name': name,
+    #     'Instance ID': instance.id,
+    #     'Type': instance.instance_type,
+    #     'State': instance.state['Name'],
+    #     'Private IP': instance.private_ip_address,
+    #     'Public IP': instance.public_ip_address,
+    #     'Launch Time': instance.launch_time
+    # }
+    # attributes = ['Instance ID', 'Type', 'State', 'Private IP', 'Public IP', 'Launch Time']
+    # for instance_id, instance in ec2info.items():
+    #     for key in attributes:
+    #         print("{0}: {1}".format(key, instance[key]))
+    #     print("------")
+
+    testList = list(ec2_resource.instances.all())
+
+    if len(testList) > 0:
+        for item in testList:
+            print(item.tags)
+
+# test1()
 
 # --------------------------------------------------------------
 
@@ -651,28 +701,8 @@ def ec2_metrics_amm():
             
             metrics_holder.append(metrics)
             # response["header"][""]
-            return metrics_holder
-
-#------------------------------------------------------------------------------
-# [{'AmiLaunchIndex': 0, 'ImageId': 'ami-064d05b4fe8515623', 'InstanceId': 'i-043567371c05991f9', 'InstanceType': 't1.micro', 
-# 'KeyName': 'ec2-key-pair', 'LaunchTime': datetime.datetime(2022, 12, 22, 16, 25, 14, tzinfo=tzutc()), 
-# 'Monitoring': {'State': 'disabled'}, 'Placement': {'AvailabilityZone': 'us-east-1b', 'GroupName': '', 'Tenancy': 'default'}, 
-# 'Platform': 'windows', 'PrivateDnsName': 'ip-172-31-21-12.ec2.internal', 'PrivateIpAddress': '172.31.21.12', 'ProductCodes': [], 'PublicDnsName': '', 
-# 'State': {'Code': 80, 'Name': 'stopped'}, 'StateTransitionReason': 'User initiated (2022-12-22 23:22:21 GMT)', 'SubnetId': 'subnet-0496468f4b393d676', 
-# 'VpcId': 'vpc-0e8dc4407141eb883', 'Architecture': 'x86_64', 
-# 'BlockDeviceMappings': [{'DeviceName': '/dev/sda1', 'Ebs': {'AttachTime': datetime.datetime(2022, 12, 4, 17, 49, 27, tzinfo=tzutc()), 'DeleteOnTermination': True, 'Status': 'attached', 'VolumeId': 'vol-0102a32c11923a8c1'}}], 
-# 'ClientToken': '6d251cb0-46ab-4e32-8b29-fa85f584488f', 'EbsOptimized': False, 'EnaSupport': True, 'Hypervisor': 'xen', 
-# 'NetworkInterfaces': [{'Attachment': {'AttachTime': datetime.datetime(2022, 12, 4, 17, 49, 26, tzinfo=tzutc()), 'AttachmentId': 'eni-attach-0b973f025345198c9', 'DeleteOnTermination': True, 'DeviceIndex': 0, 'Status': 'attached', 'NetworkCardIndex': 0}, 
-# 'Description': '', 'Groups': [{'GroupName': 'launch-wizard-2', 'GroupId': 'sg-08d4f8ebbd3bf8b10'}], 'Ipv6Addresses': [], 'MacAddress': '0a:fd:f4:be:f4:21', 'NetworkInterfaceId': 'eni-05fd1aeb96fc3be7e', 'OwnerId': '653628891621', 'PrivateDnsName': 'ip-172-31-21-12.ec2.internal', 'PrivateIpAddress': '172.31.21.12', 
-# 'PrivateIpAddresses': [{'Primary': True, 'PrivateDnsName': 'ip-172-31-21-12.ec2.internal', 'PrivateIpAddress': '172.31.21.12'}], 'SourceDestCheck': True, 'Status': 'in-use', 'SubnetId': 'subnet-0496468f4b393d676', 'VpcId': 'vpc-0e8dc4407141eb883', 'InterfaceType': 'interface'}], 
-# 'RootDeviceName': '/dev/sda1', 'RootDeviceType': 'ebs', 'SecurityGroups': [{'GroupName': 'launch-wizard-2', 'GroupId': 'sg-08d4f8ebbd3bf8b10'}], 'SourceDestCheck': True, 'StateReason': {'Code': 'Client.UserInitiatedShutdown', 'Message': 'Client.UserInitiatedShutdown: User initiated shutdown'}, 
-# 'Tags': [{'Key': 'Name', 'Value': 'test-instance2'}], 'VirtualizationType': 'hvm', 'CpuOptions': {'CoreCount': 1, 'ThreadsPerCore': 1}, 'CapacityReservationSpecification': {'CapacityReservationPreference': 'open'}, 'HibernationOptions': {'Configured': False}, 
-# 'MetadataOptions': {'State': 'applied', 'HttpTokens': 'optional', 'HttpPutResponseHopLimit': 1, 'HttpEndpoint': 'enabled', 'HttpProtocolIpv6': 'disabled', 'InstanceMetadataTags': 'disabled'}, 'EnclaveOptions': {'Enabled': False}, 
-# 'PlatformDetails': 'Windows', 'UsageOperation': 'RunInstances:0002', 'UsageOperationUpdateTime': datetime.datetime(2022, 12, 4, 17, 49, 26, tzinfo=tzutc()), 'PrivateDnsNameOptions': {'HostnameType': 'ip-name', 'EnableResourceNameDnsARecord': True, 'EnableResourceNameDnsAAAARecord': False}, 
-# 'MaintenanceOptions': {'AutoRecovery': 'default'}, 'mainState': {'selected_datapoints': [{'Timestamp': datetime.datetime(2022, 12, 22, 18, 22, tzinfo=tzutc()), 'Average': 0.7333448677986331, 'Minimum': 0.645161290322544, 'Maximum': 1.03448275862073, 'Unit': 'Percent', 'sort_by': 1}, 
-# {'Timestamp': datetime.datetime(2022, 12, 21, 18, 22, tzinfo=tzutc()), 'Average': 3.5355675644290567, 'Minimum': 0.645161290322544, 'Maximum': 51.8032786885246, 'Unit': 'Percent', 'sort_by': 0}], 
-# 'last_avg': 0.7333448677986331, 'last_min': 0.645161290322544, 'last_max': 1.03448275862073, 'avg_load': 0.007, 'last_time': '2022-12-22 18:22:00+00:00'}}]
-
+    return metrics_holder
+# ec2_metrics_amm()
 
 #-----------------------------------------------------------------------------
 
@@ -797,6 +827,38 @@ def ec2_instance_metrics(type, ins_id):
 
     return rds_graph
     
+#---- AWS/EBS -----------------------------------------------------------------------------------------------#
+def aws_ebs_volumes():
+
+    ebs_vol = ec2_resource.volumes.all()
+
+    vol_count = 0
+
+    # for volume in ebs_vol:
+    #     print('Evaluating volume {0}'.format(volume.id))
+    #     print('The number of attachments for this volume is {0}'.format(len(volume.attachments)))
+
+    ebs_status = ec2_client.describe_volumes(
+    Filters=[
+        {
+            'Name': 'status',
+            'Values': [
+                'available',
+            ]
+        },
+    ],
+    
+    )
+    unattached_count = (len(ebs_status))
+
+    # print(ebs_status)
+
+    for volume in ebs_vol:
+        print(volume)
+        vol_count += 1
+    # print(f'Count:',  vol_count)
+
+    return volume, vol_count, unattached_count
 
 
 #---- AWS/S3 ------------------------------------------------------------------------------------------------#
@@ -823,8 +885,6 @@ def aws_s3():
 #-------------------------------------------------------
 
 def aws_get_s3_bucket_size():
-
-    
 
     cw = boto3.client('cloudwatch')
     s3client = boto3.client('s3')
@@ -874,7 +934,7 @@ def s3_objects_size():
     for bucket in allbuckets['Buckets']:
         bucket = s3_resource.Bucket(bucket["Name"])
         for obj in bucket.objects.all():
-            totalObject += 1
+            totalObject 
             size += obj.size
 
     # print('total size:')
@@ -927,7 +987,6 @@ def aws_get_s3_metrics():
     return s3_graph
 
 
-
 #---- AWS/RDS ------------------------------------------------------------------------------------------------#
 
 @app.route('/aws/rds')
@@ -946,9 +1005,89 @@ def aws_rds():
 
     rds_states = rds_state_stats()
 
+    response, rds_totalStorage, rds_insCnt = get_rds_instance_details()
+
+    return render_template('aws/aws_rds.html', 
+        response=response,
+        rds_CPUUtilization=rds_CPUUtilization,
+        # rds_DatabaseConnections=rds_DatabaseConnections,
+        rds_FreeStorageSpace=rds_FreeStorageSpace,
+        rds_FreeableMemory=rds_FreeableMemory,
+        rds_ReadIOPS=rds_ReadIOPS,
+        rds_WriteIOPS=rds_WriteIOPS,
+        rds_WriteThroughput=rds_WriteThroughput,
+        rds_ReadThroughput=rds_ReadThroughput,
+        rds_WriteLatency=rds_WriteLatency,
+        rds_ReadLatency=rds_ReadLatency,
+        rds_states=rds_states,
+        rds_insCnt=rds_insCnt,
+        rds_totalStorage=rds_totalStorage
+        )
+#-------------------------------------------------------
+
+def get_rds_graph(type):
+    
+    data=[]
     response_data=[]
+    res = rds_client.describe_db_instances()
+
+    for i in res['DBInstances']:   
+            response_data.append({
+            "DBInstanceIdentifier": i['DBInstanceIdentifier']
+        })
+
+    # print(response_data)
+  
+    instance_ids=[i["DBInstanceIdentifier"] for i in response_data]
+    for ins in instance_ids:
+
+        if type == 'CPUUtilization':
+            data.append(["AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", str(ins)])
+            filter_data={"metrics":data}
+            print(filter_data)
+        elif type == 'freeStorageSpace':
+            data.append(["AWS/RDS", "FreeStorageSpace", "DBInstanceIdentifier", str(ins)])
+            filter_data={"metrics":data}
+        elif type == 'freeableMemory':
+            data.append(["AWS/RDS", "FreeableMemory", "DBInstanceIdentifier", str(ins)])
+            filter_data={"metrics":data}
+        elif type == 'readIOPS':
+            data.append(["AWS/RDS", "ReadIOPS", "DBInstanceIdentifier", str(ins)])
+            filter_data={"metrics":data}
+        elif type == 'writeIOPS':
+            data.append(["AWS/RDS", "WriteIOPS", "DBInstanceIdentifier", str(ins)])
+            filter_data={"metrics":data}
+        elif type == 'readThroughput':
+            data.append(["AWS/RDS", "ReadThroughput", "DBInstanceIdentifier", str(ins)])
+            filter_data={"metrics":data}
+        elif type == 'writeThroughput':
+            data.append(["AWS/RDS", "WriteThroughput", "DBInstanceIdentifier", str(ins)])
+            filter_data={"metrics":data}
+        elif type == 'readLatency':
+            data.append(["AWS/RDS", "ReadLatency", "DBInstanceIdentifier", str(ins)])
+            filter_data={"metrics":data}
+        elif type == 'writeLatency':
+            data.append(["AWS/RDS", "WriteLatency", "DBInstanceIdentifier", str(ins)])
+            filter_data={"metrics":data}
+
+
+        img = cw_client.get_metric_widget_image(MetricWidget=json.dumps(filter_data))
+        bytes_data=io.BytesIO(img["MetricWidgetImage"])
+        fr=base64.b64encode(bytes_data.getvalue())
+        
+        rds_graph = fr.decode('utf-8')
+
+        return rds_graph
+
+#-------------------------------------------------------
+def get_rds_instance_details():
+
+    response_data=[]
+    total_storage = 0
+    ins_cnt = 0
 
     response = rds_client.describe_db_instances()
+
     for i in response['DBInstances']:   
         try:
             response_data.append({
@@ -960,26 +1099,19 @@ def aws_rds():
             "DBInstanceArn":i["DBInstanceArn"],
             "DBInstanceStatus":i["DBInstanceStatus"]
         })
+            total_storage += (i["AllocatedStorage"])
+            ins_cnt += 1
+
         except Exception as ex:
             continue
             pass
+    
+    roundSize = ("%.3f TB" % (total_storage*1.0/1024))
+    print(roundSize)
+    print(f'instance count: ', ins_cnt)
 
-    return render_template('aws/aws_rds.html', 
-        response=response, 
-     
 
-        rds_CPUUtilization=rds_CPUUtilization,
-        # rds_DatabaseConnections=rds_DatabaseConnections,
-        rds_FreeStorageSpace=rds_FreeStorageSpace,
-        rds_FreeableMemory=rds_FreeableMemory,
-        rds_ReadIOPS=rds_ReadIOPS,
-        rds_WriteIOPS=rds_WriteIOPS,
-        rds_WriteThroughput=rds_WriteThroughput,
-        rds_ReadThroughput=rds_ReadThroughput,
-        rds_WriteLatency=rds_WriteLatency,
-        rds_ReadLatency=rds_ReadLatency,
-        rds_states=rds_states         
-        )
+    return response, roundSize, ins_cnt
 #-------------------------------------------------------
 def get_rds_instancelevel_metrics(type):
     
@@ -1017,56 +1149,7 @@ def get_rds_instancelevel_metrics(type):
 
     return rds_graph
 #------------------------------------------------------------------
-def get_rds_graph(type):
-  
-    data=[]
-    response_data=[]
-    response = rds_client.describe_db_instances()
-    for i in response['DBInstances']:   
-            response_data.append({
-            "DBInstanceIdentifier": i['DBInstanceIdentifier']
-        })
 
-    # print(response_data)
-
-    instance_ids=[i["DBInstanceIdentifier"] for i in response_data]
-    for ins in instance_ids:
-
-        if type == 'CPUUtilization':
-            data.append(["AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", str(ins)])
-            filter_data={"metrics":data}
-        elif type == 'freeStorageSpace':
-            data.append(["AWS/RDS", "FreeStorageSpace", "DBInstanceIdentifier", str(ins)])
-            filter_data={"metrics":data}
-        elif type == 'freeableMemory':
-            data.append(["AWS/RDS", "FreeableMemory", "DBInstanceIdentifier", str(ins)])
-            filter_data={"metrics":data}
-        elif type == 'readIOPS':
-            data.append(["AWS/RDS", "ReadIOPS", "DBInstanceIdentifier", str(ins)])
-            filter_data={"metrics":data}
-        elif type == 'writeIOPS':
-            data.append(["AWS/RDS", "WriteIOPS", "DBInstanceIdentifier", str(ins)])
-            filter_data={"metrics":data}
-        elif type == 'readThroughput':
-            data.append(["AWS/RDS", "ReadThroughput", "DBInstanceIdentifier", str(ins)])
-            filter_data={"metrics":data}
-        elif type == 'writeThroughput':
-            data.append(["AWS/RDS", "WriteThroughput", "DBInstanceIdentifier", str(ins)])
-            filter_data={"metrics":data}
-        elif type == 'readLatency':
-            data.append(["AWS/RDS", "ReadLatency", "DBInstanceIdentifier", str(ins)])
-            filter_data={"metrics":data}
-        elif type == 'writeLatency':
-            data.append(["AWS/RDS", "WriteLatency", "DBInstanceIdentifier", str(ins)])
-            filter_data={"metrics":data}
-
-    response = cw_client.get_metric_widget_image(MetricWidget=json.dumps(filter_data))
-    bytes_data=io.BytesIO(response["MetricWidgetImage"])
-    fr=base64.b64encode(bytes_data.getvalue())
-    
-    rds_graph = fr.decode('utf-8')
-
-    return rds_graph
 
 #------------------------------------------------------------------
 def get_rds_metrics():
@@ -1142,11 +1225,16 @@ def rds_instance_stop():
 #---------------------------------------------------------------
 
 def rds_state_stats():
+
     stats = {
         "available": 0,
         "starting": 0,
         "stopping": 0,
-        "stopped": 0
+        "stopped": 0,
+        "backing-up": 0,
+        "creating": 0,
+        "deleting": 0,
+        "configuring-enhanced-monitoring": 0
         }
     
     paginator = rds_client.get_paginator('describe_db_instances')
@@ -1158,13 +1246,44 @@ def rds_state_stats():
                     # print('##############################################')
                     state = ins['DBInstanceStatus']
                     stats[state] += 1
-    graph_data=[]
+    state_data=[]
     for i in stats.keys():
-        graph_data.append({"state":i,"value":int(stats[i])})
+        state_data.append({"state":i,"value":int(stats[i])})
 
-    return(graph_data)   
+    return state_data
 
 #---------------------------------------------------------------
+@app.route('/aws/rds-all')
+def rds_all():
+
+    data = []
+    size = 0
+    totalObject = 0
+
+    response = rds_client.describe_db_instances()
+
+    for i in response['DBInstances']:   
+        try:
+            # print(i["AllocatedStorage"])
+            size += (i["AllocatedStorage"])
+        except Exception as ex:
+            continue
+            pass
+        
+        print(size)
+        
+        # bucket = s3_resource.Bucket(bucket["Name"])
+        # for obj in bucket.objects.all():
+        #     totalObject 
+        #     size += obj.size
+
+    # print('total size:')
+
+    # roundSize = ("%.3f GB" % (size*1.0/1024/1024/1024))
+    
+#----------------------------------------------------------------
+
+
 
 
 #---- AWS/LAMBDA ------------------------------------------------------------------------------------------------#
@@ -1215,6 +1334,26 @@ def efs_instances():
         # FileSystemId='string'
     )
     return response
+
+#-----COSTS --------#
+def get_costs():
+    client = boto3.client('ce')
+
+    response = client.get_cost_and_usage(
+        TimePeriod={
+            'Start': '2023-01-08',
+            'End': '2023-01-09'
+        },
+        Metrics=['AmortizedCost'],
+        Granularity='DAILY',
+  
+    )
+    from pprint import pprint
+    pprint(response)
+
+# get_costs()
+#-------------------------------------------------------------#
+
 
 #---- ERROR HANDLERS ------------------------------------------------------------------------------------------------#
 

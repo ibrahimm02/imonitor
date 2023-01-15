@@ -61,41 +61,44 @@
             <li>
               <a href="#computeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Compute</a>
               <ul class="collapse list-unstyled" id="computeSubmenu">
-                <li class="{% block nav_ec2 %}{% endblock %}"><a href="{{url_for('aws_ec2')}}">EC2</a></li>
-                <li><a href="#">Lambda</a></li>
-                <li><a href="#">Elastic Beanstalk</a></li>
+                <li class="{% block nav_ec2 %}{% endblock %}"><a href="{{url_for('aws_ec2')}}">Compute Engine</a></li>
+                <li><a href="#">App Engine</a></li>
+                <li><a href="#">Batch</a></li>
               </ul>
             </li>
             <li>
               <a href="#storageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Storage</a>
               <ul class="collapse list-unstyled" id="storageSubmenu">
-                <li class="{% block nav_s3 %}{% endblock %}"><a href="{{ url_for('aws_s3')}}">S3</a></li>
-                <li><a href="#">Elastic Block Store</a></li>
-                <li><a href="#">Elastic File System</a></li>
+                <li class="{% block nav_s3 %}{% endblock %}"><a href="{{ url_for('aws_s3')}}">Cloud Storage</a></li>
+                <li><a href="#">Persistent Disk</a></li>
+                <li><a href="#">Cloud Filestore</a></li>
               </ul>
             </li>
             <li>
               <a href="#databaseSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Database</a>
               <ul class="collapse list-unstyled" id="databaseSubmenu">
-                <li><a href="{{ url_for('aws_rds')}}">RDS</a></li>
-                <li><a href="#">DynamoDB</a></li>   
-                <li><a href="#">ElastiCache</a></li>
+                <li><a href="{{ url_for('aws_rds')}}">AlloyDB</a></li>
+                <li><a href="#">Datastore</a></li>   
+                <li><a href="#">Firestore</a></li>
+                <li><a href="#">Cloud SQL</a></li>
               </ul>
             </li>
             <li>
               <a href="#networkingSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Networking & CD</a>
               <ul class="collapse list-unstyled" id="networkingSubmenu">
-                <li><a href="#">CloudFront</a></li>
-                <li><a href="#">Elastic Load Balancing</a></li>
-                <li><a href="#">VPC</a></li>
+                <li><a href="#">Cloud CDN</a></li>
+                <li><a href="#">Cloud DNS</a></li>
+                <li><a href="#">Cloud Load Balancing</a></li>
+                <li><a href="#">Cloud VPN</a></li>
+
               </ul>
             </li>
             <li>
-              <a href="#containersSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Containers</a>
+              <a href="#containersSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Serverless Computing</a>
               <ul class="collapse list-unstyled" id="containersSubmenu">
-                <li><a href="#">Elastic Container Registry</a></li>
-                <li><a href="#">Elastic Container Service</a></li>
-                <li><a href="#">Elastic Kubernetes Service</a></li>
+                <li><a href="#">Cloud Run</a></li>
+                <li><a href="#">Cloud Functions</a></li>
+                <li><a href="#">Cloud Scheduler</a></li>
               </ul>
             </li>
           </ul>

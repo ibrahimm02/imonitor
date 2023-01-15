@@ -4,88 +4,6 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
 <div class="container">
 
     <div class="row">
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Earnings (Monthly)</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">$40,000</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Earnings (Annual)</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">$215,000</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Tasks
-                            </div>
-                            <div class="row no-gutters align-items-center">
-                                <div class="col-auto">
-                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">50%</div>
-                                </div>
-                                <div class="col">
-                                    <div class="progress progress-sm mr-2">
-                                        <div class="progress-bar bg-info" role="progressbar"
-                                            style="width: 50%" aria-valuenow="50" aria-valuemin="0"
-                                            aria-valuemax="100"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Pending Requests</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">18</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-comments fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
         <div class="col-xl-8 col-lg-7">
             <div class="card shadow">
                 <div
@@ -94,7 +12,7 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-xl-6 col-lg-7">
+                        <div class="col-xl-6 col-lg-7 mb-1">
                                 <div class="card text-center border-1 shadow-sm">
                                     <span class="caption">Instance States</span>
                                     <canvas id="myChart" height="205"></canvas>
@@ -104,7 +22,7 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
                             <div class="card border-1 shadow-sm px-1">
                                 <img
                                     src="data:image/png;base64,{{ec2_CPUUtilization}}"
-                                    alt="CPUUtilization Graph"/>
+                                    alt="EC2 CPUUtilization Graph"/>
                             </div>
                         </div>
                     </div>
@@ -119,10 +37,10 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
                         </div>
                         <div class="card-body">
                             <div class="row align-items-center mb-2">
-                                <div class="col-3">
+                                <div class="col-sm-3">
                                     <div class="card shadow h-100">
                                         <div class="card-body text-center">
-                                            <div class="text-xs font-weight-bold text-primary  mb-1">
+                                            <div class="text-xs font-weight-bold text-secondary text-uppercase  mb-1">
                                                 Available
                                             </div>
                                             <div class="h5 mb-0 font-weight-bold text-gray-800">
@@ -132,10 +50,10 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
                                     </div>
                                 </div>
                                         
-                                <div class="col-3">
+                                <div class="col-sm-3">
                                     <div class="card shadow h-100">
                                         <div class="card-body text-center">
-                                            <div class="text-xs font-weight-bold text-primary mb-1">
+                                            <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
                                                 Stopped
                                             </div>
                                             <div class="h5 mb-0 font-weight-bold text-gray-800">
@@ -145,27 +63,27 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
                                     </div>
                                 </div>
 
-                                <div class="col-3">
+                                <div class="col-sm-3">
                                     <div class="card shadow h-100">
                                         <div class="card-body text-center">
-                                            <div class="text-xs font-weight-bold text-primary mb-1">
+                                            <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
                                                 DB Instances
                                             </div>
                                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                                {{rds_states[3]['value']}}
+                                                {{rds_insCnt}}
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="col-3">
+                                <div class="col-sm-3">
                                     <div class="card shadow h-100">
                                         <div class="card-body text-center">
-                                            <div class="text-xs font-weight-bold text-primary mb-1">
-                                                DB Clusters
+                                            <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
+                                                Storage
                                             </div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                                {{rds_states[3]['value']}}
+                                            <div class="h6 mb-0 font-weight-bold text-gray-800">
+                                                {{rds_totalStorage}} / 100TB
                                             </div>
                                         </div>
                                     </div>
@@ -173,19 +91,19 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
                             </div>
 
                             <div class="row">
-                                <div class="col-6">
+                                <div class="col-sm-6">
                                     <div class="card border-1 shadow h-100 px-1">
                                         
-                                        <img src="data:image/png;base64,{{ec2_CPUUtilization}}"
-                                        alt="CPUUtilization Graph"/>
+                                        <img src="data:image/png;base64,{{rds_CPUUtilization}}"
+                                        alt="RDS CPUUtilization Graph"/>
                                       
                                     </div>
                                 </div>
-                                <div class="col-6">
+                                <div class="col-sm-6">
                                     <div class="card border-1 shadow h-100 px-1">
                                         
-                                        <img src="data:image/png;base64,{{ec2_CPUUtilization}}"
-                                        alt="CPUUtilization Graph"/>
+                                        <img src="data:image/png;base64,{{rds_FreeableMemory}}"
+                                        alt="RDS FreeableMemory Graph"/>
                                      
                                     </div>
                                 </div>
@@ -202,15 +120,15 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
             <div class="card shadow mb-4">
                 <div
                     class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">S3 Buckets</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">S3</h6>
                 </div>
                 <div class="card-body">
                     <div class="col-xl col-md">
                         <div class="row align-items-center mb-2">
-                            <div class="col-5 ">
-                                <div class="card">
+                            <div class="col-sm-5 ">
+                                <div class="card shadow">
                                     <div class="card-body text-center">
-                                        <div class="text-xs font-weight-bold text-primary  mb-1">
+                                        <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
                                             Buckets
                                         </div>
                                         <div class="h5 mb-0 font-weight-bold text-gray-800">
@@ -222,10 +140,10 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
                                 </div>
                             </div>
                                     
-                            <div class="col-5 p-0">
-                                <div class="card">
+                            <div class="col-sm-5 p-0">
+                                <div class="card shadow">
                                     <div class="card-body text-center">
-                                        <div class="text-xs font-weight-bold text-primary mb-1">
+                                        <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
                                             Storage Size
                                         </div>
                                         <div class="h5 mb-0 font-weight-bold text-gray-800">
@@ -246,7 +164,7 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
                             
                         <div class="row no-gutters align-items-center">
                             <div class="col">
-                                <div class="card border-1 shadow-sm px-1">
+                                <div class="card border-1 shadow-sm px-1 mt-1">
                                     <img
                                         src="data:image/png;base64,{{ec2_CPUUtilization}}"
                                         alt="CPUUtilization Graph"/>
@@ -261,13 +179,36 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
                 <div class="col-xl-12 col-lg-10">
                     <div class="card shadow">
                         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                            <h6 class="m-0 font-weight-bold text-primary">RDS</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Elastic Block Store</h6>
                         </div>
                         <div class="card-body">
-                            123
-                            123
-                            123
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="card shadow h-100">
+                                        <div class="card-body text-center">
+                                            <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
+                                                Volumes
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                {{ebs_vol_count}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
+                                <div class="col-sm-6">
+                                    <div class="card shadow h-100">
+                                        <div class="card-body text-center">
+                                            <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
+                                                Unattached
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                {{ebs_unattached_count}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
                         </div>
                     </div>
@@ -278,208 +219,55 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
         </div>
     </div>
 
-                                        <!-- Content Row -->
-                                        <div class="row">
+    {% set stat = [] %} 
+    {% for value in ec2_states: %} 
+        {% set tmp = stat.append(value['value']) %}
+        <!-- {{value['value']}} -->
+    {% endfor %}
+    
+    <script>
+        // Global parameters:
+        // do not resize the chart canvas when its container does (keep at 600x400px)
+        Chart.defaults.global.responsive = false;
+    
+        // define the chart data
+        var chartData = {
+                labels: ["Pending","Running","Shutting-down","Terminated","Stopping","Stopped"],
+                datasets: [
+                    {
+                    data:{{stat}},
+                    backgroundColor: [
+                        "#d2d62e",
+                        "#00a65a",
+                        "#f39c12",
+                        "#3c8dbc",
+                        "#00c0ef",
+                        "#f56954",
+                    ],
+                    },
+                ],
+            };
+    
+        // get chart canvas
+        var ctx = document.getElementById("myChart").getContext("2d");
+    
+        var options = {
+                tooltips: {
+                    enabled: true,
+                },
+                legend: {
+                    position: 'bottom',
+                },
+            };
+    
+        // create the chart using the chart canvas
+        var myChart = new Chart(ctx, {
+                type: "doughnut",
+                data: chartData,
+                options: options,
+                });
+    </script>
 
-                                            <!-- Content Column -->
-                                            <div class="col-lg-6 mb-4">
-                    
-                                                <!-- Project Card Example -->
-                                                <div class="card shadow mb-4">
-                                                    <div class="card-header py-3">
-                                                        <h6 class="m-0 font-weight-bold text-primary">Projects</h6>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        <h4 class="small font-weight-bold">Server Migration <span
-                                                                class="float-right">20%</span></h4>
-                                                        <div class="progress mb-4">
-                                                            <div class="progress-bar bg-danger" role="progressbar" style="width: 20%"
-                                                                aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
-                                                        </div>
-                                                        <h4 class="small font-weight-bold">Sales Tracking <span
-                                                                class="float-right">40%</span></h4>
-                                                        <div class="progress mb-4">
-                                                            <div class="progress-bar bg-warning" role="progressbar" style="width: 40%"
-                                                                aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
-                                                        </div>
-                                                        <h4 class="small font-weight-bold">Customer Database <span
-                                                                class="float-right">60%</span></h4>
-                                                        <div class="progress mb-4">
-                                                            <div class="progress-bar" role="progressbar" style="width: 60%"
-                                                                aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
-                                                        </div>
-                                                        <h4 class="small font-weight-bold">Payout Details <span
-                                                                class="float-right">80%</span></h4>
-                                                        <div class="progress mb-4">
-                                                            <div class="progress-bar bg-info" role="progressbar" style="width: 80%"
-                                                                aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
-                                                        </div>
-                                                        <h4 class="small font-weight-bold">Account Setup <span
-                                                                class="float-right">Complete!</span></h4>
-                                                        <div class="progress">
-                                                            <div class="progress-bar bg-success" role="progressbar" style="width: 100%"
-                                                                aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                    
-                                                <!-- Color System -->
-                                                <div class="row">
-                                                    <div class="col-lg-6 mb-4">
-                                                        <div class="card bg-primary text-white shadow">
-                                                            <div class="card-body">
-                                                                Primary
-                                                                <div class="text-white-50 small">#4e73df</div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-lg-6 mb-4">
-                                                        <div class="card bg-success text-white shadow">
-                                                            <div class="card-body">
-                                                                Success
-                                                                <div class="text-white-50 small">#1cc88a</div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-lg-6 mb-4">
-                                                        <div class="card bg-info text-white shadow">
-                                                            <div class="card-body">
-                                                                Info
-                                                                <div class="text-white-50 small">#36b9cc</div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-lg-6 mb-4">
-                                                        <div class="card bg-warning text-white shadow">
-                                                            <div class="card-body">
-                                                                Warning
-                                                                <div class="text-white-50 small">#f6c23e</div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-lg-6 mb-4">
-                                                        <div class="card bg-danger text-white shadow">
-                                                            <div class="card-body">
-                                                                Danger
-                                                                <div class="text-white-50 small">#e74a3b</div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-lg-6 mb-4">
-                                                        <div class="card bg-secondary text-white shadow">
-                                                            <div class="card-body">
-                                                                Secondary
-                                                                <div class="text-white-50 small">#858796</div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-lg-6 mb-4">
-                                                        <div class="card bg-light text-black shadow">
-                                                            <div class="card-body">
-                                                                Light
-                                                                <div class="text-black-50 small">#f8f9fc</div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-lg-6 mb-4">
-                                                        <div class="card bg-dark text-white shadow">
-                                                            <div class="card-body">
-                                                                Dark
-                                                                <div class="text-white-50 small">#5a5c69</div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                    
-                                            </div>
-                    
-                                            <div class="col-lg-6 mb-4">
-                    
-                                                <!-- Illustrations -->
-                                                <div class="card shadow mb-4">
-                                                    <div class="card-header py-3">
-                                                        <h6 class="m-0 font-weight-bold text-primary">Illustrations</h6>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        <div class="text-center">
-                                                            <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width: 25rem;"
-                                                                src="img/undraw_posting_photo.svg" alt="...">
-                                                        </div>
-                                                        <p>Add some quality, svg illustrations to your project courtesy of <a
-                                                                target="_blank" rel="nofollow" href="https://undraw.co/">unDraw</a>, a
-                                                            constantly updated collection of beautiful svg images that you can use
-                                                            completely free and without attribution!</p>
-                                                        <a target="_blank" rel="nofollow" href="https://undraw.co/">Browse Illustrations on
-                                                            unDraw &rarr;</a>
-                                                    </div>
-                                                </div>
-                    
-                                                <!-- Approach -->
-                                                <div class="card shadow mb-4">
-                                                    <div class="card-header py-3">
-                                                        <h6 class="m-0 font-weight-bold text-primary">Development Approach</h6>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        <p>SB Admin 2 makes extensive use of Bootstrap 4 utility classes in order to reduce
-                                                            CSS bloat and poor page performance. Custom CSS classes are used to create
-                                                            custom components and custom utility classes.</p>
-                                                        <p class="mb-0">Before working with this theme, you should become familiar with the
-                                                            Bootstrap framework, especially the utility classes.</p>
-                                                    </div>
-                                                </div>
-                    
-                                            </div>
-                                        </div>
-
-                                        {% set stat = [] %} 
-                                        {% for value in ec2_states: %} 
-                                        {% set tmp = stat.append(value['value']) %}
-                                        <!-- {{value['value']}} -->
-                                        {% endfor %}
-                                        
-                                        <script>
-                                          // Global parameters:
-                                          // do not resize the chart canvas when its container does (keep at 600x400px)
-                                          Chart.defaults.global.responsive = false;
-                                        
-                                          // define the chart data
-                                          var chartData = {
-                                            labels: ["Pending","Running","Shutting-down","Terminated","Stopping","Stopped"],
-                                            datasets: [
-                                              {
-                                                data:{{stat}},
-                                                backgroundColor: [
-                                                  "#d2d62e",
-                                                  "#00a65a",
-                                                  "#f39c12",
-                                                  "#3c8dbc",
-                                                  "#00c0ef",
-                                                  "#f56954",
-                                                ],
-                                              },
-                                            ],
-                                          };
-                                        
-                                          // get chart canvas
-                                          var ctx = document.getElementById("myChart").getContext("2d");
-                                        
-                                          var options = {
-                                            tooltips: {
-                                              enabled: true,
-                                            },
-                                            legend: {
-                                              position: 'bottom',
-                                            },
-                                          };
-                                        
-                                          // create the chart using the chart canvas
-                                          var myChart = new Chart(ctx, {
-                                            type: "doughnut",
-                                            data: chartData,
-                                            options: options,
-                                          });
-                                        </script>
-
-    {% endblock %}
+{% endblock %}
   </div>
 </div>
