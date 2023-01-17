@@ -1,17 +1,15 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, current_app, flash
-from flask_bootstrap import Bootstrap
 import boto3
 from boto3 import Session
 from flask_cors import CORS
-from datetime import datetime, timedelta, date
+
 from operator import itemgetter
 import json
 import base64
 import io
-from collections import defaultdict
+import datetime
 
 app = Flask(__name__)
-Bootstrap(app)
 CORS(app)
 app.secret_key = 'flash-secret'
 
@@ -161,12 +159,11 @@ def aws_ec2():
     ec2_DiskReadBytes = get_ec2_DiskReadBytes()
     ec2_DiskWriteBytes = get_ec2_DiskWriteBytes()
 
-
     # ec2_metrics = ec2_metrics_amm()
 
     ec2_states = ec2_state_stats()
     # data = {'chart_data': ec2_states}
-    
+
     if not(instances):
         return render_template("aws/aws-ec2/ec2.html", info="No instance Data")
 
@@ -183,9 +180,9 @@ def aws_ec2():
         ec2_CPUCreditBalance=ec2_CPUCreditBalance,
         ec2_DiskReadBytes=ec2_DiskReadBytes,
         ec2_DiskWriteBytes=ec2_DiskWriteBytes,
-
         # ec2_metrics=ec2_metrics, 
-        ec2_states=ec2_states)
+        ec2_states=ec2_states,
+        )
 
 # --------------------------------------------------------------
 
@@ -625,8 +622,8 @@ def ec2_state_stats():
 
 #-----------------------------------------------------------------------------
 
-now = datetime.utcnow() # Now time in UTC format 
-past = now - timedelta(minutes=60) # Minus 60 minutes
+# now = datetime.utcnow() # Now time in UTC format 
+# past = now - timedelta(minutes=60) # Minus 60 minutes
 
 def ec2_metrics_amm():
 
@@ -639,23 +636,17 @@ def ec2_metrics_amm():
     for reservation in response["Reservations"]:
         for instance in reservation["Instances"]:
             #print(instance["InstanceId"])
-            try:
-                EC2CPUUtilization = cw_client.get_metric_statistics(
-                    Namespace = 'AWS/EC2',
-                    MetricName = 'CPUUtilization',
-                    StartTime=datetime.utcnow() - timedelta(days=7) ,
-                    EndTime=datetime.utcnow(),
-                    Period = 86400,
-                    Statistics=['Maximum','Minimum','Average'],
-                    Dimensions = [
-                        {
-                            'Name': 'InstanceId',
-                            'Value': instance['InstanceId']
-                        }   
-                    ]        
-                ) 
-            except Exception():
-                print(Exception)
+          
+            EC2CPUUtilization = cw_client.get_metric_statistics(
+                Period=86400,
+                StartTime=datetime.datetime.utcnow() - datetime.timedelta(days=1),
+                EndTime=datetime.datetime.utcnow(),
+                MetricName='CPUUtilization',
+                Namespace='AWS/EC2',
+                Statistics=['Average', 'Minimum', 'Maximum'],
+                Dimensions=[{'Name':'InstanceId', 'Value':instance['InstanceId']}]
+            ) 
+          
             #  return print(EC2CPUUtilization)
                     
             datapoints = EC2CPUUtilization['Datapoints']     # CPU Utilization results                
@@ -666,7 +657,7 @@ def ec2_metrics_amm():
             for i in range(len(sorted_datapoint)):
                 sorted_datapoint[i]['sort_by'] = i
 
-                print(sorted_datapoint)
+            print(sorted_datapoint)
 
             last_datapoint = sorted_datapoint[-1]  # Last result
             last_max_utilization = last_datapoint['Maximum'] # Last utilization
@@ -702,65 +693,67 @@ def ec2_metrics_amm():
             metrics_holder.append(metrics)
             # response["header"][""]
     return metrics_holder
+
 # ec2_metrics_amm()
 
 #-----------------------------------------------------------------------------
 
 @app.route('/ec2-instance-start', methods=["POST"])
 def ec2_instance_start():
+
     key = request.form['instance']
-
-    instance = ec2_resource.Instance(key)
-    instance.start()
-
-    print(f'Starting EC2 instance: {instance.id}')
     
-    # instance.wait_until_running()
+    try:
+        instance = ec2_resource.Instance(key)
+        instance.start()
+        # print(f'Starting EC2 instance: {instance.id}')
 
-    print(f'EC2 instance "{instance.id}" has been started')
-    flash(f'EC2 instance "{instance.id}" has been started')
+        # # instance.wait_until_running()
+
+        # print(f'EC2 instance "{instance.id}" has been started')
+        flash(f'EC2 instance "{instance.id}" has been started')
+    except:
+        return False
+
     return redirect(url_for('aws_ec2'))
+
 #-------------------------------------------------------------------
 
 @app.route('/ec2-instance-stop', methods=["POST"])
 def ec2_instance_stop():
     key = request.form['instance']
 
-    instance = ec2_resource.Instance(key)
-    instance.stop()
+    try:
+        instance = ec2_resource.Instance(key)
+        instance.stop()
+        # print(f'Stopping EC2 instance: {instance.id}')
 
-    print(f'Stopping EC2 instance: {instance.id}')
-    
-    # instance.wait_until_running()
+        # instance.wait_until_stopped()
 
-    print(f'EC2 instance "{instance.id}" has been stopped')
+        # print(f'EC2 instance "{instance.id}" has been stopped')
 
-    flash(f'EC2 instance "{instance.id}" has been stopped')
+        flash(f'EC2 instance "{instance.id}" has been stopped')
+    except:
+        return False
+
     return redirect(url_for('aws_ec2'))
 
 #---------------------------------------------------------------------
 @app.route('/ec2-instance-data', methods=["POST"])
 def ec2_instance_data():
 
-    key = request.form['instance']
+    key = request.form['instanceId']
 
-   
-    ec2_CPUUtilization = ec2_instance_metrics(type='CPUUtilization', ins_id=key)
-    ec2_DiskReadOps = ec2_instance_metrics(type='DiskReadOps', ins_id=key)
-    ec2_DiskWriteOps = ec2_instance_metrics(type='DiskWriteOps', ins_id=key)
-    ec2_NetworkIn = ec2_instance_metrics(type='NetworkIn', ins_id=key)
-    ec2_NetworkOut = ec2_instance_metrics(type='NetworkOut', ins_id=key)
-    ec2_CPUCreditUsage = ec2_instance_metrics(type='CPUCreditUsage', ins_id=key)
-    ec2_CPUCreditBalance = ec2_instance_metrics(type='CPUCreditBalance', ins_id=key)
-    ec2_DiskReadBytes = ec2_instance_metrics(type='DiskReadBytes', ins_id=key)
-    ec2_DiskWriteBytes = ec2_instance_metrics(type='DiskWriteBytes', ins_id=key)
-
-
-    # Helper method to serialize datetime fields
-    def json_datetime_serializer(obj):
-        if isinstance(obj, (datetime, date)):
-            return obj.isoformat()
-        raise TypeError ("Type %s not serializable" % type(obj))
+    dp_time_CU, dp_avg_CU = get_ec2_ins_metrics(type='CPUUtilization', ins_id=key)
+    dp_time_DRO, dp_avg_DRO = get_ec2_ins_metrics(type='DiskReadOps', ins_id=key)
+    dp_time_DWO, dp_avg_DWO = get_ec2_ins_metrics(type='DiskWriteOps', ins_id=key)
+    dp_time_NI, dp_avg_NI = get_ec2_ins_metrics(type='NetworkIn', ins_id=key)
+    dp_time_NO, dp_avg_NO = get_ec2_ins_metrics(type='NetworkOut', ins_id=key)
+    dp_time_CCU, dp_avg_CCU = get_ec2_ins_metrics(type='CPUCreditUsage', ins_id=key)
+    dp_time_CCB, dp_avg_CCB = get_ec2_ins_metrics(type='CPUCreditBalance', ins_id=key)
+    dp_time_DRB, dp_avg_DRB = get_ec2_ins_metrics(type='DiskReadBytes', ins_id=key)
+    dp_time_DWB, dp_avg_DWB = get_ec2_ins_metrics(type='DiskWriteBytes', ins_id=key)
+    dp_time_SCF, dp_avg_SCF = get_ec2_ins_metrics(type='StatusCheckFailed', ins_id=key)
 
     response = ec2_client.describe_instances(
         InstanceIds=[
@@ -771,29 +764,61 @@ def ec2_instance_data():
     # print(f'Instance {key} attributes:')
 
     for reservation in response['Reservations']:
-        json.dumps(
-                reservation,
-                indent=4,
-                default=json_datetime_serializer
-            )
+        reservation
     
     return render_template('aws/aws-ec2/aws_ec2_instance_data.html', 
                             instance=reservation,
-                            ec2_CPUUtilization=ec2_CPUUtilization,
-                            ec2_DiskReadOps=ec2_DiskReadOps,
-                            ec2_DiskWriteOps=ec2_DiskWriteOps,
-                            ec2_NetworkIn= ec2_NetworkIn,
-                            ec2_NetworkOut= ec2_NetworkOut,
-                            ec2_CPUCreditUsage= ec2_CPUCreditUsage,
-                            ec2_CPUCreditBalance=ec2_CPUCreditBalance,           
-                            ec2_DiskReadBytes=ec2_DiskReadBytes,             
-                            ec2_DiskWriteBytes= ec2_DiskWriteBytes
+                            dp_time_CU=dp_time_CU, dp_avg_CU=dp_avg_CU,
+                            dp_time_DRO=dp_time_DRO, dp_avg_DRO=dp_avg_DRO,
+                            dp_time_DWO=dp_time_DWO, dp_avg_DWO=dp_avg_DWO,
+                            dp_time_NI=dp_time_NI, dp_avg_NI=dp_avg_NI,
+                            dp_time_NO=dp_time_NO, dp_avg_NO=dp_avg_NO,
+                            dp_time_CCU=dp_time_CCU, dp_avg_CCU=dp_avg_CCU,
+                            dp_time_CCB=dp_time_CCB, dp_avg_CCB=dp_avg_CCB,
+                            dp_time_DRB=dp_time_DRB, dp_avg_DRB=dp_avg_DRB,
+                            dp_time_DWB=dp_time_DWB, dp_avg_DWB=dp_avg_DWB,
+                            dp_time_SCF=dp_time_SCF, dp_avg_SCF=dp_avg_SCF
                             )
+#----------------------------------------------------------------------------------
+def get_ec2_ins_metrics(type, ins_id):
 
+    dps_avg = []
+    dps_time = []
 
-def ec2_instance_metrics(type, ins_id):
+    dp = cw_client.get_metric_statistics(
+        Period=300,
+        StartTime=datetime.datetime.utcnow() - datetime.timedelta(days=1),
+        EndTime=datetime.datetime.utcnow(),
+        MetricName=type,
+        Namespace='AWS/EC2',
+        Statistics=['Average'],
+        Dimensions=[{'Name':'InstanceId', 'Value':ins_id}]
+        )
+    # print(dp)
 
+    datapoints = dp['Datapoints']     # CPU Utilization results                
+    sorted_datapoint = sorted(datapoints, key=itemgetter('Timestamp'))
+
+    # print(sorted_datapoint)
+
+    for i in range(len(sorted_datapoint)):
+        sorted_datapoint[i]['sort_by'] = i
+
+    for dp in sorted_datapoint:
+        time = dp['Timestamp']
+        output_date = datetime.datetime.strftime(time, "%H:%M")
+
+        dps_avg.append(round(dp['Average'], 4))
+        dps_time.append(output_date)
     
+    dt = dps_time[-10:]
+    da = dps_avg[-10:]
+    # print(dt)
+    # print(da)
+
+    return json.dumps(dt), json.dumps(da)
+#-----------------------------------------------------------------------------------------
+def ec2_instance_metrics(type, ins_id):
 
     if type == "CPUUtilization":
         ins_met = {"metrics":[["AWS/EC2", "CPUUtilization", "InstanceId", str(ins_id)]]}  
@@ -813,7 +838,6 @@ def ec2_instance_metrics(type, ins_id):
         ins_met = {"metrics": [["AWS/EC2", "DiskReadBytes", "InstanceId", str(ins_id)]]}
     if type == "DiskWriteBytes":
         ins_met = {"metrics": [["AWS/EC2", "DiskWriteBytes", "InstanceId", str(ins_id)]]}
-
 
     response = cw_client.get_metric_widget_image(MetricWidget=json.dumps(ins_met))
     
@@ -865,13 +889,18 @@ def aws_ebs_volumes():
 
 @app.route('/aws/s3')
 def aws_s3():
-    # Retrieve the list of existing buckets
-    
+
     response = s3_client.list_buckets()
 
     size_count = s3_objects_size()
 
-    s3_graph = aws_get_s3_metrics()
+    # dp_time_BSB, dp_avg_BSB = aws_get_s3_bucket_metrics("BucketSizeBytes", "project-test-bucket1", "StandardStorage" )
+    # dp_time_NOO, dp_avg_NOO = aws_get_s3_bucket_metrics("NumberOfObjects", "project-test-bucket1", "AllStorageTypes")
+
+    # dp_a_NOO = json.loads(dp_avg_NOO)
+    # dp_a_NOO = [round(x) for x in dp_a_NOO]
+    # dp_a_BSB = json.loads(dp_avg_BSB)
+
 
     if len(response['Buckets'])==0:
         return f'No Buckets!'
@@ -880,7 +909,13 @@ def aws_s3():
         print('Existing buckets:')
         for bucket in response['Buckets']:
             print(f'  {bucket["Name"]}')
-        return render_template("aws/aws_s3.html", response=response, size_count=size_count, s3_graph=s3_graph)
+
+        return render_template("aws/aws-s3/aws_s3.html", 
+                response=response, 
+                size_count=size_count, 
+                # dp_time_BSB=dp_time_BSB, dp_avg_BSB=dp_avg_BSB,
+                # dp_time_NOO=dp_time_NOO, dp_avg_NOO=dp_avg_NOO
+                )
 
 #-------------------------------------------------------
 
@@ -906,7 +941,7 @@ def aws_get_s3_bucket_size():
                                             ],
                                             Statistics=['Average'],
                                             Period=3600,
-                                            StartTime=datetime.utcnow() - timedelta(days=7) ,
+                                            StartTime=datetime.utcnow() - datetime.timedelta(days=7) ,
                                             EndTime=datetime.utcnow(),
                                             )
         # The cloudwatch metrics will have the single datapoint, so we just report on it. 
@@ -934,7 +969,7 @@ def s3_objects_size():
     for bucket in allbuckets['Buckets']:
         bucket = s3_resource.Bucket(bucket["Name"])
         for obj in bucket.objects.all():
-            totalObject 
+            totalObject += 1
             size += obj.size
 
     # print('total size:')
@@ -942,50 +977,74 @@ def s3_objects_size():
     # print("%.3f GB" % (size*1.0/1024/1024/1024))
     # print('total count:')
     # print(totalCount)
+    print(f'Total Objects: ', totalObject)
     data.append({'total_size': roundSize, 'total_bucket': totalBucket, 'total_object': totalObject })
     return data
 
 
 #-------------------------------------------------------
+@app.route('/s3-bucket-data', methods=["POST"])
+def s3_bucket_data():
 
-def aws_get_s3_metrics():
-    # List metrics through the pagination interface
-    response = cw_client.get_metric_statistics(
-            MetricName='BucketSizeBytes',
+    key = request.form['bucketName']
+
+    dp_time_BSB, dp_avg_BSB = aws_get_s3_bucket_metrics("BucketSizeBytes", key, "StandardStorage", ['Average'])
+    dp_time_NOO, dp_avg_NOO = aws_get_s3_bucket_metrics("NumberOfObjects", key, "AllStorageTypes", ['Average'])
+    dp_time_AR, dp_avg_AR = aws_get_s3_bucket_metrics("AllRequests", key, "StandardStorage", ['Sum'])
+
+    print(f'Time: ', dp_time_AR)
+    print(f'Average: ', dp_avg_AR)
+
+    return render_template("aws/aws-s3/aws_s3_bucket_data.html",
+                            dp_time_BSB=dp_time_BSB, dp_avg_BSB=dp_avg_BSB,
+                            dp_time_NOO=dp_time_NOO, dp_avg_NOO=dp_avg_NOO)
+#-------------------------------------------------------
+def aws_get_s3_bucket_metrics(type, bname, sttype, stat):
+
+    dps_avg = []
+    dps_time = []
+    
+    dp = cw_client.get_metric_statistics(
+            MetricName=type,
             Namespace='AWS/S3',
             Dimensions=[
                 {
                     'Name': 'BucketName',
-                    'Value': 'project-test-bucket1'
+                    'Value': bname
                 },
                 {
                     'Name': 'StorageType',
-                    'Value': 'StandardStorage'
+                    'Value': sttype
                 }
             ],
-            Statistics=['Average'],
+            Statistics=stat,
             Period=86400,
-            StartTime=datetime.utcnow() - timedelta(days=14) ,
-            EndTime=datetime.utcnow(),
+            StartTime=datetime.datetime.utcnow() - datetime.timedelta(days=7) ,
+            EndTime=datetime.datetime.utcnow(),
         
     )
-        
-    print(response)
 
-    ins_met = '{"metrics": [["AWS/S3", "BucketSizeBytes", "BucketName", "project-test-bucket1", "StorageType", "StandardStorage", "Statistics", "Average"]]}'
+    datapoints = dp['Datapoints']                
+    sorted_datapoint = sorted(datapoints, key=itemgetter('Timestamp'))
 
-    response2 = cw_client.get_metric_widget_image(MetricWidget=ins_met)
-    
-    # print(response)
+    # print(sorted_datapoint)
 
-    bytes_data=io.BytesIO(response2["MetricWidgetImage"])
-    fr=base64.b64encode(bytes_data.getvalue())
+    for i in range(len(sorted_datapoint)):
+        sorted_datapoint[i]['sort_by'] = i
 
-    # print(fr)
-    s3_graph = fr.decode('utf-8')
+    for dp in sorted_datapoint:
+        time = dp['Timestamp']
+        output_date = datetime.datetime.strftime(time, "%H:%M")
 
-    return s3_graph
+        dps_avg.append(round(dp['Average'], 4))
+        dps_time.append(output_date)
 
+    dt = dps_time[-10:]
+    da = dps_avg[-10:]
+    # print(dt)
+    # print(da)
+
+    return json.dumps(dt), json.dumps(da)
 
 #---- AWS/RDS ------------------------------------------------------------------------------------------------#
 
@@ -1021,7 +1080,7 @@ def aws_rds():
         rds_ReadLatency=rds_ReadLatency,
         rds_states=rds_states,
         rds_insCnt=rds_insCnt,
-        rds_totalStorage=rds_totalStorage
+        rds_totalStorage=rds_totalStorage,
         )
 #-------------------------------------------------------
 
@@ -1155,11 +1214,11 @@ def get_rds_instancelevel_metrics(type):
 def get_rds_metrics():
     
     now = datetime.utcnow() # Now time in UTC format 
-    past = now - timedelta(minutes=60) # Minus 60 minutes
+    past = now - datetime.timedelta(minutes=60) # Minus 60 minutes
  
     response = cw_client.get_metric_statistics(
         Period=86400,
-        StartTime=datetime.utcnow() - timedelta(days=7) ,
+        StartTime=datetime.utcnow() - datetime.timedelta(days=7) ,
         EndTime=datetime.utcnow(),
         MetricName='CPUUtilization',
         Namespace='AWS/RDS',
@@ -1258,7 +1317,6 @@ def rds_all():
 
     data = []
     size = 0
-    totalObject = 0
 
     response = rds_client.describe_db_instances()
 
@@ -1271,19 +1329,10 @@ def rds_all():
             pass
         
         print(size)
-        
-        # bucket = s3_resource.Bucket(bucket["Name"])
-        # for obj in bucket.objects.all():
-        #     totalObject 
-        #     size += obj.size
 
-    # print('total size:')
-
-    # roundSize = ("%.3f GB" % (size*1.0/1024/1024/1024))
+    return response
     
 #----------------------------------------------------------------
-
-
 
 
 #---- AWS/LAMBDA ------------------------------------------------------------------------------------------------#
@@ -1353,7 +1402,42 @@ def get_costs():
 
 # get_costs()
 #-------------------------------------------------------------#
+def get_ec2_datapoints():
 
+    dps_avg = []
+    dps_time = []
+
+    dp = cw_client.get_metric_statistics(
+        Period=300,
+        StartTime=datetime.datetime.utcnow() - datetime.timedelta(days=1),
+        EndTime=datetime.datetime.utcnow(),
+        MetricName='CPUUtilization',
+        Namespace='AWS/EC2',
+        Statistics=['Average'],
+        Dimensions=[{'Name':'InstanceId', 'Value':'i-0e81bafe1ec8a68f8'}]
+        )
+    # print(dp)
+
+    datapoints = dp['Datapoints']     # CPU Utilization results                
+    sorted_datapoint = sorted(datapoints, key=itemgetter('Timestamp'))
+
+    # print(sorted_datapoint)
+
+    for i in range(len(sorted_datapoint)):
+        sorted_datapoint[i]['sort_by'] = i
+
+    for dp in sorted_datapoint:
+        time = dp['Timestamp']
+        output_date = datetime.datetime.strftime(time, "%H:%M")
+
+        dps_avg.append(round(dp['Average'], 4))
+        dps_time.append(output_date)
+    # print(sorted_datapoint)
+    dt = dps_time[-10:]
+    da = dps_avg[-10:]
+    print(da)
+
+    return json.dumps(dt), json.dumps(da)
 
 #---- ERROR HANDLERS ------------------------------------------------------------------------------------------------#
 

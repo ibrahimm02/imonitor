@@ -1,0 +1,113 @@
+{% extends "aws/aws_base.html" %} 
+{% block nav_s3 %}active{% endblock %} 
+{% block title %}iMonitor - S3{% endblock %} 
+{% block navTitle %}S3{% endblock %}
+{% block content %}
+
+<div class="row">
+  <div class="col-sm-6">
+    <div class="card border-1 shadow-sm mb-2 px-1">
+      <div class="card-body">
+        <div class="chart-area p-1">
+          <canvas id="bsb-chart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <div class="card border-1 shadow-sm mb-2 px-1">
+      <div class="card-body">
+        <div class="chart-area p-1">
+          <canvas id="noo-chart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+  // Storage bytes graph
+  let dp_t_BSB = JSON.parse({{ dp_time_BSB | tojson }})
+  let dp_a_BSB = JSON.parse({{ dp_avg_BSB | tojson}})
+
+  // NoOfObjects
+  let dp_t_NOO = JSON.parse({{ dp_time_NOO | tojson }})
+  let dp_a_NOO = JSON.parse({{ dp_avg_NOO | tojson}})
+
+  //------------------------------------------------------------
+
+  ec2_ins_graph(dp_t_BSB, dp_a_BSB, "Storage Bytes", "bsb-chart")
+  ec2_ins_graph(dp_t_NOO, dp_a_NOO, "No Of Objects", "noo-chart")
+  //------------------------------------------------------------
+
+  function ec2_ins_graph(dt, da, label, id) {
+
+    // Set new default font family and font color
+    (Chart.defaults.global.defaultFontFamily = "Nunito"),
+    '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+    Chart.defaults.global.defaultFontColor = "#858796";
+
+    var chartData = {
+      labels: dt,
+      datasets: [{
+        label: label,
+        lineTension: 0.1,
+        backgroundColor: "rgba(78, 115, 223, 0.05)",
+        borderColor: "rgba(78, 115, 223, 1)",
+        pointRadius: 2,
+        pointBackgroundColor: "rgba(78, 115, 223, 1)",
+        pointBorderColor: "rgba(78, 115, 223, 1)",
+        pointHoverRadius: 3,
+        pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+        pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+        pointHitRadius: 10,
+        pointBorderWidth: 2,
+
+        data: da,
+
+      }],
+      options: {
+        maintainAspectRatio: false,
+        layout: {
+          padding: {
+            left: 10,
+            right: 25,
+            top: 25,
+            bottom: 0,
+          },
+        },
+        legend: {
+          display: false,
+        },
+        tooltips: {
+          backgroundColor: "rgb(255,255,255)",
+          bodyFontColor: "#858796",
+          titleMarginBottom: 10,
+          titleFontColor: "#6e707e",
+          titleFontSize: 14,
+          borderColor: "#dddfeb",
+          borderWidth: 1,
+          xPadding: 15,
+          yPadding: 15,
+          displayColors: false,
+          intersect: false,
+          mode: "index",
+          caretPadding: 10,
+        },
+      },
+    };
+
+    var ctx = document.getElementById(id).getContext("2d");
+
+    var myChart = new Chart(ctx, {
+      type: "line",
+      data: chartData,
+
+    });
+
+  }
+</script>
+
+
+{% endblock %}
