@@ -1,5 +1,8 @@
-{% extends "aws/aws_base.html" %} {% block title %}iMonitor - Overview{%
-endblock %} {% block nav_index %}active{% endblock %} {% block content %}
+{% extends "aws/aws_base.html" %} 
+{% block title %}iMonitor - Overview{% endblock %} 
+{% block nav_index %}active{% endblock %}
+{% block navTitle %}Overview{% endblock %}
+{% block content %}
 
 <div class="container">
 
@@ -7,21 +10,21 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
         <div class="col-xl-8 col-lg-7">
             <div class="card shadow">
                 <div
-                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    class="card-header py-2 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">EC2</h6>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-xl-6 col-lg-7 mb-1">
-                                <div class="card text-center border-1 shadow-sm">
+                                <div class="card shadow text-center border-1 shadow-sm">
                                     <div class="card-body p-0" style="margin:auto">
-                                    <span class="caption">Instance States</span>
-                                    <canvas id="myChart" height="205"></canvas>
-                                </div>
+                                        <span class="caption">Instance States</span>
+                                        <canvas id="myChart" height="205"></canvas>
+                                    </div>
                                 </div>
                         </div>
                         <div class="col-xl-6 col-lg-7">
-                            <div class="card border-1 shadow-sm px-1">
+                            <div class="card shadow border-1 shadow-sm px-1">
                                 <img
                                     src="data:image/png;base64,{{ec2_CPUUtilization}}"
                                     alt="EC2 CPUUtilization Graph"/>
@@ -39,14 +42,14 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
             <div class="row mt-4 mb-4">
                 <div class="col-xl-12 col-lg-10">
                     <div class="card shadow">
-                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <div class="card-header py-2 d-flex flex-row align-items-center justify-content-between">
                             <h6 class="m-0 font-weight-bold text-primary">RDS</h6>
                         </div>
                         <div class="card-body">
                             <div class="row align-items-center mb-2">
                                 <div class="col-sm-3">
                                     <div class="card shadow h-100">
-                                        <div class="card-body text-center">
+                                        <div class="card-body text-center p-2">
                                             <div class="text-xs font-weight-bold text-secondary text-uppercase  mb-1">
                                                 Available
                                             </div>
@@ -59,7 +62,7 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
                                         
                                 <div class="col-sm-3">
                                     <div class="card shadow h-100">
-                                        <div class="card-body text-center">
+                                        <div class="card-body text-center p-2">
                                             <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
                                                 Stopped
                                             </div>
@@ -72,7 +75,7 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
 
                                 <div class="col-sm-3">
                                     <div class="card shadow h-100">
-                                        <div class="card-body text-center">
+                                        <div class="card-body text-center p-2">
                                             <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
                                                 DB Instances
                                             </div>
@@ -85,7 +88,7 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
 
                                 <div class="col-sm-3">
                                     <div class="card shadow h-100">
-                                        <div class="card-body text-center">
+                                        <div class="card-body text-center p-2">
                                             <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
                                                 Storage
                                             </div>
@@ -126,7 +129,7 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
         <div class="col-xl-4 col-lg-5">
             <div class="card shadow mb-4">
                 <div
-                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    class="card-header py-2 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">S3</h6>
                 </div>
                 <div class="card-body">
@@ -139,7 +142,7 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
                                             Buckets
                                         </div>
                                         <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                            {% for item in size_count:%}
+                                            {% for item in s3_size_count:%}
                                                 {{item['total_bucket']}}
                                             {% endfor %}
                                         </div>
@@ -154,7 +157,7 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
                                             Storage Size
                                         </div>
                                         <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                            {% for item in size_count:%}
+                                            {% for item in s3_size_count:%}
                                                 {{item['total_size']}}
                                             {% endfor %}
                                         </div>
@@ -173,8 +176,8 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
                             <div class="col">
                                 <div class="card border-1 shadow-sm px-1 mt-1">
                                     <img
-                                        src="data:image/png;base64,{{ec2_CPUUtilization}}"
-                                        alt="CPUUtilization Graph"/>
+                                        src="data:image/png;base64,{{s3_graph_NOO}}"
+                                        alt="s3 Graph"/>
                                 </div>
                             </div>
                         </div>
@@ -185,14 +188,14 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
             <div class="row mt-4 mb-4">
                 <div class="col-xl-12 col-lg-10">
                     <div class="card shadow">
-                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <div class="card-header py-2 d-flex flex-row align-items-center justify-content-between">
                             <h6 class="m-0 font-weight-bold text-primary">Elastic Block Store</h6>
                         </div>
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-sm-6">
-                                    <div class="card shadow h-100">
-                                        <div class="card-body text-center">
+                                    <div class="card shadow h-80">
+                                        <div class="card-body text-center p-2">
                                             <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
                                                 Volumes
                                             </div>
@@ -204,8 +207,8 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
                                 </div>
 
                                 <div class="col-sm-6">
-                                    <div class="card shadow h-100">
-                                        <div class="card-body text-center">
+                                    <div class="card shadow h-80">
+                                        <div class="card-body text-center p-2">
                                             <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
                                                 Unattached
                                             </div>
@@ -213,6 +216,16 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
                                                 {{ebs_unattached_count}}
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row no-gutters align-items-center">
+                                <div class="col">
+                                    <div class="card border-1 shadow-sm px-1 mt-1">
+                                        <img
+                                            src="data:image/png;base64,{{ebsGraph}}"
+                                            alt="ebs Graph"/>
                                     </div>
                                 </div>
                             </div>
@@ -244,14 +257,7 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
                 datasets: [
                     {
                     data:{{stat}},
-                    backgroundColor: [
-                        "#d2d62e",
-                        "#00a65a",
-                        "#f39c12",
-                        "#3c8dbc",
-                        "#00c0ef",
-                        "#f56954",
-                    ],
+                    backgroundColor: ["#d2d62e", "#00a65a", "#f39c12", "#3c8dbc", "#00c0ef", "#f56954",],
                     },
                 ],
             };
@@ -260,6 +266,12 @@ endblock %} {% block nav_index %}active{% endblock %} {% block content %}
         var ctx = document.getElementById("myChart").getContext("2d");
     
         var options = {
+                plugins: {
+                    labels: {
+                        render: 'value',
+                        fontSize: 16,
+                    },  
+                },
                 tooltips: {
                     enabled: true,
                 },

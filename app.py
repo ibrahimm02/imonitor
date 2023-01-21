@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, c
 import boto3
 from boto3 import Session
 from flask_cors import CORS
-
 from operator import itemgetter
 import json
 import base64
@@ -51,14 +50,15 @@ def aws_overview():
     ec2_CPUUtilization = get_ec2_CPUUtilization()
     ec2_CPUCreditUsage = get_ec2_CPUCreditUsage()
 
-    size_count = s3_objects_size()
+    s3_size_count = s3_objects_size()
+    s3_graph_NOO = s3_graph("NumberOfObjects")
 
     rds_states = rds_state_stats()
     rds, rds_totalStorage, rds_insCnt = get_rds_instance_details()
     rds_CPUUtilization = get_rds_graph(type='CPUUtilization')  
     rds_FreeableMemory = get_rds_graph(type='freeableMemory') 
 
-    ebs_volumes, ebs_vol_count, ebs_unattached_count = aws_ebs_volumes()
+    ebs_volumes, ebs_vol_count, ebs_unattached_count, ebsGraph = aws_ebs_volumes()
 
     if not(response):
         return render_template("message.html",message="No Instances running. Create an instance first")
@@ -69,7 +69,8 @@ def aws_overview():
     ec2_states=ec2_states,
     ec2_CPUUtilization=ec2_CPUUtilization,
     ec2_CPUCreditUsage=ec2_CPUCreditUsage,
-    size_count=size_count,
+    s3_size_count=s3_size_count,
+    s3_graph_NOO=s3_graph_NOO,
     rds_states=rds_states,
     rds_insCnt=rds_insCnt,
     rds_totalStorage=rds_totalStorage,
@@ -78,6 +79,7 @@ def aws_overview():
     ebs_volumes=ebs_volumes,
     ebs_vol_count=ebs_vol_count,
     ebs_unattached_count=ebs_unattached_count,
+    ebsGraph=ebsGraph
     )
 
 #----GCP OVERVIEW---------------------------------------------------------------------------------------------------#
@@ -125,23 +127,6 @@ def ec2_instances():
 
 @app.route('/aws/ec2')
 def aws_ec2():
-    # # ec2_client = boto3.client("ec2", region_name="us-west-2")
-    # reservations = ec2_client.describe_instances(Filters=[
-    #     {
-    #         "Name": "instance-state-name",
-    #         "Values": ["running"],
-    #     }
-    # ]).get("Reservations")
-
-    # for reservation in reservations:
-    #     for instance in reservation["Instances"]:
-    #         instance_id = instance["InstanceId"]
-    #         instance_type = instance["InstanceType"]
-    #         public_ip = instance["PublicIpAddress"]
-    #         private_ip = instance["PrivateIpAddress"]
-    #         print(f"{instance_id}, {instance_type}, {public_ip}, {private_ip}")
-        
-    # return reservations
 
     instances = ec2_resource.instances.all()
     
@@ -159,10 +144,9 @@ def aws_ec2():
     ec2_DiskReadBytes = get_ec2_DiskReadBytes()
     ec2_DiskWriteBytes = get_ec2_DiskWriteBytes()
 
-    # ec2_metrics = ec2_metrics_amm()
+    avg_util, max_util, min_util = get_ec2_metrics_amm()
 
     ec2_states = ec2_state_stats()
-    # data = {'chart_data': ec2_states}
 
     if not(instances):
         return render_template("aws/aws-ec2/ec2.html", info="No instance Data")
@@ -180,7 +164,7 @@ def aws_ec2():
         ec2_CPUCreditBalance=ec2_CPUCreditBalance,
         ec2_DiskReadBytes=ec2_DiskReadBytes,
         ec2_DiskWriteBytes=ec2_DiskWriteBytes,
-        # ec2_metrics=ec2_metrics, 
+        avg_util=avg_util, max_util=max_util, min_util=min_util,
         ec2_states=ec2_states,
         )
 
@@ -205,43 +189,6 @@ def get_running_instances():
             print(f"{instance_id}, {instance_type}, {public_ip}, {private_ip}")
 
 #---------------------------------------------------------------
-def test1():
-
-    # instance = ec2_resource.instances.filter(Filters=[{
-    #     'Name': 'instance-state-name',
-    #     'Values': ['running']}])
-
-    # ec2info = defaultdict()
-    # for tag in instance.tags:
-    #     if 'Name'in tag['Key']:
-    #         print(tag['Key'])
-    #         name = tag['Value']
-    # # Add instance info to a dictionary    \
-    # print(instance.get('Instances'))
-    # ec2info[instance.id] = {
-    #     'Name': name,
-    #     'Instance ID': instance.id,
-    #     'Type': instance.instance_type,
-    #     'State': instance.state['Name'],
-    #     'Private IP': instance.private_ip_address,
-    #     'Public IP': instance.public_ip_address,
-    #     'Launch Time': instance.launch_time
-    # }
-    # attributes = ['Instance ID', 'Type', 'State', 'Private IP', 'Public IP', 'Launch Time']
-    # for instance_id, instance in ec2info.items():
-    #     for key in attributes:
-    #         print("{0}: {1}".format(key, instance[key]))
-    #     print("------")
-
-    testList = list(ec2_resource.instances.all())
-
-    if len(testList) > 0:
-        for item in testList:
-            print(item.tags)
-
-# test1()
-
-# --------------------------------------------------------------
 
 # get_running_instances()
 
@@ -621,80 +568,56 @@ def ec2_state_stats():
     return (graph_data)
 
 #-----------------------------------------------------------------------------
+def get_ec2_metrics_amm():
 
-# now = datetime.utcnow() # Now time in UTC format 
-# past = now - timedelta(minutes=60) # Minus 60 minutes
+    dp_avg = []
+    dp_max = []
+    dp_min = []
 
-def ec2_metrics_amm():
+    reservations = ec2_client.describe_instances(Filters=[
+        {
+            "Name": "instance-state-name",
+            "Values": ["running"],
+        }
+    ]).get("Reservations")
 
-    cw_client = boto3.client('cloudwatch')
-    
-    metrics = {}
-    metrics_holder = []
+    for res in reservations:
+        for instance in res["Instances"]:
 
-    response = ec2_client.describe_instances()
-    for reservation in response["Reservations"]:
-        for instance in reservation["Instances"]:
-            #print(instance["InstanceId"])
-          
-            EC2CPUUtilization = cw_client.get_metric_statistics(
-                Period=86400,
-                StartTime=datetime.datetime.utcnow() - datetime.timedelta(days=1),
+            print(instance["InstanceId"])
+
+            response = cw_client.get_metric_statistics(
+                MetricName = 'CPUUtilization',
+                Namespace = 'AWS/EC2',
+                Period = 86400,
+                StartTime=datetime.datetime.utcnow() - datetime.timedelta(hours=3),
                 EndTime=datetime.datetime.utcnow(),
-                MetricName='CPUUtilization',
-                Namespace='AWS/EC2',
-                Statistics=['Average', 'Minimum', 'Maximum'],
-                Dimensions=[{'Name':'InstanceId', 'Value':instance['InstanceId']}]
-            ) 
-          
-            #  return print(EC2CPUUtilization)
-                    
-            datapoints = EC2CPUUtilization['Datapoints']     # CPU Utilization results                
-            sorted_datapoint = sorted(datapoints, key=itemgetter('Timestamp'))
+                Statistics=['Maximum','Minimum','Average'],
+                Dimensions = [
+                    {
+                        'Name': 'InstanceId',
+                        'Value': instance["InstanceId"]
+                    }   
+                ],        
+            )
 
-                # print(sorted_datapoint)
+            datapoints = response['Datapoints']
 
-            for i in range(len(sorted_datapoint)):
-                sorted_datapoint[i]['sort_by'] = i
-
-            print(sorted_datapoint)
-
-            last_datapoint = sorted_datapoint[-1]  # Last result
-            last_max_utilization = last_datapoint['Maximum'] # Last utilization
-            last_min_utilization = last_datapoint['Minimum'] # Last utilization
-            last_avg_utilization = last_datapoint['Average'] # Last utilization
-                                            
-                                            
-            # avg_load = round((last_avg_utilization / 100.0) 3)  # Last utilization in %
-            # timestamp = str(last_datapoint['Timestamp'])         # Last utilization timestamp
-
-            # max_load = round((last_max_utilization / 100.0), 3)
-            # min_load = round((last_min_utilization / 100.0), 3)
-
-            avg_load = round((last_avg_utilization), 3)  # Last utilization in %
-            timestamp = str(last_datapoint['Timestamp'])         # Last utilization timestamp
-
-            max_load = round((last_max_utilization), 3)
-            min_load = round((last_min_utilization), 3)
-            #print("{0} load at {1}".format(load, timestamp))
-
-            # result['selected_datapoints'] = datapoints
-            # result['last_avg'] = last_avg_utilization
-            # result['last_min'] = last_min_utilization
-            # result['last_max'] = last_max_utilization
-            # result['avg_load'] = avg_load
-            # result['last_time'] = timestamp                
-            # instance['mainState'] = result
-            # instance_holder.append(instance)
-            metrics['last_avg'] = avg_load
-            metrics['last_max'] = max_load
-            metrics['last_min'] = min_load
+            for dp in datapoints:
             
-            metrics_holder.append(metrics)
-            # response["header"][""]
-    return metrics_holder
+                dp_avg.append(dp['Average'])
+                dp_max.append(dp['Maximum'])
+                dp_min.append(dp['Minimum'])
 
-# ec2_metrics_amm()
+        avg_uti = round(sum(dp_avg)/len(dp_avg),3)
+        max_uti = max(dp_max)
+        min_uti = min(dp_min)
+
+        print(f' Average', avg_uti)
+        print(f' Maximum', max_uti)
+        print(f' Minimum', min_uti)
+
+    return avg_uti, max_uti, min_uti
 
 #-----------------------------------------------------------------------------
 
@@ -847,20 +770,18 @@ def ec2_instance_metrics(type, ins_id):
     fr=base64.b64encode(bytes_data.getvalue())
 
     # print(fr)
-    rds_graph = fr.decode('utf-8')
+    ec2_graph = fr.decode('utf-8')
 
-    return rds_graph
+    return ec2_graph
     
 #---- AWS/EBS -----------------------------------------------------------------------------------------------#
 def aws_ebs_volumes():
 
     ebs_vol = ec2_resource.volumes.all()
 
+    data = []
+    filter_data = []
     vol_count = 0
-
-    # for volume in ebs_vol:
-    #     print('Evaluating volume {0}'.format(volume.id))
-    #     print('The number of attachments for this volume is {0}'.format(len(volume.attachments)))
 
     ebs_status = ec2_client.describe_volumes(
     Filters=[
@@ -878,11 +799,22 @@ def aws_ebs_volumes():
     # print(ebs_status)
 
     for volume in ebs_vol:
-        print(volume)
+        print(volume.id)
         vol_count += 1
     # print(f'Count:',  vol_count)
 
-    return volume, vol_count, unattached_count
+        data.append(["AWS/EBS", "VolumeReadBytes", "VolumeId", str(volume.id)])
+        filter_data={"metrics":data}
+
+        response = cw_client.get_metric_widget_image(MetricWidget=json.dumps(filter_data))
+
+        bytes_data=io.BytesIO(response["MetricWidgetImage"])
+        fr=base64.b64encode(bytes_data.getvalue())
+
+        # print(fr)
+        ebsGraph = fr.decode('utf-8')
+
+    return volume, vol_count, unattached_count, ebsGraph
 
 
 #---- AWS/S3 ------------------------------------------------------------------------------------------------#
@@ -901,6 +833,8 @@ def aws_s3():
     # dp_a_NOO = [round(x) for x in dp_a_NOO]
     # dp_a_BSB = json.loads(dp_avg_BSB)
 
+    img_BSB = s3_graph("BucketSizeBytes")
+    img_NOO = s3_graph("NumberOfObjects")
 
     if len(response['Buckets'])==0:
         return f'No Buckets!'
@@ -913,8 +847,8 @@ def aws_s3():
         return render_template("aws/aws-s3/aws_s3.html", 
                 response=response, 
                 size_count=size_count, 
-                # dp_time_BSB=dp_time_BSB, dp_avg_BSB=dp_avg_BSB,
-                # dp_time_NOO=dp_time_NOO, dp_avg_NOO=dp_avg_NOO
+                img_BSB=img_BSB,
+                img_NOO=img_NOO,
                 )
 
 #-------------------------------------------------------
@@ -924,34 +858,37 @@ def aws_get_s3_bucket_size():
     cw = boto3.client('cloudwatch')
     s3client = boto3.client('s3')
 
-    # Get a list of all buckets
     allbuckets = s3client.list_buckets()
 
-    # Header Line for the output going to standard out
     print('Bucket'.ljust(45) + 'Size in Bytes'.rjust(25))
 
-    # Iterate through each bucket
+    # res = s3_client.put_bucket_metrics_configuration(
+    #     Bucket='project-test-bucket1',
+    #     Id='metrics-config-id',
+    #     MetricsConfiguration={
+    #         'Id': 'metrics-config-id',
+    #         'Filter': {
+    #             'Prefix': 'my-prefix',
+    #         }
+    #     }
+    # )
+
+    # print(f'PutMetrics: ',res)
+
     for bucket in allbuckets['Buckets']:
-        # For each bucket item, look up the cooresponding metrics from CloudWatch
+    
         response = cw.get_metric_statistics(Namespace='AWS/S3',
-                                            MetricName='BucketSizeBytes',
-                                            Dimensions=[
-                                                {'Name': 'BucketName', 'Value': bucket['Name']},
-                                                {'Name': 'StorageType', 'Value': 'StandardStorage'}
-                                            ],
+                                            MetricName='BytesUploaded',
+                                            Dimensions=[{'Name': 'BucketName', 'Value': bucket['Name']}],
                                             Statistics=['Average'],
                                             Period=3600,
-                                            StartTime=datetime.utcnow() - datetime.timedelta(days=7) ,
-                                            EndTime=datetime.utcnow(),
+                                            StartTime=datetime.datetime.utcnow() - datetime.timedelta(days=7) ,
+                                            EndTime=datetime.datetime.utcnow(),
                                             )
-        # The cloudwatch metrics will have the single datapoint, so we just report on it. 
 
         print(response)
         for item in response["Datapoints"]:
             print(bucket["Name"].ljust(45) + str("{:,}".format(int(item["Average"]))).rjust(25))
-            # Note the use of "{:,}".format.   
-            # This is a new shorthand method to format output.
-            # I just discovered it recently.
 
 # aws_get_s3_bucket_size()
 
@@ -981,6 +918,46 @@ def s3_objects_size():
     data.append({'total_size': roundSize, 'total_bucket': totalBucket, 'total_object': totalObject })
     return data
 
+#------------------------------------------------------
+def s3_graph(type):
+
+    start = datetime.datetime.utcnow() - datetime.timedelta(days=7)
+    end = datetime.datetime.utcnow()
+
+    data=[]
+    response_data=[]
+
+    allbuckets = s3_client.list_buckets()
+
+    for i in allbuckets['Buckets']:
+        response_data.append({
+            "BucketName": i['Name']
+        })
+    # print(f'Response Data: ', response_data)
+
+    bucket_names=[i["BucketName"] for i in response_data]
+    for bname in bucket_names:
+
+        if type == "BucketSizeBytes":
+            data.append(["AWS/S3", "BucketSizeBytes", "BucketName", str(bname), "StorageType", "StandardStorage"])
+            filter_data={"metrics":data,"start": str(start), "end": str(end),"title": "Bucket Size Bytes"}
+            # print(f'Filter Data: ', filter_data)
+        elif type == "NumberOfObjects":
+            data.append(["AWS/S3", "NumberOfObjects", "BucketName", str(bname), "StorageType", "AllStorageTypes"])
+            filter_data={"metrics":data, "start": str(start), "end": str(end),"title": "Number Of Objects"}
+            # print(f'Filter Data: ', filter_data)
+
+        response = cw_client.get_metric_widget_image(MetricWidget=json.dumps(filter_data))
+        
+        # print(response)
+
+        bytes_data=io.BytesIO(response["MetricWidgetImage"])
+        fr=base64.b64encode(bytes_data.getvalue())
+
+        # print(fr)
+        s3graph = fr.decode('utf-8')
+
+    return s3graph
 
 #-------------------------------------------------------
 @app.route('/s3-bucket-data', methods=["POST"])
@@ -988,16 +965,20 @@ def s3_bucket_data():
 
     key = request.form['bucketName']
 
+    # objects = s3_client.list_objects_v2(Bucket='project-test-bucket1')
+
+    # for obj in objects['Contents']:
+    #     print(obj)
+
     dp_time_BSB, dp_avg_BSB = aws_get_s3_bucket_metrics("BucketSizeBytes", key, "StandardStorage", ['Average'])
     dp_time_NOO, dp_avg_NOO = aws_get_s3_bucket_metrics("NumberOfObjects", key, "AllStorageTypes", ['Average'])
-    dp_time_AR, dp_avg_AR = aws_get_s3_bucket_metrics("AllRequests", key, "StandardStorage", ['Sum'])
 
-    print(f'Time: ', dp_time_AR)
-    print(f'Average: ', dp_avg_AR)
 
     return render_template("aws/aws-s3/aws_s3_bucket_data.html",
+                            key=key,
                             dp_time_BSB=dp_time_BSB, dp_avg_BSB=dp_avg_BSB,
                             dp_time_NOO=dp_time_NOO, dp_avg_NOO=dp_avg_NOO)
+
 #-------------------------------------------------------
 def aws_get_s3_bucket_metrics(type, bname, sttype, stat):
 
@@ -1034,7 +1015,7 @@ def aws_get_s3_bucket_metrics(type, bname, sttype, stat):
 
     for dp in sorted_datapoint:
         time = dp['Timestamp']
-        output_date = datetime.datetime.strftime(time, "%H:%M")
+        output_date = datetime.datetime.strftime(time, "%d/%m/%Y")
 
         dps_avg.append(round(dp['Average'], 4))
         dps_time.append(output_date)
@@ -1066,7 +1047,7 @@ def aws_rds():
 
     response, rds_totalStorage, rds_insCnt = get_rds_instance_details()
 
-    return render_template('aws/aws_rds.html', 
+    return render_template('aws/aws-rds/aws_rds.html', 
         response=response,
         rds_CPUUtilization=rds_CPUUtilization,
         # rds_DatabaseConnections=rds_DatabaseConnections,
@@ -1136,7 +1117,7 @@ def get_rds_graph(type):
         
         rds_graph = fr.decode('utf-8')
 
-        return rds_graph
+    return rds_graph
 
 #-------------------------------------------------------
 def get_rds_instance_details():
@@ -1166,69 +1147,92 @@ def get_rds_instance_details():
             pass
     
     roundSize = ("%.3f TB" % (total_storage*1.0/1024))
-    print(roundSize)
-    print(f'instance count: ', ins_cnt)
+    # print(f'size: ', roundSize)
+    # print(f'instance count: ', ins_cnt)
 
+    # print(f'response data :',response_data)
 
     return response, roundSize, ins_cnt
 #-------------------------------------------------------
-def get_rds_instancelevel_metrics(type):
-    
-    if type == 'CPUUtilization':
-        rds = '{"metrics": [["AWS/RDS", "CPUUtilization"]]}'
-    elif type == 'databaseConnections':
-        rds = '{"metrics": [["AWS/RDS", "DatabaseConnections"]]}'
-    elif type == 'freeStorageSpace':
-        rds = '{"metrics": [["AWS/RDS", "FreeStorageSpace"]]}'
-    elif type == 'freeableMemory':
-        rds = '{"metrics": [["AWS/RDS", "FreeableMemory"]]}'
-    elif type == 'readIOPS':
-        rds = '{"metrics": [["AWS/RDS", "ReadIOPS"]]}'
-    elif type == 'writeIOPS':
-        rds = '{"metrics": [["AWS/RDS", "WriteIOPS"]]}'
-    elif type == 'readThroughput':
-        rds = '{"metrics": [["AWS/RDS", "ReadThroughput"]]}'    
-    elif type == 'writeThroughput':
-        rds = '{"metrics": [["AWS/RDS", "WriteThroughput"]]}'
-    elif type == 'readLatency':
-        rds = '{"metrics": [["AWS/RDS", "ReadLatency"]]}'
-    elif type == 'writeLatency':
-        rds = '{"metrics": [["AWS/RDS", "WriteLatency"]]}'
-    
-    
-    response = cw_client.get_metric_widget_image(MetricWidget=rds)
-    
-    # print(response)
+@app.route('/aws/rds-instance-data', methods=["POST"])
+def rds_instance_data():
 
-    bytes_data=io.BytesIO(response["MetricWidgetImage"])
-    fr=base64.b64encode(bytes_data.getvalue())
+    key = request.form['dbInstanceId']
 
-    # print(fr)
-    rds_graph = fr.decode('utf-8')
+    db_data = get_rds_db_data(key)
 
-    return rds_graph
-#------------------------------------------------------------------
+    rds_t_CU, rds_a_CU = get_rds_ins_metrics("CPUUtilization", key)
+    rds_t_FSS, rds_a_FSS = get_rds_ins_metrics("FreeStorageSpace", key)
+    rds_t_FM, rds_a_FM = get_rds_ins_metrics("FreeableMemory", key)
+    rds_t_RIOPS, rds_a_RIOPS = get_rds_ins_metrics("ReadIOPS", key)
+    rds_t_WIOPS, rds_a_WIOPS = get_rds_ins_metrics("WriteIOPS", key)
+    rds_t_RT, rds_a_RT = get_rds_ins_metrics("ReadThroughput", key)
+    rds_t_WT, rds_a_WT = get_rds_ins_metrics("WriteThroughput", key)
+    rds_t_RL, rds_a_RL = get_rds_ins_metrics("ReadLatency", key)
+    rds_t_WL, rds_a_WL = get_rds_ins_metrics("WriteLatency", key)
+    rds_t_DBC, rds_a_DBC = get_rds_ins_metrics("DatabaseConnections", key)
 
+    return render_template('aws/aws-rds/aws_rds_instance_data.html', 
+                            key=key, db_data=db_data,
+                            rds_t_CU=rds_t_CU, rds_a_CU=rds_a_CU,
+                            rds_t_FSS=rds_t_FSS, rds_a_FSS=rds_a_FSS,
+                            rds_t_FM=rds_t_FM, rds_a_FM=rds_a_FM,
+                            rds_t_RIOPS=rds_t_RIOPS, rds_a_RIOPS=rds_a_RIOPS,
+                            rds_t_WIOPS=rds_t_WIOPS, rds_a_WIOPS=rds_a_WIOPS,
+                            rds_t_RT=rds_t_RT, rds_a_RT=rds_a_RT,
+                            rds_t_WT=rds_t_WT, rds_a_WT=rds_a_WT,
+                            rds_t_RL=rds_t_RL, rds_a_RL=rds_a_RL,
+                            rds_t_WL=rds_t_WL, rds_a_WL=rds_a_WL,
+                            rds_t_DBC=rds_t_DBC, rds_a_DBC=rds_a_DBC)
 
-#------------------------------------------------------------------
-def get_rds_metrics():
-    
-    now = datetime.utcnow() # Now time in UTC format 
-    past = now - datetime.timedelta(minutes=60) # Minus 60 minutes
- 
-    response = cw_client.get_metric_statistics(
-        Period=86400,
-        StartTime=datetime.utcnow() - datetime.timedelta(days=7) ,
-        EndTime=datetime.utcnow(),
-        MetricName='CPUUtilization',
+#-------------------------------------------------------
+def get_rds_ins_metrics(type, ins_id):
+
+    dps_avg = []
+    dps_time = []
+
+    dp = cw_client.get_metric_statistics(
+        Period=300,
+        StartTime=datetime.datetime.utcnow() - datetime.timedelta(days=1),
+        EndTime=datetime.datetime.utcnow(),
+        MetricName=type,
         Namespace='AWS/RDS',
-        Statistics=['Maximum'],
-        Dimensions=[{'Name':'DBInstanceIdentifier', 'Value':'database-1'}]
+        Statistics=['Average'],
+        Dimensions=[{'Name':'DBInstanceIdentifier', 'Value':ins_id}]
         )
-    return print(response)
+    # print(dp)
 
+    datapoints = dp['Datapoints']
+    sorted_datapoint = sorted(datapoints, key=itemgetter('Timestamp'))
 
-# get_rds_metrics()
+    # print(sorted_datapoint)
+
+    for i in range(len(sorted_datapoint)):
+        sorted_datapoint[i]['sort_by'] = i
+
+    for dp in sorted_datapoint:
+        time = dp['Timestamp']
+        output_date = datetime.datetime.strftime(time, "%H:%M")
+
+        dps_avg.append(round(dp['Average'], 4))
+        dps_time.append(output_date)
+    
+    dt = dps_time[-10:]
+    da = dps_avg[-10:]
+    # print(dt)
+    # print(da)
+
+    return json.dumps(dt), json.dumps(da)
+
+#------------------------------------------------------------------
+@app.route('/aws/rds-all-data')
+def get_rds_db_data(dbId):
+
+    response = rds_client.describe_db_instances(
+        DBInstanceIdentifier=dbId,
+    )
+
+    return response
 
 #------------------------------------------------------------------
 def get_rds_snapshots():
@@ -1282,7 +1286,6 @@ def rds_instance_stop():
     return redirect(url_for('aws_rds'))
 
 #---------------------------------------------------------------
-
 def rds_state_stats():
 
     stats = {
@@ -1312,28 +1315,44 @@ def rds_state_stats():
     return state_data
 
 #---------------------------------------------------------------
-@app.route('/aws/rds-all')
-def rds_all():
+@app.route('/aws/cloudfront')
+def get_cloudfront_metrics():
 
-    data = []
-    size = 0
+    client = boto3.client('cloudfront')
 
-    response = rds_client.describe_db_instances()
+    response = client.list_distributions()
 
-    for i in response['DBInstances']:   
-        try:
-            # print(i["AllocatedStorage"])
-            size += (i["AllocatedStorage"])
-        except Exception as ex:
-            continue
-            pass
-        
-        print(size)
+    dp = cw_client.get_metric_statistics(Namespace='AWS/CloudFront',
+                                    MetricName='Requests',
+                                    Dimensions=[{'Name': 'Id', 'Value': 'E2C5AR6K3UBX5F'}],
+                                    Statistics=['Average'],
+                                    Period=3600,
+                                    StartTime=datetime.datetime.utcnow() - datetime.timedelta(days=7) ,
+                                    EndTime=datetime.datetime.utcnow(),
+                                    )
+
+    print(dp)
 
     return response
     
 #----------------------------------------------------------------
+@app.route('/aws/ebs-met')
+def get_ebs_metrics():
 
+    ebs_vol = ec2_client.describe_volumes()
+
+    dp = cw_client.get_metric_statistics(Namespace='AWS/EBS',
+                                    MetricName='VolumeReadBytes',
+                                    Dimensions=[{'Name': 'VolumeId', 'Value': 'vol-0b5363d3f9b960df6'}],
+                                    Statistics=['Average'],
+                                    Period=3600,
+                                    StartTime=datetime.datetime.utcnow() - datetime.timedelta(days=7) ,
+                                    EndTime=datetime.datetime.utcnow(),
+                                    )
+
+    print(dp)
+
+    return ebs_vol
 
 #---- AWS/LAMBDA ------------------------------------------------------------------------------------------------#
 
@@ -1438,6 +1457,8 @@ def get_ec2_datapoints():
     print(da)
 
     return json.dumps(dt), json.dumps(da)
+#---------------------------------------------------------------------
+
 
 #---- ERROR HANDLERS ------------------------------------------------------------------------------------------------#
 
@@ -1450,12 +1471,6 @@ def page_not_found(e):
 @app.errorhandler(500)
 def server_error(e):
     return render_template("500.html"), 500
-
-
-
-
-
-
 
 
 

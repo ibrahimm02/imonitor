@@ -71,3 +71,16 @@ pointer-events: none;
 th {
   font-weight: 500 !important;
 }
+
+#box-header
+{
+    margin: 0;
+}
+
+#box-header span {
+  color: black;
+}
+
+.clear{
+    clear:both;
+}

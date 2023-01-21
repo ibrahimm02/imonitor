@@ -1,0 +1,327 @@
+{% extends "aws/aws_base.html" %} 
+{% block nav_s3 %}active{% endblock %} {%
+block title %}iMonitor - S3{% endblock %} 
+{% block navTitle %}{{key}}{% endblock %}
+{% block content %}
+
+<h4 class="mt-2">Database Id: {{db_data.DBInstances[0]['DBInstanceIdentifier']}}</h4>
+
+<div id="instancePage">
+    <div class="card mb-2">
+      <div class="card-body">
+        <div class="row my-2">
+          <div class="col">
+            <div>
+              <h6>Status</h6>
+              <span>{{db_data.DBInstances[0]['ActivityStreamStatus']}}</span>
+            </div>
+          </div>
+          <div class="col">
+            <div>
+              <h6>Class</h6>
+              <span>{{db_data.DBInstances[0]['DBInstanceClass']}}</span>
+            </div>
+          </div>
+          <div class="col">
+            <div>
+              <h6>Engine</h6>
+              <span>{{db_data.DBInstances[0]['Engine']}}</span>
+            </div>
+          </div>
+          <div class="col">
+            <div>
+              <h6>Region & AZ</h6>
+              <span>{{db_data.DBInstances[0]['AvailabilityZone']}}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="row my-2">
+            <div class="col">
+              <div>
+                <h6>Engine Version</h6>
+                <span>{{db_data.DBInstances[0]['EngineVersion']}}</span>
+              </div>
+            </div>
+            <div class="col">
+              <div>
+                <h6>License Model</h6>
+                <span>{{db_data.DBInstances[0]['LicenseModel']}}</span>
+              </div>
+            </div>
+            <div class="col">
+                <div>
+                    <h6>Encryption</h6>
+                    <span>{{db_data.DBInstances[0]['StorageEncrypted']}}</span>
+                </div>
+            </div>
+            <div class="col">
+                <div>
+                    <h6>Storage</h6>
+                    <span>{{db_data.DBInstances[0]['AllocatedStorage']}}</span>
+                </div>
+            </div>
+          </div>
+          
+
+        <div class="row my-2">
+            <div class="col">
+                <div>
+                    <h6>Storage type</h6>
+                    <span>{{db_data.DBInstances[0]['StorageType']}}</span>
+                </div>
+               
+            </div>
+            <div class="col">
+                <div>
+                    <h6>Created Time</h6>
+                    <span>{{db_data.DBInstances[0]['InstanceCreateTime'].strftime("%d-%m-%Y, %H:%M:%S")}}</span>
+                </div>
+            </div>
+            <div class="col">
+            
+            <div>
+                <h6>Resource ID</h6>
+                <span>{{db_data.DBInstances[0]['DbiResourceId']}}</span>
+              </div>
+            </div>
+            <div class="col">
+                <div>
+                    <h6>Amazon Resource Name (ARN)</h6>
+                    <span>{{db_data.DBInstances[0]['DBInstanceArn']}}</span>
+                </div>
+            </div>
+        </div>
+    
+      </div>
+    </div>
+</div>
+
+
+<hr>
+
+<nav class="navbar px-0" style="background: transparent !important">
+    <div class="container-fluid px-0">
+      <a class="navbar-brand">Monitoring: {{key}}</a>
+      <a class="btn btn-light btn-outline-dark" href="{{ url_for('aws_rds')}}" role="button">
+        <i class="bx bx-refresh bx-fw"></i> Refresh
+      </a>
+    </div>
+</nav>
+
+<div class="row row-cols-1 row-cols-md-2">
+    <div class="col-sm-6">
+      <div class="card border-1 shadow-sm mb-4 px-1">
+        <div class="card-body">
+          <div class="chart-area p-1">
+            <canvas id="cu-chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="card border-1 shadow-sm mb-4 px-1">
+        <div class="card-body">
+          <div class="chart-area p-1">
+            <canvas id="fss-chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="card border-1 shadow-sm mb-4 px-1">
+        <div class="card-body">
+          <div class="chart-area p-1">
+            <canvas id="fm-chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="card border-1 shadow-sm mb-4 px-1">
+        <div class="card-body">
+          <div class="chart-area p-1">
+            <canvas id="riops-chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="card border-1 shadow-sm mb-4 px-1">
+        <div class="card-body">
+          <div class="chart-area p-1">
+            <canvas id="wiops-chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="card border-1 shadow-sm mb-4 px-1">
+        <div class="card-body">
+          <div class="chart-area p-1">
+            <canvas id="rt-chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="card border-1 shadow-sm mb-4 px-1">
+        <div class="card-body">
+          <div class="chart-area p-1">
+            <canvas id="wt-chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="card border-1 shadow-sm mb-4 px-1">
+        <div class="card-body">
+          <div class="chart-area p-1">
+            <canvas id="rl-chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="card border-1 shadow-sm mb-2 px-1">
+        <div class="card-body">
+          <div class="chart-area p-1">
+            <canvas id="wl-chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="card border-1 shadow-sm mb-2 px-1">
+        <div class="card-body">
+          <div class="chart-area p-1">
+            <canvas id="dbc-chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+    let dp_t_CU = JSON.parse({{ rds_t_CU | tojson }})
+    let dp_a_CU = JSON.parse({{ rds_a_CU | tojson}})
+
+    // DRO graph
+    let dp_t_FSS = JSON.parse({{ rds_t_FSS | tojson }})
+    let dp_a_FSS = JSON.parse({{ rds_a_FSS | tojson}})
+
+    // DWO graph
+    let dp_t_FM = JSON.parse({{ rds_t_FM | tojson }})
+    let dp_a_FM = JSON.parse({{ rds_a_FM | tojson}})
+
+    // NI graph
+    let dp_t_RIOPS = JSON.parse({{ rds_t_RIOPS | tojson }})
+    let dp_a_RIOPS = JSON.parse({{ rds_a_RIOPS | tojson}})
+
+    // NO graph
+    let dp_t_WIOPS = JSON.parse({{ rds_t_WIOPS | tojson }})
+    let dp_a_WIOPS = JSON.parse({{ rds_a_WIOPS | tojson}})
+
+    // CCU graph
+    let dp_t_RT = JSON.parse({{ rds_t_RT | tojson }})
+    let dp_a_RT = JSON.parse({{ rds_a_RT | tojson}})
+
+    // CCB graph
+    let dp_t_WT = JSON.parse({{ rds_t_WT | tojson }})
+    let dp_a_WT = JSON.parse({{ rds_a_WT | tojson}})
+
+    // DRB graph
+    let dp_t_RL = JSON.parse({{ rds_t_RL | tojson }})
+    let dp_a_RL = JSON.parse({{ rds_a_RL | tojson}})
+
+    // DWB graph
+    let dp_t_WL = JSON.parse({{ rds_t_WL | tojson }})
+    let dp_a_WL = JSON.parse({{ rds_a_WL | tojson}})
+
+    let dp_t_DBC = JSON.parse({{ rds_t_DBC | tojson }})
+    let dp_a_DBC = JSON.parse({{ rds_a_DBC | tojson}})
+
+ 
+  rds_ins_graph(dp_t_CU, dp_a_CU, "CPU Utilization", "cu-chart")
+  rds_ins_graph(dp_t_FSS, dp_a_FSS, "Free Storage Space", "fss-chart")
+  rds_ins_graph(dp_t_FM, dp_a_FM, "Freeable Memory", "fm-chart")
+  rds_ins_graph(dp_t_RIOPS, dp_a_RIOPS, "Read IOPS", "riops-chart")
+  rds_ins_graph(dp_t_WIOPS, dp_a_WIOPS, "Write IOPS", "wiops-chart")
+  rds_ins_graph(dp_t_RT, dp_a_RT, "Read Throughput", "rt-chart")
+  rds_ins_graph(dp_t_WT, dp_a_WT, "Write Throughput", "wt-chart")
+  rds_ins_graph(dp_t_RL, dp_a_RL, "Read Latency", "rl-chart")
+  rds_ins_graph(dp_t_WL, dp_a_WL, "Write Latency", "wl-chart")
+  rds_ins_graph(dp_t_DBC, dp_a_DBC, "Database Connection", "dbc-chart")
+
+ 
+  function rds_ins_graph(dt, da, label, id) {
+
+      // Set new default font family and font color
+      (Chart.defaults.global.defaultFontFamily = "Nunito"),
+      '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+      Chart.defaults.global.defaultFontColor = "#858796";
+
+      var chartData = {
+        labels: dt,
+        datasets: [{
+          label: label,
+          lineTension: 0.1,
+          backgroundColor: "rgba(78, 115, 223, 0.05)",
+          borderColor: "rgba(78, 115, 223, 1)",
+          pointRadius: 2,
+          pointBackgroundColor: "rgba(78, 115, 223, 1)",
+          pointBorderColor: "rgba(78, 115, 223, 1)",
+          pointHoverRadius: 3,
+          pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+          pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+          pointHitRadius: 10,
+          pointBorderWidth: 2,
+
+          data: da,
+
+        }],
+        options: {
+          maintainAspectRatio: false,
+          layout: {
+            padding: {
+              left: 10,
+              right: 25,
+              top: 25,
+              bottom: 0,
+            },
+          },
+          legend: {
+            display: false,
+          },
+          tooltips: {
+            backgroundColor: "rgb(255,255,255)",
+            bodyFontColor: "#858796",
+            titleMarginBottom: 10,
+            titleFontColor: "#6e707e",
+            titleFontSize: 14,
+            borderColor: "#dddfeb",
+            borderWidth: 1,
+            xPadding: 15,
+            yPadding: 15,
+            displayColors: false,
+            intersect: false,
+            mode: "index",
+            caretPadding: 10,
+          },
+        },
+      };
+
+      var ctx = document.getElementById(id).getContext("2d");
+
+      var myChart = new Chart(ctx, {
+        type: "line",
+        data: chartData,
+
+      });
+
+    }
+</script>
+
+{% endblock %}

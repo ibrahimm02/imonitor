@@ -25,7 +25,7 @@ block title %}iMonitor - S3{% endblock %} {% block navTitle %}S3{% endblock %}
       <div class="card-body">
         <h5 class="card-title">Total Object Count</h5>
         <h1 class="display-6">
-          {% for item in size_count:%} {{item['total_object']}} {% endfor %}
+          {% for item in size_count:%} {{item['total_object']}}{% endfor %}
         </h1>
       </div>
     </div>
@@ -35,7 +35,7 @@ block title %}iMonitor - S3{% endblock %} {% block navTitle %}S3{% endblock %}
       <div class="card-body">
         <h5 class="card-title">Total Storage Size</h5>
         <h1 class="display-6">
-          {% for item in size_count:%} {{item['total_size']}} {% endfor %}
+          {% for item in size_count:%} {{item['total_size']}}{% endfor %}
         </h1>
       </div>
     </div>
@@ -50,8 +50,6 @@ block title %}iMonitor - S3{% endblock %} {% block navTitle %}S3{% endblock %}
         style="vertical-align: middle">
         <thead class="table-dark">
           <th class="border-0 rounded-start">Bucket Name</th>
-          <!-- <th class="border-0">No of Objects</th>
-          <th class="border-0">Storage Bytes</th> -->
           <th class="border-0 rounded-end">Creation Date</th>
         </thead>
 
@@ -73,8 +71,6 @@ block title %}iMonitor - S3{% endblock %} {% block navTitle %}S3{% endblock %}
               </button>
             </form>          
           </td>
-          <!-- <td>{{dp_avg_NOO | last}}</td>
-          <td>{{dp_avg_BSB | last}}</td> -->
           <td>{{bucket.CreationDate.strftime("%d-%m-%Y, %H:%M:%S")}}</td>
         </tr>
         {%endfor%}
@@ -83,16 +79,24 @@ block title %}iMonitor - S3{% endblock %} {% block navTitle %}S3{% endblock %}
   </div>
 </div>
 
-<!-- <div class="col-sm-6">
-  <div class="card border-1 shadow-sm mb-2 px-1">
-    <div class="card-body">
-      <div class="chart-area p-1">
-        <canvas id="bsb-chart"></canvas>
-      </div>
-    </div>
+<div class="row">
+<div class="col-sm-6">
+  <div class="card border-0 shadow-sm mb-4 px-1">
+    <img
+      src="data:image/png;base64,{{img_BSB}}"
+      alt="s3_BSB Graph"
+    />
   </div>
-</div> -->
-
+</div>
+<div class="col-sm-6">
+  <div class="card border-0 shadow-sm mb-4 px-1">
+    <img
+      src="data:image/png;base64,{{img_NOO}}"
+      alt="s3_NOO Graph"
+    />
+  </div>
+</div>
+</div>
 </script>
 
 {% endblock content %}

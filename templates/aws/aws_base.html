@@ -5,37 +5,24 @@
     <!-- <meta http-equiv="refresh" content="60" -->
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
     <title>{% block title %}iMonitor{% endblock %}</title> 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css"
-      integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4"
-      crossorigin="anonymous"/> -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" 
     integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" 
     crossorigin="anonymous" 
     referrerpolicy="no-referrer" />
 
-    <link href='https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css' 
-      rel='stylesheet'>
+    <link href='https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css' rel='stylesheet'>
 
       <!-- Custom CSS -->
     <link href="{{url_for('static', filename='css/style.css')}}" rel="stylesheet"/>
     <link href="{{url_for('static', filename='css/sidenav.css')}}" rel="stylesheet"/>
-    <link href="{{url_for('static', filename='css/nv.d3.css')}}" rel="stylesheet"/>
    
-    <!-- NVD3 -->
+    <!-- ChartJs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script> -->
     <script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script>
-
-    <!-- Font Awesome JS -->
-    
-
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
 
   </head>
   <body>
@@ -74,17 +61,6 @@
                 </ul>
               </li>
               <li>
-                <a href="#storageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
-                  <svg width="32" height="32" viewBox="0 0 52 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="globalNav-0391" data-testid="storage-svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M17 38H35L35.001 43H17V38ZM17 45H35C36.103 45 37 44.103 37 43V38C37 36.897 36.103 36 35 36H17C15.897 36 15 36.897 15 38V43C15 44.103 15.897 45 17 45ZM15 23H36V21H15V23ZM15 10H23V8H15V10ZM15 16H24V14H15V16ZM50 52.034C50 53.118 49.118 54 48.034 54H3.966C2.882 54 2 53.118 2 52.034V31H50V52.034ZM11 2H30V12C30 12.552 30.447 13 31 13H41V29H11V2ZM32 3.414L39.586 11H32V3.414ZM51 29H43V12H42.991C42.99 11.74 42.898 11.484 42.707 11.293L31.707 0.293C31.516 0.102 31.26 0.0100002 31 0.0100002V0H10C9.447 0 9 0.448 9 1V29H1C0.447 29 0 29.448 0 30V52.034C0 54.221 1.779 56 3.966 56H48.034C50.221 56 52 54.221 52 52.034V30C52 29.448 51.553 29 51 29Z" fill="currentColor"></path></svg>
-                  Storage
-                </a>
-                <ul class="collapse list-unstyled" id="storageSubmenu">
-                  <li class="{% block nav_s3 %}{% endblock %}"><a href="{{ url_for('aws_s3')}}">S3</a></li>
-                  <li><a href="#">Elastic Block Store</a></li>
-                  <li><a href="#">Elastic File System</a></li>
-                </ul>
-              </li>
-              <li>
                 <a href="#databaseSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
                   <svg width="32" height="32" viewBox="0 0 38 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="globalNav-0391" data-testid="database-svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M19 27.982C8.981 27.982 2 24.822 2 21.986V11.667C5.057 14.275 11.357 15.991 19 15.991C26.643 15.991 32.943 14.275 36 11.667V21.986C36 24.822 29.019 27.982 19 27.982ZM19 41.727C8.981 41.727 2 38.567 2 35.732V25.658C5.057 28.267 11.357 29.982 19 29.982C26.643 29.982 32.943 28.267 36 25.658V35.732C36 38.567 29.019 41.727 19 41.727ZM19 54C8.981 54 2 50.84 2 48.004V39.403C5.057 42.012 11.357 43.727 19 43.727C26.643 43.727 32.943 42.012 36 39.403V48.004C36 50.84 29.019 54 19 54ZM19 2C29.019 2 36 5.16 36 7.996C36 10.831 29.019 13.991 19 13.991C8.981 13.991 2 10.831 2 7.996C2 5.16 8.981 2 19 2ZM19 0C8.168 0 0 3.438 0 7.996V48.004C0 52.563 8.168 56 19 56C29.832 56 38 52.563 38 48.004V7.996C38 3.438 29.832 0 19 0Z" fill="currentColor"></path></svg>
                   Database
@@ -93,6 +69,17 @@
                   <li><a href="{{ url_for('aws_rds')}}">RDS</a></li>
                   <li><a href="#">DynamoDB</a></li>   
                   <li><a href="#">ElastiCache</a></li>
+                </ul>
+              </li>
+              <li>
+                <a href="#storageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                  <svg width="32" height="32" viewBox="0 0 52 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="globalNav-0391" data-testid="storage-svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M17 38H35L35.001 43H17V38ZM17 45H35C36.103 45 37 44.103 37 43V38C37 36.897 36.103 36 35 36H17C15.897 36 15 36.897 15 38V43C15 44.103 15.897 45 17 45ZM15 23H36V21H15V23ZM15 10H23V8H15V10ZM15 16H24V14H15V16ZM50 52.034C50 53.118 49.118 54 48.034 54H3.966C2.882 54 2 53.118 2 52.034V31H50V52.034ZM11 2H30V12C30 12.552 30.447 13 31 13H41V29H11V2ZM32 3.414L39.586 11H32V3.414ZM51 29H43V12H42.991C42.99 11.74 42.898 11.484 42.707 11.293L31.707 0.293C31.516 0.102 31.26 0.0100002 31 0.0100002V0H10C9.447 0 9 0.448 9 1V29H1C0.447 29 0 29.448 0 30V52.034C0 54.221 1.779 56 3.966 56H48.034C50.221 56 52 54.221 52 52.034V30C52 29.448 51.553 29 51 29Z" fill="currentColor"></path></svg>
+                  Storage
+                </a>
+                <ul class="collapse list-unstyled" id="storageSubmenu">
+                  <li class="{% block nav_s3 %}{% endblock %}"><a href="{{ url_for('aws_s3')}}">S3</a></li>
+                  <li><a href="#">Elastic Block Store</a></li>
+                  <li><a href="#">Elastic File System</a></li>
                 </ul>
               </li>
               <li>
@@ -118,23 +105,6 @@
                 </ul>
               </li>
             </ul>
-         
-          <!-- <ul class="list-unstyled CTAs">
-          <li>
-              <a
-              href="https://bootstrapious.com/tutorial/files/sidebar.zip"
-              class="download"
-              >Download source</a
-              >
-          </li>
-          <li>
-              <a
-              href="https://bootstrapious.com/p/bootstrap-sidebar"
-              class="article"
-              >Back to article</a
-              >
-          </li>
-          </ul> -->
         </nav>
   
         <!-- Page Content Holder -->
@@ -157,7 +127,7 @@
                     <i class="fas fa-align-justify"></i>
                     </button>
                     
-                    <h4 class="navbar-center">{% block navTitle %}iMonitor{% endblock %}</h4>
+                    <h4 class="navbar-center">{% block navTitle %} {% endblock %}</h4>
 
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul class="nav navbar-nav ml-auto">
@@ -179,7 +149,6 @@
                 </div>
             </nav>
 
-  
             <div class="container">
               
               {% block content %} 
@@ -210,7 +179,7 @@
       crossorigin="anonymous">
     </script>
     
-    <!-- Bootstrap JS -->
+    <!-- Bootstrap JS / sidenav usage-->
     <script
      src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"
      integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm"
@@ -218,11 +187,11 @@
     </script>
 
     <!-- Datalables Chartjs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" 
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" 
     integrity="sha512-JPcRR8yFa8mmCsfrw4TNte1ZvF1e3+1SdGMslZvmrzDYxS69J7J49vkFL8u6u8PlPJK+H3voElBtUCzaXj+6ig==" 
     crossorigin="anonymous" 
     referrerpolicy="no-referrer">
-    </script>
+    </script> -->
 
     <script type="text/javascript">
       $(document).ready(function () {

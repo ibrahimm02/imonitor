@@ -31,9 +31,20 @@ block title %}iMonitor - RDS{% endblock %} {% block navTitle %}RDS{% endblock %}
             {%for bucket in response['DBInstances']%}
             <tr>
               <td>
-                <a href="#" style="text-decoration: underline; color: #0dcaf0"
-                  >{{bucket.DBInstanceIdentifier}}</a
-                >
+                <form action="{{ url_for('rds_instance_data')}}" method="POST">
+                  <input
+                    type="hidden"
+                    name="dbInstanceId"
+                    value="{{bucket.DBInstanceIdentifier}}"
+                  />
+                  <button
+                    type="submit"
+                    class="btn btn-link"
+                    style="color: #0dcaf0"
+                  >
+                  {{bucket.DBInstanceIdentifier}}
+                  </button>
+                </form>
               </td>
               <td>{{bucket.Engine}}</td>
               <td>

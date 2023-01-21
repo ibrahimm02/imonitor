@@ -22,36 +22,76 @@
       </div>
     </div>
   </div>
-  <div class="col-sm-2">
-    <div class="card text-center border-0 shadow-sm mb-4 h-80">
+  <div class="col-sm-6">
+    <div class="card border-0 shadow-sm mb-4 h-80">
       <div class="card-body">
-        <h5 class="card-title">Average Utilization</h5>
-        {% for m in ec2_metrics: %}
-        <h1 class="display-6">{{m.last_avg}}%</h1>
-        {% endfor %}
+        <div>
+          <div id="box-header">
+            <span class="card-title mb-1" style="float: left;">CPU Utilization (%)</span> 
+            <span style="float: right;">(3hrs)</span>
+             <div class="clear"></div>
+         </div>        
+        
+      </div>
+        <div class="row">
+          <div class="col-sm-4">
+            <div class="card text-center border-0 h-80">
+              <div class="card-body py-2">
+                <h6 class="card-title">Average</h6>
+                <!-- {% for m in ec2_metrics: %}
+                <h1 class="display-6">{{m.last_avg}}%</h1>
+                {% endfor %} -->
+                <span>{{avg_util}}%</span>
+                <div class="progress progress-sm mr-2">
+                  <div class="progress-bar progress-bar-striped" 
+                    role="progressbar" 
+                    style="width: {{avg_util}}%" 
+                    aria-valuenow="{{avg_util}}" aria-valuemin="0" aria-valuemax="100">
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="card text-center border-0  h-80">
+              <div class="card-body py-2">
+                <h6 class="card-title">Minimum</h6>
+                <!-- {% for m in ec2_metrics: %}
+                <h1 class="display-6">{{m.last_min}}%</h1>
+                {% endfor %} -->
+                <span>{{min_util}}%</span>
+                <div class="progress progress-sm mr-2">
+                  <div class="progress-bar progress-bar-striped" 
+                    role="progressbar" style="width: {{min_util}}" 
+                    aria-valuenow="{{min_util}}" aria-valuemin="0" aria-valuemax="100">
+                </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="card text-center border-0  h-80">
+              <div class="card-body py-2">
+                <h6 class="card-title">Maximum</h6>
+                <!-- {% for m in ec2_metrics: %}
+                <h1 class="display-6">{{m.last_max}}%</h1>
+                {% endfor %} -->
+                <span>{{max_util}}%</span>
+                <div class="progress progress-sm mr-2">
+                  <div class="progress-bar progress-bar-striped" 
+                    role="progressbar" style="width: {{max_util}}%" 
+                    aria-valuenow="{{max_util}}" aria-valuemin="0" aria-valuemax="100">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-  <div class="col-sm-2">
-    <div class="card text-center border-0 shadow-sm mb-4 h-80">
-      <div class="card-body">
-        <h5 class="card-title">Minimum Utilization</h5>
-        {% for m in ec2_metrics: %}
-        <h1 class="display-6">{{m.last_min}}%</h1>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-  <div class="col-sm-2">
-    <div class="card text-center border-0 shadow-sm mb-4 h-80">
-      <div class="card-body">
-        <h5 class="card-title">Maximum Utilization</h5>
-        {% for m in ec2_metrics: %}
-        <h1 class="display-6">{{m.last_max}}%</h1>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
+
   <div class="col-sm-4">
     <div class="card text-center border-0 shadow-sm mb-4 h-80">
       <div class="card-body m-0" style="padding: 5px 10px">
@@ -192,7 +232,7 @@
         class="table table-nowrap mb-0 rounded table-hover"
         style="vertical-align: middle"
       >
-        <thead class="align-middle table-secondary">
+        <thead class="align-middle table-dark">
           <tr>
             <th class="border-0 rounded-start">Instance Name</th>
             <th class="border-0" >Instance Id</th>
@@ -312,29 +352,17 @@
   var ctx = document.getElementById("myChart").getContext("2d");
 
   var options = {
+    plugins: {
+      labels: {
+          render: 'value',
+          fontSize: 16,
+      },
+    },
     tooltips: {
       enabled: true,
     },
     legend: {
       position: 'right',
-    },
-    plugins: {
-      labels: [
-        {
-          render: "label",
-          position: "outside",
-          fontColor: "#000",
-          fontSize: 15,
-          padding: 0
-
-        },
-        {
-          render: "percentage",
-          fontColor: "#000",
-          fontSize: 10,
-          position: "border",
-        },
-      ],
     },
   };
 
