@@ -88,7 +88,7 @@
                   Networking
                 </a>
                 <ul class="collapse list-unstyled" id="networkingSubmenu">
-                  <li class="{% block nav_cloudfront %}{% endblock %}"><a href="#">CloudFront</a></li>
+                  <li class="{% block nav_cloudfront %}{% endblock %}"><a href="{{ url_for('aws_cloudfront')}}">CloudFront</a></li>
                   <li><a href="#">Elastic Load Balancing</a></li>
                   <li><a href="#">VPC</a></li>
                 </ul>

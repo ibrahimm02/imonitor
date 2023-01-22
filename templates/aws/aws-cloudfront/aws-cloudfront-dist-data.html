@@ -1,0 +1,99 @@
+{% extends "aws/aws_base.html" %} {% block title %}iMonitor - CloudFront{%
+endblock %} {% block nav_cloudfront %}active{% endblock %} {% block navTitle
+%}{{key}}{% endblock %} {% block content %}
+
+<div id="instancePage">
+  <div class="card mb-2">
+    <div class="card-body">
+      <div class="row my-2">
+        <div class="col my-1">
+          <div>
+            <h6>ARN</h6>
+            <span>{{response.ARN}}</span>
+          </div>
+        </div>
+        <div class="col my-1">
+          <div>
+            <h6>Domain Name</h6>
+            <span>{{response.DomainName}}</span>
+          </div>
+        </div>
+        <div class="col my-1">
+            <div>
+                <h6>Last Modified</h6>
+                <span>{{response.LastModifiedTime.strftime("%d-%m-%Y, %H:%M:%S")}}</span>
+            </div>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+  <nav class="navbar px-0" style="background: transparent !important">
+    <div class="container-fluid px-0">
+      <a class="navbar-brand">Monitoring-{{key}} </a>
+      <a
+        class="btn btn-light btn-outline-dark"
+        href="{{ url_for('aws_cloudfront')}}"
+        role="button"
+      >
+        <i class="bx bx-refresh bx-fw"></i> Refresh
+      </a>
+    </div>
+  </nav>
+
+  <div class="cointainer">
+    <div class="row row-cols-1 row-cols-md-3">
+      <div class="col-sm-3">
+        <div class="card border-0 shadow-sm mb-4 px-1">
+          <img
+            src="data:image/png;base64,{{cf_REQ_graph}}"
+            alt="rds_CPUUtilization Graph"
+          />
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <div class="card border-0 shadow-sm mb-4 px-1">
+          <img
+            src="data:image/png;base64,{{cf_BD_graph}}"
+            alt="rds_FreeStorageSpace Graph"
+          />
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <div class="card border-0 shadow-sm mb-4 px-1">
+          <img
+            src="data:image/png;base64,{{cf_BU_graph}}"
+            alt="rds_FreeableMemory Graph"
+          />
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <div class="card border-0 shadow-sm mb-4 px-1">
+          <img
+            src="data:image/png;base64,{{cf_4ER_graph}}"
+            alt="rds_ReadIOPS Graph"
+          />
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <div class="card border-0 shadow-sm mb-4 px-1">
+          <img
+            src="data:image/png;base64,{{cf_5ER_graph}}"
+            alt="rds_WriteIOPS Graph"
+          />
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <div class="card border-0 shadow-sm mb-3 px-1">
+          <img
+            src="data:image/png;base64,{{cf_TER_graph}}"
+            alt="rds_ReadThroughput Graph"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% endblock %}
+</div>

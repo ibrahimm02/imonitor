@@ -79,3 +79,7 @@ th {
 .clear{
     clear:both;
 }
+
+.border-left {
+  border-bottom: 0.15rem solid #2c3e50 !important;
+}

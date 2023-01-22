@@ -563,54 +563,59 @@ def get_ec2_metrics_amm():
 
     # print(reservations)
 
-    if not reservations:
-        # print("list empty")
-        avg_uti = dp_avg.append(0)
-        max_uti = dp_max.append(0)
-        min_uti = dp_min.append(0)
+    # if not reservations:
+    #     print("list empty")
+    #     avg_uti = dp_avg.append(0)
+    #     max_uti = dp_max.append(0)
+    #     min_uti = dp_min.append(0)
 
-    else:
-        # print("list not empty")
+    # else:
+    #     print("list not empty")
 
-        for res in reservations:
-            for instance in res["Instances"]:
+    for res in reservations:
+        for instance in res["Instances"]:
 
-                print(instance["InstanceId"])
+            print(instance["InstanceId"])
 
-                response = cw_client.get_metric_statistics(
-                    MetricName = 'CPUUtilization',
-                    Namespace = 'AWS/EC2',
-                    Period = 86400,
-                    StartTime=datetime.datetime.utcnow() - datetime.timedelta(hours=3),
-                    EndTime=datetime.datetime.utcnow(),
-                    Statistics=['Maximum','Minimum','Average'],
-                    Dimensions = [
-                        {
-                            'Name': 'InstanceId',
-                            'Value': instance["InstanceId"]
-                        }   
-                    ],        
-                )
+            response = cw_client.get_metric_statistics(
+                MetricName = 'CPUUtilization',
+                Namespace = 'AWS/EC2',
+                Period = 86400,
+                StartTime=datetime.datetime.utcnow() - datetime.timedelta(hours=3),
+                EndTime=datetime.datetime.utcnow(),
+                Statistics=['Maximum','Minimum','Average'],
+                Dimensions = [
+                    {
+                        'Name': 'InstanceId',
+                        'Value': instance["InstanceId"]
+                    }   
+                ],        
+            )
 
-                datapoints = response['Datapoints']
+            datapoints = response['Datapoints']
 
-                for dp in datapoints:
-                
-                    dp_avg.append(dp['Average'])
-                    dp_max.append(dp['Maximum'])
-                    dp_min.append(dp['Minimum'])
+            print(f'dp: ', datapoints)
+
+            for dp in datapoints:
+            
+                dp_avg.append(dp['Average'])
+                dp_max.append(dp['Maximum'])
+                dp_min.append(dp['Minimum'])
 
     # avg_uti = round(sum(dp_avg)/len(dp_avg),3)
     # max_uti = round(sum(dp_max)/len(dp_max),3)
     # min_uti = round(sum(dp_min)/len(dp_min),3)
-    avg_uti = round(statistics.mean(dp_avg),3)
-    max_uti = round(statistics.mean(dp_max),3)
-    min_uti = round(statistics.mean(dp_min),3)
+    if dp_avg != [] or dp_max != [] or dp_min != []:
 
-    # print(f' Average2', avg_uti)
-    # print(f' Maximum2', max_uti)
-    # print(f' Minimum2', min_uti)
+        avg_uti = round(statistics.mean(dp_avg),3)
+        max_uti = round(statistics.mean(dp_max),3)
+        min_uti = round(statistics.mean(dp_min),3)
 
+    else:
+        avg_uti = (0)
+        max_uti = (0)
+        min_uti = (0)
+    
     return avg_uti, max_uti, min_uti
 
 
@@ -941,7 +946,7 @@ def s3_objects_size():
 def s3_graph(type):
 
     start = datetime.datetime.utcnow() - datetime.timedelta(days=7)
-    end = datetime.datetime.utcnow()
+    end = datetime.datetime.utcnow() - datetime.timedelta(days=1)
 
     data=[]
     response_data=[]
@@ -1405,7 +1410,52 @@ def get_cloudfront_metrics(type):
 
 
     return cf_graph
+
+@app.route('/aws/cloudfront-distribution', methods=["POST"])
+def get_cf_dist_data():
+
+    key = request.form['distributionId']
+
+    response = cf_client.get_distribution(Id=key).get("Distribution")
     
+    print(f'Response: ' ,response)
+
+    cf_REQ_graph = get_cf_dist_graph("Requests", key)
+    cf_BD_graph = get_cf_dist_graph("BytesDownloaded", key)
+    cf_BU_graph = get_cf_dist_graph("BytesUploaded", key)
+    cf_4ER_graph = get_cf_dist_graph("4xxErrorRate", key)
+    cf_5ER_graph = get_cf_dist_graph("5xxErrorRate", key)
+    cf_TER_graph = get_cf_dist_graph("TotalErrorRate", key)
+    cf_dist = get_cloudfront_dist()
+
+    return render_template('aws/aws-cloudfront/aws-cloudfront-dist-data.html', 
+                key=key,
+                response=response,
+                cf_REQ_graph=cf_REQ_graph,
+                cf_BD_graph=cf_BD_graph,
+                cf_BU_graph=cf_BU_graph,
+                cf_4ER_graph=cf_4ER_graph,
+                cf_5ER_graph=cf_5ER_graph,
+                cf_TER_graph=cf_TER_graph,
+                cf_dist=cf_dist)
+
+def get_cf_dist_graph(type, distId):
+
+    data = []
+    filter_data = []
+
+    data.append(["AWS/CloudFront", str(type), "DistributionId", str(distId), "Region", "Global"])
+    filter_data = {"metrics":data}
+
+    img = cw_client.get_metric_widget_image(MetricWidget=json.dumps(filter_data))
+
+    bytes_data=io.BytesIO(img["MetricWidgetImage"])
+    fr=base64.b64encode(bytes_data.getvalue())
+
+    cf_graph = fr.decode('utf-8')
+
+    return cf_graph
+
 #----------------------------------------------------------------
 @app.route('/aws/ebs-met')
 def get_ebs_metrics():

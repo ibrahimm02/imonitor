@@ -5,14 +5,13 @@
 {% block content %}
 
 
-<div class="card text-center border-0 shadow-sm mb-2">
+<div class="card border-0 shadow-sm mb-2">
     <div class="card-body p-0">
       <div class="table-responsive table-wrapper">
         <table
           class="table table-nowrap mb-0 rounded table-hover"
-          style="vertical-align: middle"
-        >
-          <thead class="table-dark">
+          style="vertical-align: middle">
+          <thead class="table-dark text-center">
             <th class="border-0 rounded-start">Distibution ID</th>
             <th class="border-0">Domain Name</th>
             <th class="border-0">Origins</th>
@@ -21,7 +20,23 @@
 
           {%for items in cf_dist['Items']%}
           <tr>
-            <td>{{items.Id}}</td>
+            <td><span>
+              <form action="{{ url_for('get_cf_dist_data')}}" method="POST">
+                <input
+                  type="hidden"
+                  name="distributionId"
+                  value="{{items.Id}}"
+                />
+                <button
+                  type="submit"
+                  class="btn btn-link"
+                  style="color: #0dcaf0"
+                >
+                {{items.Id}}
+                </button>
+              </form>
+            </span>
+            </td>
             <td>{{items.DomainName}}</td>
             <td>{{items.Origins['Items'][0]['DomainName']}}</td>
             <td>{{items.Status}}</td>
@@ -37,19 +52,14 @@
     {{items}}
 {% endfor %} -->
 
-
-<!-- <div class="container">
-    {{cf_dist}}
-</div> -->
-
 <hr class="mt-0 mb-2" />
 
 <nav class="navbar px-0" style="background: transparent !important">
   <div class="container-fluid px-0">
-    <a class="navbar-brand">Monitoring-all DBs </a>
+    <a class="navbar-brand">Monitoring-all Distributions </a>
     <a
       class="btn btn-light btn-outline-dark"
-      href="{{ url_for('aws_rds')}}"
+      href="{{ url_for('aws_cloudfront')}}"
       role="button"
     >
       <i class="bx bx-refresh bx-fw"></i> Refresh
