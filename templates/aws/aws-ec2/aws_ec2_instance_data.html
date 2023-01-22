@@ -1,6 +1,6 @@
-{% extends "aws/aws_base.html" %} {% block title %}iMonitor - EC2{% endblock %}
-<!-- {% block nav_index %}active{% endblock %}  -->
-
+{% extends "aws/aws_base.html" %} 
+{% block title %}iMonitor - EC2{% endblock %}
+{% block nav_ec2 %}active{% endblock %} 
 {% block content %}
 
 <h4 class="mt-2">Instance Id: {{instance.Instances[0]['InstanceId']}}</h4>

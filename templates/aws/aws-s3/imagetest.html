@@ -1,6 +1,11 @@
+{% extends "aws/aws_base.html" %} 
+{% block title %}iMonitor - CloudFront{% endblock %}
+{% block nav_cloudfront %}active{% endblock %} 
+{% block navTitle %}CloudFront{% endblock %} 
+{% block content %}
+
 <div class="card border-0 shadow-sm mb-4 px-1">
-    <img
-      src="data:image/png;base64,{{s3graph}}"
-      alt="rds_CPUUtilization Graph"
-    />
-  </div>
+  <img src="data:image/png;base64,{{cf_graph}}" alt="CF Graph" />
+</div>
+
+{% endblock %}
