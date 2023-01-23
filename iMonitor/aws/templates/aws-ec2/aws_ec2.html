@@ -1,4 +1,4 @@
-{% extends "aws/aws_base.html" %} 
+{% extends "aws_base.html" %} 
 {% block title %}iMonitor - EC2{% endblock %}
 {% block nav_ec2 %}active{% endblock %} 
 {% block navTitle %}EC2{% endblock %} 
@@ -126,7 +126,7 @@
   <nav class="navbar px-0" style="background: transparent !important">
     <div class="container-fluid px-0">
       <a class="navbar-brand">Monitoring-all instances</a>
-      <a class="btn btn-light btn-outline-dark" href="{{ url_for('aws_ec2')}}" role="button">
+      <a class="btn btn-light btn-outline-dark" href="{{ url_for('aws_bp.aws_ec2')}}" role="button">
           <i class="bx bx-refresh bx-fw"></i> Refresh
       </a>
     </div>
@@ -235,7 +235,7 @@
           <tr>
             <td><span>{{instance.tags[0]['Value']}}</span></td>
             <td><span>
-              <form action="{{ url_for('ec2_instance_data')}}" method="POST">
+              <form action="{{ url_for('aws_bp.ec2_instance_data')}}" method="POST">
                 <input
                   type="hidden"
                   name="instanceId"
@@ -265,7 +265,7 @@
                 </button>
                 <ul class="dropdown-menu">
                   <li>
-                    <form action="{{ url_for('ec2_instance_start')}}" method="POST">
+                    <form action="{{ url_for('aws_bp.ec2_instance_start')}}" method="POST">
                       <input
                         type="hidden"
                         name="instance"
@@ -275,7 +275,7 @@
                     </form>
                   </li>
                   <li>
-                    <form action="{{ url_for('ec2_instance_stop')}}" method="POST">
+                    <form action="{{ url_for('aws_bp.ec2_instance_stop')}}" method="POST">
                       <input
                         type="hidden"
                         name="instance"

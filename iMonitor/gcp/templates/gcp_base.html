@@ -20,7 +20,7 @@
     <link href="{{url_for('static', filename='css/style.css')}}" rel="stylesheet"/>
     <link href="{{url_for('static', filename='css/sidenav.css')}}" rel="stylesheet"/>
    
-    <!-- ChartJs -->
+    <!-- Chartjs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script>
 
@@ -33,49 +33,52 @@
             <h4><i class='bx bxs-chart bx-fw'></i> iMonitor</h4>
           </div>
           <ul class="list-unstyled components">
-            <p class="bg-light text-dark" style="text-align: center;">
-                <img src="https://img.icons8.com/color/480/null/azure-1.png" width="32" height="32"/>
-                Microsoft Azure
-              </p>
-            <li style="border-top: 1px solid #fff;" class="{% block nav_index %}{% endblock %}"><a href="{{url_for('azure_overview')}}">Overview</a></li>
+            <p class="bg-light text-dark" style="font-size: 0.8em;">
+                <img src="https://img.icons8.com/color/480/null/google-cloud.png" width="25" height="25"/>
+                Google Cloud Platform
+            </p>
+            <li style="border-top: 1px solid #fff;" class="{% block nav_index %}{% endblock %}"><a href="{{url_for('gcp_bp.gcp_overview')}}">Overview</a></li>
             <li>
               <a href="#computeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Compute</a>
               <ul class="collapse list-unstyled" id="computeSubmenu">
-                <li class="{% block nav_ec2 %}{% endblock %}"><a href="{{url_for('aws_ec2')}}">EC2</a></li>
-                <li><a href="#">Lambda</a></li>
-                <li><a href="#">Elastic Beanstalk</a></li>
-              </ul>
-            </li>
-            <li>
-              <a href="#storageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Storage</a>
-              <ul class="collapse list-unstyled" id="storageSubmenu">
-                <li class="{% block nav_s3 %}{% endblock %}"><a href="{{ url_for('aws_s3')}}">S3</a></li>
-                <li><a href="#">Elastic Block Store</a></li>
-                <li><a href="#">Elastic File System</a></li>
+                <li class="{% block nav_ec2 %}{% endblock %}"><a href="#">Compute Engine</a></li>
+                <li><a href="#">App Engine</a></li>
+                <li><a href="#">Batch</a></li>
               </ul>
             </li>
             <li>
               <a href="#databaseSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Database</a>
               <ul class="collapse list-unstyled" id="databaseSubmenu">
-                <li><a href="{{ url_for('aws_rds')}}">RDS</a></li>
-                <li><a href="#">DynamoDB</a></li>   
-                <li><a href="#">ElastiCache</a></li>
+                <li><a href="#">AlloyDB</a></li>
+                <li><a href="#">Datastore</a></li>   
+                <li><a href="#">Firestore</a></li>
+                <li><a href="#">Cloud SQL</a></li>
               </ul>
             </li>
             <li>
-              <a href="#networkingSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Networking & CD</a>
+              <a href="#storageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Storage</a>
+              <ul class="collapse list-unstyled" id="storageSubmenu">
+                <li class="{% block nav_s3 %}{% endblock %}"><a href="#">Cloud Storage</a></li>
+                <li><a href="#">Persistent Disk</a></li>
+                <li><a href="#">Cloud Filestore</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#networkingSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Networking</a>
               <ul class="collapse list-unstyled" id="networkingSubmenu">
-                <li><a href="#">CloudFront</a></li>
-                <li><a href="#">Elastic Load Balancing</a></li>
-                <li><a href="#">VPC</a></li>
+                <li><a href="#">Cloud CDN</a></li>
+                <li><a href="#">Cloud DNS</a></li>
+                <li><a href="#">Cloud Load Balancing</a></li>
+                <li><a href="#">Cloud VPN</a></li>
+
               </ul>
             </li>
             <li>
-              <a href="#containersSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Containers</a>
+              <a href="#containersSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Serverless <br>Computing</a>
               <ul class="collapse list-unstyled" id="containersSubmenu">
-                <li><a href="#">Elastic Container Registry</a></li>
-                <li><a href="#">Elastic Container Service</a></li>
-                <li><a href="#">Elastic Kubernetes Service</a></li>
+                <li><a href="#">Cloud Run</a></li>
+                <li><a href="#">Cloud Functions</a></li>
+                <li><a href="#">Cloud Scheduler</a></li>
               </ul>
             </li>
           </ul>
@@ -107,7 +110,7 @@
                         <ul class="nav navbar-nav ml-auto">
                       
                               <li class="nav-item {% block nav_account %}{% endblock %}"></li>
-                                <a class="nav-link" href="{{ url_for('aws_account')}}">Account</a>
+                                <a class="nav-link" href="#">Account</a>
                             </li>
                     <!-- <li class="nav-item">
                         <a class="nav-link" href="#">Page</a>

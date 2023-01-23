@@ -1,4 +1,4 @@
-{% extends "aws/aws_base.html" %} 
+{% extends "aws_base.html" %} 
 {% block title %}iMonitor - CloudFront{% endblock %}
 {% block nav_cloudfront %}active{% endblock %} 
 {% block navTitle %}CloudFront{% endblock %} 
@@ -21,7 +21,7 @@
           {%for items in cf_dist['Items']%}
           <tr>
             <td><span>
-              <form action="{{ url_for('get_cf_dist_data')}}" method="POST">
+              <form action="{{ url_for('aws_bp.get_cf_dist_data')}}" method="POST">
                 <input
                   type="hidden"
                   name="distributionId"
@@ -59,7 +59,7 @@
     <a class="navbar-brand">Monitoring-all Distributions </a>
     <a
       class="btn btn-light btn-outline-dark"
-      href="{{ url_for('aws_cloudfront')}}"
+      href="{{ url_for('aws_bp.aws_cloudfront')}}"
       role="button"
     >
       <i class="bx bx-refresh bx-fw"></i> Refresh

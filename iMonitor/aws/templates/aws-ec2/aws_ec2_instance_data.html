@@ -1,4 +1,4 @@
-{% extends "aws/aws_base.html" %} 
+{% extends "aws_base.html" %} 
 {% block title %}iMonitor - EC2{% endblock %}
 {% block nav_ec2 %}active{% endblock %} 
 {% block content %}
@@ -547,120 +547,10 @@
           </div> -->
           </div>
 
-          <!-- <div class="tab-pane" id="contact">
-                    <div class="row border g-0 rounded shadow-sm">
-                    <div class="col p-4">
-                        <h3>Contact</h3>
-                        <p>
-                        Lorem Ipsum is simply dummy text of the printing and typesetting
-                        industry. Lorem Ipsum has been the industry's standard dummy text
-                        ever since the 1500s, when an unknown printer took a galley of
-                        type and scrambled it to make a type specimen book.
-                        </p>
-                    </div>
-                    <div class="col-auto">
-                        <img src="images/contact.jpg" class="img-thumbnail dimension" />
-                    </div>
-                    </div>
-                </div> -->
         </div>
       </div>
     </div>
   </div>
-
-  <!-- <div class="card mb-2">
-    <div class="card-body">
-      <nav class="navbar px-0" style="background: transparent !important">
-        <div class="container-fluid px-0">
-          <a class="navbar-brand"
-            >Monitoring: {{instance.Instances[0]['InstanceId']}}</a
-          >
-          <a
-            class="btn btn-light btn-outline-dark"
-            href="{{ url_for('aws_ec2')}}"
-            role="button"
-          >
-            <i class="bx bx-refresh bx-fw"></i> Refresh
-          </a>
-        </div>
-      </nav>
-
-      <div class="row row-cols-1 row-cols-md-3">
-        <div class="col-sm-3">
-          <div class="card border-1 shadow-sm mb-4 px-1">
-            <img
-              src="data:image/png;base64,{{ec2_CPUUtilization}}"
-              alt="CPUUtilization Graph"
-            />
-          </div>
-        </div>
-        <div class="col-sm-3">
-          <div class="card border-1 shadow-sm mb-4 px-1">
-            <img
-              src="data:image/png;base64,{{ec2_DiskReadOps}}"
-              alt="DiskReadOps Graph"
-            />
-          </div>
-        </div>
-        <div class="col-sm-3">
-          <div class="card border-1 shadow-sm mb-4 px-1">
-            <img
-              src="data:image/png;base64,{{ec2_DiskWriteOps}}"
-              alt="DiskWriteOps Graph"
-            />
-          </div>
-        </div>
-        <div class="col-sm-3">
-          <div class="card border-1 shadow-sm mb-4 px-1">
-            <img
-              src="data:image/png;base64,{{ec2_NetworkIn}}"
-              alt="NetworkIn Graph"
-            />
-          </div>
-        </div>
-        <div class="col-sm-3">
-          <div class="card border-1 shadow-sm mb-4 px-1">
-            <img
-              src="data:image/png;base64,{{ec2_NetworkOut}}"
-              alt="NetworkOut Graph"
-            />
-          </div>
-        </div>
-        <div class="col-sm-3">
-          <div class="card border-1 shadow-sm mb-4 px-1">
-            <img
-              src="data:image/png;base64,{{ec2_CPUCreditUsage}}"
-              alt="CPUCreditUsage Graph"
-            />
-          </div>
-        </div>
-        <div class="col-sm-3">
-          <div class="card border-1 shadow-sm mb-2 px-1">
-            <img
-              src="data:image/png;base64,{{ec2_CPUCreditBalance}}"
-              alt="CPUCreditBalance Graph"
-            />
-          </div>
-        </div>
-        <div class="col-sm-3">
-          <div class="card border-1 shadow-sm mb-2 px-1">
-            <img
-              src="data:image/png;base64,{{ec2_DiskReadBytes}}"
-              alt="DiskReadBytes Graph"
-            />
-          </div>
-        </div>
-        <div class="col-sm-3">
-          <div class="card border-1 shadow-sm mb-2 px-1">
-            <img
-              src="data:image/png;base64,{{ec2_DiskWriteBytes}}"
-              alt="DiskWriteBytes Graph"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  </div> -->
 
   <hr />
 
@@ -671,7 +561,7 @@
       >
       <a
         class="btn btn-light btn-outline-dark"
-        href="{{ url_for('aws_ec2')}}"
+        href="{{ url_for('aws_bp.aws_ec2')}}"
         role="button"
       >
         <i class="bx bx-refresh bx-fw"></i> Refresh

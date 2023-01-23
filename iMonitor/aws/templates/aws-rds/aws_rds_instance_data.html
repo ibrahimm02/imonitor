@@ -1,4 +1,4 @@
-{% extends "aws/aws_base.html" %} 
+{% extends "aws_base.html" %} 
 {% block nav_rds %}active{% endblock %} 
 {% block title %}iMonitor - RDS{% endblock %} 
 {% block navTitle %}{{key}}{% endblock %}
@@ -103,7 +103,7 @@
 <nav class="navbar px-0" style="background: transparent !important">
     <div class="container-fluid px-0">
       <a class="navbar-brand">Monitoring: {{key}}</a>
-      <a class="btn btn-light btn-outline-dark" href="{{ url_for('aws_rds')}}" role="button">
+      <a class="btn btn-light btn-outline-dark" href="{{ url_for('aws_bp.aws_rds')}}" role="button">
         <i class="bx bx-refresh bx-fw"></i> Refresh
       </a>
     </div>

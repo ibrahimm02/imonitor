@@ -1,4 +1,4 @@
-{% extends "aws/aws_base.html" %} {% block title %}iMonitor - CloudFront{%
+{% extends "aws_base.html" %} {% block title %}iMonitor - CloudFront{%
 endblock %} {% block nav_cloudfront %}active{% endblock %} {% block navTitle
 %}{{key}}{% endblock %} {% block content %}
 
@@ -34,7 +34,7 @@ endblock %} {% block nav_cloudfront %}active{% endblock %} {% block navTitle
       <a class="navbar-brand">Monitoring-{{key}} </a>
       <a
         class="btn btn-light btn-outline-dark"
-        href="{{ url_for('aws_cloudfront')}}"
+        href="{{ url_for('aws_bp.aws_cloudfront')}}"
         role="button"
       >
         <i class="bx bx-refresh bx-fw"></i> Refresh

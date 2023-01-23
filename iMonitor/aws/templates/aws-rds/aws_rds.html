@@ -1,4 +1,4 @@
-{% extends "aws/aws_base.html" %} 
+{% extends "aws_base.html" %} 
 {% block nav_rds %}active{% endblock %} 
 {% block title %}iMonitor - RDS{% endblock %} 
 {% block navTitle %}RDS{% endblock %}
@@ -35,7 +35,7 @@
             {%for bucket in response['DBInstances']%}
             <tr>
               <td>
-                <form action="{{ url_for('rds_instance_data')}}" method="POST">
+                <form action="{{ url_for('aws_bp.rds_instance_data')}}" method="POST">
                   <input
                     type="hidden"
                     name="dbInstanceId"
@@ -65,7 +65,7 @@
                     <ul class="dropdown-menu">
                       <li>
                         <form
-                          action="{{ url_for('rds_instance_start')}}"
+                          action="{{ url_for('aws_bp.rds_instance_start')}}"
                           method="POST"
                         >
                           <input
@@ -80,7 +80,7 @@
                       </li>
                       <li>
                         <form
-                          action="{{ url_for('rds_instance_stop')}}"
+                          action="{{ url_for('aws_bp.rds_instance_stop')}}"
                           method="POST"
                         >
                           <input
@@ -157,7 +157,7 @@
     <a class="navbar-brand">Monitoring-all DBs </a>
     <a
       class="btn btn-light btn-outline-dark"
-      href="{{ url_for('aws_rds')}}"
+      href="{{ url_for('aws_bp.aws_rds')}}"
       role="button"
     >
       <i class="bx bx-refresh bx-fw"></i> Refresh
@@ -241,76 +241,6 @@
     </div>
   </div>
 </div>
-
-<!-- <hr class="mt-0 mb-3">
-
-    <div class="card text-center border-0 shadow-sm mb-2">
-        <div class="card-body p-0">
-          <div class="table-responsive table-wrapper">
-            <table class="table table-nowrap mb-0 rounded table-hover" style="vertical-align: middle">
-              <thead class="table-dark">
-                <th class="border-0 rounded-start">DB Identifier</th>
-                <th class="border-0">Engine</th>  
-                <th class="border-0">Status</th> 
-                <th class="border-0">Class</th> 
-                <th class="border-0">Allocated Storage</th> 
-                <th class="border-0 rounded-end">AvailabilityZone</th>  
-              </thead>
-      
-              {%for bucket in response['DBInstances']%}
-              <tr>               
-                <td><a href="#" style="text-decoration:underline; color:#0dcaf0">{{bucket.DBInstanceIdentifier}}</a></td>
-                <td>{{bucket.Engine}}</td>
-                <td>
-                  <span>
-                    <div class="btn-group dropend">
-                      <button
-                        type="button"
-                        class="btn btn-outline-info dropdown-toggle btn-sm"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                      >
-                      {{bucket.DBInstanceStatus}}
-                      </button>
-                      <ul class="dropdown-menu">
-                        <li>
-                          <form action="{{ url_for('rds_instance_start')}}" method="POST">
-                            <input
-                              type="hidden"
-                              name="instance"
-                              value="{{bucket.DBInstanceIdentifier}}"
-                            />
-                            <button type="submit" class="dropdown-item">Start</button>
-                          </form>
-                        </li>
-                        <li>
-                          <form action="{{ url_for('rds_instance_stop')}}" method="POST">
-                            <input
-                              type="hidden"
-                              name="instance"
-                              value="{{bucket.DBInstanceIdentifier}}"
-                            />
-                            <button type="submit" class="dropdown-item">Stop</button>
-                          </form>
-                        </li>
-                      </ul>
-                    </div>
-                  </span>
-                </td>
-                <td>{{bucket.DBInstanceClass}}</td>
-                <td>{{bucket.AllocatedStorage}} GB</td>
-                <td>{{bucket.AvailabilityZone}}</td>
-              </tr>
-              {%endfor%}
-            </table>
-          </div>
-        </div>
-    </div> -->
-
-
-
-
-
 
 
 {% endblock content %}

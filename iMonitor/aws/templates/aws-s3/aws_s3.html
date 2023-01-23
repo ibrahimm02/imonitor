@@ -1,4 +1,4 @@
-{% extends "aws/aws_base.html" %} 
+{% extends "aws_base.html" %} 
 {% block nav_s3 %}active{% endblock %} 
 {% block title %}iMonitor - S3{% endblock %} 
 {% block navTitle %}S3{% endblock %}
@@ -58,7 +58,7 @@
         {%for bucket in response['Buckets']%}
         <tr>
           <td>
-            <form action="{{ url_for('s3_bucket_data')}}" method="POST">
+            <form action="{{ url_for('aws_bp.s3_bucket_data')}}" method="POST">
               <input
                 type="hidden"
                 name="bucketName"

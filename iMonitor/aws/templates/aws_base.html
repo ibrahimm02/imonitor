@@ -40,7 +40,7 @@
                 Amazon Web Services
               </p>
               <li style="border-top: 1px solid #fff;" class="{% block nav_index %}{% endblock %}">
-                <a href="{{url_for('aws_overview')}}">
+                <a href="{{url_for('aws_bp.aws_overview')}}">
                   &nbsp;<svg width="26" height="26" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="4" height="4" rx="1" fill="currentColor"></rect><rect y="6" width="4" height="4" rx="1" fill="currentColor"></rect><rect y="12" width="4" height="4" rx="1" fill="currentColor"></rect><rect x="6" width="4" height="4" rx="1" fill="currentColor"></rect><rect x="6" y="6" width="4" height="4" rx="1" fill="currentColor"></rect><rect x="6" y="12" width="4" height="4" rx="1" fill="currentColor"></rect><rect x="12" width="4" height="4" rx="1" fill="currentColor"></rect><rect x="12" y="6" width="4" height="4" rx="1" fill="currentColor"></rect><rect x="12" y="12" width="4" height="4" rx="1" fill="currentColor"></rect></svg>
                   Overview
                 </a>
@@ -52,7 +52,7 @@
                 </a>
                 <ul class="collapse list-unstyled" id="computeSubmenu">
                   <li class="{% block nav_ec2 %}{% endblock %}">
-                    <a href="{{url_for('aws_ec2')}}">
+                    <a href="{{url_for('aws_bp.aws_ec2')}}">
                       EC2
                     </a>
                   </li>
@@ -66,7 +66,7 @@
                   Database
                 </a>
                 <ul class="collapse list-unstyled" id="databaseSubmenu">
-                  <li class="{% block nav_rds %}{% endblock %}"><a href="{{ url_for('aws_rds')}}">RDS</a></li>
+                  <li class="{% block nav_rds %}{% endblock %}"><a href="{{ url_for('aws_bp.aws_rds')}}">RDS</a></li>
                   <li><a href="#">DynamoDB</a></li>   
                   <li><a href="#">ElastiCache</a></li>
                 </ul>
@@ -77,7 +77,7 @@
                   Storage
                 </a>
                 <ul class="collapse list-unstyled" id="storageSubmenu">
-                  <li class="{% block nav_s3 %}{% endblock %}"><a href="{{ url_for('aws_s3')}}">S3</a></li>
+                  <li class="{% block nav_s3 %}{% endblock %}"><a href="{{ url_for('aws_bp.aws_s3')}}">S3</a></li>
                   <li><a href="#">Elastic Block Store</a></li>
                   <li><a href="#">Elastic File System</a></li>
                 </ul>
@@ -88,7 +88,7 @@
                   Networking
                 </a>
                 <ul class="collapse list-unstyled" id="networkingSubmenu">
-                  <li class="{% block nav_cloudfront %}{% endblock %}"><a href="{{ url_for('aws_cloudfront')}}">CloudFront</a></li>
+                  <li class="{% block nav_cloudfront %}{% endblock %}"><a href="{{ url_for('aws_bp.aws_cloudfront')}}">CloudFront</a></li>
                   <li><a href="#">Elastic Load Balancing</a></li>
                   <li><a href="#">VPC</a></li>
                 </ul>
@@ -133,7 +133,7 @@
                         <ul class="nav navbar-nav ml-auto">
                       
                               <li class="nav-item {% block nav_account %}{% endblock %}"></li>
-                                <a class="nav-link" href="{{ url_for('aws_account')}}">Account</a>
+                                <a class="nav-link" href="{{ url_for('aws_bp.aws_account')}}">Account</a>
                             </li>
                     <!-- <li class="nav-item">
                         <a class="nav-link" href="#">Page</a>
