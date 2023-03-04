@@ -14,5 +14,3 @@ profs
 tests/
 conftest.py
 .pytest_cache
-
-Dockerfile
