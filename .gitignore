@@ -6,3 +6,13 @@ __pycache__/
 .venv
 env/
 venv/
+
+#performace
+profs
+
+#test
+tests/
+conftest.py
+.pytest_cache
+
+Dockerfile
