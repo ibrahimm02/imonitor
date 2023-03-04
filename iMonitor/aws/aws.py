@@ -16,13 +16,20 @@ from .utils.s3.metrics import *
 
 #------------------------------------------------------------------
 
+AWS_SERVER_ACCESS_KEY = os.environ.get('AWS_SERVER_ACCESS_KEY')
+AWS_SERVER_SECRET_KEY = os.environ.get('AWS_SERVER_SECRET_KEY')
 REGION_NAME = os.environ.get('REGION_NAME')
 
-ec2_client = boto3.client("ec2", region_name=REGION_NAME)
+session = boto3.Session(
+    aws_access_key_id=AWS_SERVER_ACCESS_KEY,
+    aws_secret_access_key=AWS_SERVER_SECRET_KEY,
+)
 
-ec2_resource = boto3.resource('ec2', region_name=REGION_NAME)
+ec2_client = session.client("ec2", region_name=REGION_NAME)
 
-cw_client = boto3.client('cloudwatch', region_name=REGION_NAME)
+ec2_resource = session.resource('ec2', region_name=REGION_NAME)
+
+cw_client = session.client('cloudwatch', region_name=REGION_NAME)
 
 current_region = ec2_client.meta.region_name
 
@@ -89,7 +96,7 @@ def aws_overview():
 @aws_bp.route('/account')
 def aws_account():
 
-    account_details = boto3.client("sts").get_caller_identity()
+    account_details = session.client("sts").get_caller_identity()
     return render_template('account.html', account_details=account_details)
 
 #----------- AWS EC2 --------------------------------------------

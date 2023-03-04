@@ -6,12 +6,17 @@ import os
 import json
 from operator import itemgetter
 
+AWS_SERVER_ACCESS_KEY = os.environ.get('AWS_SERVER_ACCESS_KEY')
+AWS_SERVER_SECRET_KEY = os.environ.get('AWS_SERVER_SECRET_KEY')
 REGION_NAME = os.environ.get('REGION_NAME')
 
-REGION_NAME = os.environ.get('REGION_NAME')
-s3_client = boto3.client('s3')
-cw_client = boto3.client('cloudwatch',region_name=REGION_NAME)
+session = boto3.Session(
+    aws_access_key_id=AWS_SERVER_ACCESS_KEY,
+    aws_secret_access_key=AWS_SERVER_SECRET_KEY,
+)
 
+s3_client = session.client('s3')
+cw_client = session.client('cloudwatch',region_name=REGION_NAME)
 
 def s3_graph(type):
 
