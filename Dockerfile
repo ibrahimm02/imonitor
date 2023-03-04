@@ -2,7 +2,7 @@
 
 FROM python:3.9.10
 
-WORKDIR imonitor-docker
+WORKDIR imonitor
 
 COPY requirements.txt requirements.txt
 
